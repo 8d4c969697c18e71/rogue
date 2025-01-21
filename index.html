@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rogue</title>
+  <style>
+    body{
+      background-color: black;
+      color: white;
+      font-family: "MS Gothic";
+      width: auto;
+      padding: 25px;
+      padding-left: 25px;
+      padding-right: 25px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      user-select: none;
+      overflow: hidden;
+    }
+    .sub1{
+      display: flex;
+      flex-direction: column;
+      width: auto;
+    }
+    .log{
+      height: 100px;
+      padding-bottom: 25px;
+    }
+    .info{
+      width: 175px;
+      padding-left: 5px;
+    }
+    .note{
+      padding-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sub1">
+    <div id="log" class="log"></div>
+    <canvas id="canvas" width="500px" height="1000px"></canvas>
+  </div>
+  <div id="info" class="info"></div>
+  <div id="note" class="note"></div>
+  <script src="data.js"></script>
+  <script src="src.js"></script>
+  <script src="info.js"></script>
+</body>
+</html>
