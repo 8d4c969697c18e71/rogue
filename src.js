@@ -364,8 +364,8 @@ function move(who, direction){
 function sprint(direction){
   if(!canMove(player.x+direction.x, player.y+direction.y))
     return;
-  for(let i=-1; i<=1; i++)
-    for(let j=-1; j<=1; j++)
+  for(let i=-2; i<=2; i++)
+    for(let j=-2; j<=2; j++)
       if(isEnemy(player.x+j, player.y+i))
         return;
   if(isItem(player.x+direction.x, player.y+direction.y))
