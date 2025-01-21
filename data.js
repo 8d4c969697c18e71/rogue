@@ -332,7 +332,7 @@ const item_data = [
   },
   {
     id: 0x021,
-    name: "魔石の大欠片",
+    name: "古びた香料",
     char: "!",
     type: "consume",
     func: function(){
