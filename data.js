@@ -1,6 +1,16 @@
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+
+const canvas_width = 500;
+const canvas_height = 1000;
+canvas.style.width = '${canvas_width}px';
+canvas.style.height = '${canvas_height}px';
+const canvas_scale = window.devicePixelRatio;
+canvas.width = Math.floor(canvas_width*canvas_scale);
+canvas.height = Math.floor(canvas_height*canvas_scale);
+
+ctx.scale(canvas_scale, canvas_scale);
 const font_size = 16
 ctx.font = font_size+"px 'MS Gothic'";
 ctx.fillStyle = "white";
@@ -852,9 +862,13 @@ const npc_data = [
     dialogue: [
       "左が薬屋、右が職安、正面がダンジョンだ",
       "薬屋には治癒士もいるぞ",
+      "",
     ],
     dialogue_cnt: 0,
-    func: function(){},
+    func: function(){
+      if(this.dialogue_cnt >= this.dialogue.length-1)
+        this.dialogue_cnt = 0;
+    },
   },
   {
     id: 0x01,
