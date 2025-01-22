@@ -11,7 +11,7 @@ canvas.width = Math.floor(canvas_width*canvas_scale);
 canvas.height = Math.floor(canvas_height*canvas_scale);
 
 ctx.scale(canvas_scale, canvas_scale);
-const font_size = 16
+const font_size = 16;
 ctx.font = font_size+"px 'MS Gothic'";
 ctx.fillStyle = "white";
 ctx.textBaseline = "top";
@@ -137,6 +137,7 @@ const char_map = {
   door: "+",
 };
 let map_sight = []; // 視界
+let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let unique_map = [  // 固有マップ
   {
     id: "test",

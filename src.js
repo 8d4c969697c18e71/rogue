@@ -511,6 +511,8 @@ function isNPC(x, y){
 
 // 射撃イベント
 function eventShot(){
+  updateShotRange();
+
   let ammo = player_info.ammo;
 
   // 十字キー
@@ -582,6 +584,8 @@ function straightRecursive(x, y, direction){
 
 // 投擲イベント
 function eventThrowing(){
+  updateShotRange();
+
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -612,6 +616,7 @@ function eventThrowing(){
   // cancel
   if(key_input.cancel){
     addLog("投擲をやめた");
+    inv_cursor = -1;
     throwing_flag = false;
     ui_flag = false;
     return false;
@@ -629,6 +634,8 @@ function checkThrowing(index){
 
 // 魔法イベント
 function eventMagic(){
+  updateShotRange();
+
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -1265,12 +1272,13 @@ function drawMap(){
   for(let i=0; i<SIZEY; i++){
     for(let j=0; j<SIZEX; j++){
       if(!map_sight[i][j]){
-        ctx.fillStyle = "gray"
-        ctx.fillText(map_draw[i][j], font_size/2*j, font_size*i);
+        ctx.fillStyle = "gray";
+      }
+      else if(map_shotrange[i][j]){
+        ctx.fillStyle = "pink";
       }
       else if(map[i][j] == id_map.poison){
         ctx.fillStyle = "purple";
-        ctx.fillText(map_draw[i][j], font_size/2*j, font_size*i);
       }
       else{
         if(map_draw[i][j].match(/[a-zA-Z]/))
@@ -1281,8 +1289,8 @@ function drawMap(){
           ctx.fillStyle = "blue";
         else
           ctx.fillStyle = "yellow";
-        ctx.fillText(map_draw[i][j], font_size/2*j, font_size*i);
       }
+      ctx.fillText(map_draw[i][j], font_size/2*j, font_size*i);
     }
   }
 }
@@ -1297,6 +1305,11 @@ function updateMap(){
   updateMDWall();
   // 毒沼
   updateMDPoison();
+  // 射撃・投擲・魔法
+  if(shot_flag || throwing_flag|| magic_flag)
+    updateShotRange();
+  else
+    map_shotrange = initMap(map_shotrange, false);
 
   // アイテム
   updateMDItem();
@@ -1422,6 +1435,21 @@ function updateMDItem(){
   for(let i of item_group)
     if(map_sight[i.y][i.x])
       map_draw[i.y][i.x] = i.char;
+}
+
+// 射撃・投擲・魔法の射程 //TODO
+function updateShotRange(){
+  map_shotrange = initMap(map_shotrange, false);
+  for(let i=0; i<SIZEY; i++)
+    for(let j=0; j<SIZEX; j++)
+      if(!(i==player.y && j==player.x))
+         if((i-player.y)==(j-player.x) || -(i-player.y)==(j-player.x)
+          || i==player.y || j==player.x){
+          if(!(map[i][j]==id_map.none))
+            map_shotrange[i][j] = true;
+          else
+            map_shotrange[i][j] = false;
+      }
 }
 
 function isInMap(x, y){
@@ -1643,6 +1671,8 @@ function initMaps(){
   map_draw = initMap(map_draw, char_map[0]);
   // 視界マップ
   map_sight = initMap(map_sight, false);
+  // 射撃・投擲・魔法
+  map_shotrange = initMap(map_shotrange, false);
 }
 
 function initMap(m, v){
