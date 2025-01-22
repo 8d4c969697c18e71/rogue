@@ -1269,7 +1269,7 @@ function drawMap(){
         ctx.fillStyle = "gray";
       }
       else if(map_shotrange[i][j]){
-        ctx.fillStyle = "pink";
+        ctx.fillStyle = "purple";
       }
       else if(map[i][j] == id_map.poison){
         ctx.fillStyle = "purple";
