@@ -511,8 +511,6 @@ function isNPC(x, y){
 
 // 射撃イベント
 function eventShot(){
-  updateShotRange();
-
   let ammo = player_info.ammo;
 
   // 十字キー
@@ -584,8 +582,6 @@ function straightRecursive(x, y, direction){
 
 // 投擲イベント
 function eventThrowing(){
-  updateShotRange();
-
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -634,8 +630,6 @@ function checkThrowing(index){
 
 // 魔法イベント
 function eventMagic(){
-  updateShotRange();
-
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
