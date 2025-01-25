@@ -1063,8 +1063,8 @@ function nextFloor(){
   floor_cnt++;
   clairvoyance_flag = false;
 
-  // テスト用 //FIXME
-  generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+  // テスト用
+  //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
   if(um = unique_map.find(v=>v.id==floor_cnt)){
     generateUniqueMap(um);
