@@ -2,16 +2,22 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const canvas_width = 500;
-const canvas_height = 1000;
-canvas.style.width = '${canvas_width}px';
-canvas.style.height = '${canvas_height}px';
+const font_size = 16;
+// MAP
+const SIZEX = 64;
+const SIZEY = 32;
+const cell_width = font_size;//font_size/2;
+const cell_height = font_size;
+
+const canvas_width = SIZEX*cell_width;
+const canvas_height = SIZEY*cell_height;
+canvas.style.width = canvas_width+'px';
+canvas.style.height = canvas_height+'px';
 const canvas_scale = window.devicePixelRatio;
 canvas.width = Math.floor(canvas_width*canvas_scale);
 canvas.height = Math.floor(canvas_height*canvas_scale);
 
 ctx.scale(canvas_scale, canvas_scale);
-const font_size = 16;
 ctx.font = font_size+"px 'MS Gothic'";
 ctx.fillStyle = "white";
 ctx.textBaseline = "top";
@@ -22,10 +28,6 @@ const audio_portal = new Audio("sound/portal.wav");
 const audio_hit = new Audio("sound/hit.wav");
 const audio_shot = new Audio("sound/shot.wav");
 const audio_fire = new Audio("sound/fire.wav");
-
-// ログ
-let log_reserve = [];
-const log_reserve_size = 5;
 
 // 日付
 const month_list = [
@@ -108,8 +110,6 @@ const key_code={
 
 //==================================================MAP==================================================
 
-const SIZEX = 64;
-const SIZEY = 32;
 const ROOMNUM = 10;
 const ROOMSIZEMIN = 4;
 const ROOMSIZEMAX = 8;
@@ -121,27 +121,65 @@ const id_map = {
   stair: 3,
   portal: 4,
   poison: 5,
+  trap: 6,
 };
 let map_draw = [];  // 描画用
+//const char_map = {
+//  0: " ",
+//  1: ".",
+//  2: "#",
+//  3: "%",
+//  4: "<",
+//  5: ".",
+//  6: "^",
+//  player: "@",
+//  npc: "0",
+//  wall_v: "|",
+//  wall_h: "—",
+//  door: "+",
+//  // item
+//  gold: "$",
+//  consume: "!",
+//  food: ":",
+//  weapon: ")",
+//  armor: "[",
+//  ring: "=",
+//  scroll: "?",
+//  staff: "/",
+//  ammo: "\"",
+//  unique: "&",
+//};
 const char_map = {
   0: " ",
-  1: ".",
-  2: "#",
-  3: "%",
-  4: "<",
-  5: ".",
-  player: "@",
-  npc: "0",
-  wall_v: "|",
-  wall_h: "-",
-  door: "+",
+  1: "．",
+  2: "＃",
+  3: "％",
+  4: "＜",
+  5: "．",
+  6: "＾",
+  player: "＠",
+  npc: "Ｃ",
+  wall_v: "｜",
+  wall_h: "―",
+  door: "＋",
+  // item
+  gold: "＄",
+  consume: "！",
+  food: "：",
+  weapon: "）",
+  armor: "［",
+  ring: "＝",
+  scroll: "？",
+  staff: "／",
+  ammo: "”",
+  unique: "＆",
 };
 let map_sight = []; // 視界
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let unique_map = [  // 固有マップ
   {
     id: "test",
-    pl_x: 1, pl_y: 1, // プレイヤー位置
+    pl_x: 3, pl_y: 3, // プレイヤー位置
     safe_flag: false,
     map: [
   // 0123456789ABCDE
@@ -162,6 +200,9 @@ let unique_map = [  // 固有マップ
     "000000000000000",//E
     ],
     func: function(x_offset){
+      setItem(0x800,1+x_offset, 1);
+      setItem(0xf00,2+x_offset, 1);
+      setShop(0x03, 9+x_offset, 1);
     }
   },
   {
@@ -180,6 +221,7 @@ let unique_map = [  // 固有マップ
     "000000000",
     ],
     func: function(x_offset){
+      setShop(0x03, 6+x_offset, 4);
     }
   },
   {
@@ -210,6 +252,7 @@ let unique_map = [  // 固有マップ
       setNPC(0x00, 2+x_offset, 9);
       setNPC(0x02, 7+x_offset, 11);
       setNPC(0x03, 1+x_offset, 5);
+      setShop(0x02, 1+x_offset, 13);
     }
   },
 ];
@@ -220,7 +263,7 @@ let room_num;
 let turn_cnt = 1;
 let floor_cnt = -1;
 
-// フラグ
+// 遷移フラグ
 let gameover_flag = false;
 let ui_flag = false;
 let shop_flag = false;
@@ -228,9 +271,9 @@ let shot_flag = false;
 let throwing_flag = false;
 let magic_flag = false;
 
-let turn_flag = false;
+let turn_flag = false;  // ターン経過
 let safe_flag = false;  // 空腹度無効化
-let clairvoyance_flag = false;
+let clairvoyance_flag = false;  // 透視
 
 // プレイヤー
 let player = {
@@ -265,12 +308,11 @@ const item_data = [
   {
     id: 0x000,
     name: "金貨",
-    char: "$",
+    type: "gold"
   },
   {
     id: 0x010,
     name: "三日月草",
-    char: "!",
     type: "consume",
     func: function(){
       if(player.hp >= player.hp_max){
@@ -286,7 +328,6 @@ const item_data = [
   {
     id: 0x011,
     name: "半月草",
-    char: "!",
     type: "consume",
     func: function(){
       if(player.hp >= player.hp_max){
@@ -302,7 +343,6 @@ const item_data = [
   {
     id: 0x012,
     name: "後月草",
-    char: "!",
     type: "consume",
     func: function(){
       if(player.hp >= player.hp_max){
@@ -318,7 +358,6 @@ const item_data = [
   {
     id: 0x020,
     name: "新鮮な香料",
-    char: "!",
     type: "consume",
     func: function(){
       if(player.mp >= player.mp_max){
@@ -326,7 +365,7 @@ const item_data = [
         return false;
       }
       addMP(player, 10);
-      addLog(this.name+" 嗅いだ　MP が 10 回復した");
+      addLog(this.name+" を嗅いだ　MP が 10 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -334,7 +373,6 @@ const item_data = [
   {
     id: 0x021,
     name: "古びた香料",
-    char: "!",
     type: "consume",
     func: function(){
       if(player.mp >= player.mp_max){
@@ -350,8 +388,7 @@ const item_data = [
   {
     id: 0x030,
     name: "パン",
-    char: ":",
-    type: "consume",
+    type: "food",
     func: function(){
       if(player_info.hung >= player_info.hung_max){
         addLog("満腹だ");
@@ -368,7 +405,6 @@ const item_data = [
   {
     id: 0x100,
     name: "ショートソード",
-    char: ")",
     type: "weapon",
     func_equip: function(){
       player.atk_offset += 2;
@@ -377,10 +413,10 @@ const item_data = [
       player.atk_offset -= 2;
     },
   },
+  // 射撃武器 0x2XX
   {
-    id: 0x110,
+    id: 0x200,
     name: "狩猟弓",
-    char: ")",
     type: "weapon",
     func_equip: function(){
       player.atk_offset -= 2;
@@ -395,13 +431,13 @@ const item_data = [
     },
     func_unequip: function(){
       player.atk_offset += 2;
+      player_info.bow = false;
     },
   },
-  // 鎧 0x2XX
+  // 鎧 0x3XX
   {
-    id: 0x200,
+    id: 0x300,
     name: "レザーアーマー",
-    char: "[",
     type: "armor",
     func_equip: function(){
       player.def_offset += 1;
@@ -410,11 +446,10 @@ const item_data = [
       player.def_offset -= 1;
     },
   },
-  // 指輪 0x3XX
+  // 指輪 0x4XX
   {
-    id: 0x300,
+    id: 0x400,
     name: "生命の指輪",
-    char: "=",
     type: "ring",
     func_equip: function(){
       player.hp_max += 10;
@@ -424,11 +459,10 @@ const item_data = [
       if(player.hp > player.hp_max) player.hp = player.hp_max;
     },
   },
-  // 巻物 0x4XX
+  // 巻物 0x5XX
   {
-    id: 0x400,
+    id: 0x500,
     name: "千里眼の巻物",
-    char: "?",
     type: "scroll",
     func: function(){
       clairvoyance();
@@ -437,11 +471,10 @@ const item_data = [
       return true;
     },
   },
-  // 杖 0x5XX
+  // 杖 0x6XX
   {
-    id: 0x500,
+    id: 0x600,
     name: "火球の杖",
-    char: "/",
     type: "staff",
     func: function(){
       if(player.mp < 5){
@@ -460,30 +493,35 @@ const item_data = [
       shot(player, undefined, dir, player.mp_max/2);
     }
   },
-  // 弾薬 0x6XX
+  // 弾薬 0x7XX
   {
-    id: 0x600,
+    id: 0x700,
     name: "木の矢",
-    char: "\"",
     type: "ammo",
     dmg: 4,
     func_equip: function(){},
     func_unequip: function(){},
   },
-  // スタックアイテム 0x7XX
   {
-    id: 0x700,
+    id: 0x7f0,
+    name: "胞子",
+    type: "ammo",
+    dmg: 4,
+    func_equip: function(){},
+    func_unequip: function(){},
+  },
+  // スタックアイテム 0x8XX
+  {
+    id: 0x800,
     name: "木の矢の束",
-    char: "\"",
     type: "stack",
-    item_id: 0x600,
-    num: 5,
+    item_id: 0x700,
+    num: 8,
   },
   // ユニーク 0xfXX
   {
     id: 0xf00,
     name: "戦士キット",
-    char: "&",
     type: "unique",
     func: function(){
       if(inventory_size-inventory.length >= 4){
@@ -495,8 +533,8 @@ const item_data = [
         player.atk += 5;
         player.def += 5;
         addItem(0x100);
-        addItem(0x200);
         addItem(0x300);
+        addItem(0x400);
         addItem(0x011);
         inventory.splice(inventory.indexOf(this), 1);
         return true;
@@ -510,7 +548,6 @@ const item_data = [
   {
     id: 0xf01,
     name: "弓兵キット",
-    char: "&",
     type: "unique",
     func: function(){
       if(inventory_size-inventory.length >= 5){
@@ -522,10 +559,10 @@ const item_data = [
         player.atk += 3;
         player.def += 3;
         player_info.sight_range += 4;
-        addItem(0x110);
         addItem(0x200);
+        addItem(0x300);
         for(let i=0; i<8; i++)
-          addItem(0x700);
+          addItem(0x800);
         addItem(0x010);
         inventory.splice(inventory.indexOf(this), 1);
         return true;
@@ -539,7 +576,6 @@ const item_data = [
   {
     id: 0xf02,
     name: "魔法キット",
-    char: "&",
     type: "unique",
     func: function(){
       if(inventory_size-inventory.length >= 4){
@@ -551,7 +587,7 @@ const item_data = [
         player.atk += 1;
         player.def += 2;
         player_info.mp_regen_rate += 4;
-        addItem(0x500);
+        addItem(0x600);
         addItem(0x010);
         addItem(0x021);
         inventory.splice(inventory.indexOf(this), 1);
@@ -578,7 +614,7 @@ const item_group_table = [
   [
     0x000,
     0x010, 0x020, 0x030,
-    0x400, 0x700,
+    0x500, 0x800,
   ],
 ];
 
@@ -637,21 +673,21 @@ const enemy_data = [
   },
   {
     id: 0x05,
-    name: "",
-    char: "F",
-    hp:0, hp_max:0, 
+    name: "ミランダフラワー",
+    char: "花",//"F",
+    hp:3, hp_max:3, 
     mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
+    atk:6, def:0,
+    speed:0,
+    throwing: 0x7f0,
   },
   {
     id: 0x06,
-    name: "",
-    char: "G",
-    hp:0, hp_max:0, 
+    name: "ゴブリン",
+    char: "ゴ",//"G",
+    hp:8, hp_max:8, 
     mp:0, mp_max:0, 
-    atk:0, def:0,
+    atk:8, def:2,
     speed:1,
     throwing: undefined,
   },
@@ -688,7 +724,7 @@ const enemy_data = [
   {
     id: 0x0A,
     name: "",
-    char: "k",
+    char: "K",
     hp:0, hp_max:0, 
     mp:0, mp_max:0, 
     atk:0, def:0,
@@ -707,13 +743,13 @@ const enemy_data = [
   },
   {
     id: 0x0C,
-    name: "メイデン",
+    name: "",
     char: "M",
-    hp:3, hp_max:3, 
+    hp:0, hp_max:0, 
     mp:0, mp_max:0, 
-    atk:6, def:0,
+    atk:0, def:0,
     speed:0,
-    throwing: 0x600,
+    throwing: undefined,
   },
   {
     id: 0x0D,
@@ -757,13 +793,13 @@ const enemy_data = [
   },
   {
     id: 0x11,
-    name: "ローチ",
-    char: "R",
-    hp:8, hp_max:8, 
+    name: "リリパット",
+    char: "リ",//"R",
+    hp:4, hp_max:4, 
     mp:0, mp_max:0, 
-    atk:8, def:2,
+    atk:4, def:0,
     speed:1,
-    throwing: undefined,
+    throwing: 0x700,
   },
   {
     id: 0x12,
@@ -849,7 +885,7 @@ const enemy_data = [
 let enemy_group = [];
 const enemy_table = [
   [
-    0x11, 0x11, 0x11, 0x11, 0x0C,
+    0x06, 0x06, 0x06, 0x06, 0x05,
   ],
 ];
 
@@ -923,13 +959,12 @@ const shop_data = [
     name: "薬屋",
     dialogue_intro: "いらっしゃい",
     dialogue_outro: "またどうぞ",
-    random_flag: true,
-    item_num: 3,  // 販売品の個数(テーブルからランダム)
+    random_flag: false,
     item_table: [
       {id: 0x010, price: 10,},
-      {id: 0x010, price: 10,},
-      {id: 0x010, price: 10,},
       {id: 0x011, price: 20,},
+      {id: 0x020, price: 20,},
+      {id: 0x030, price: 10,},
     ],
     func_before: function(){},
     func_buy: function(){},
@@ -955,6 +990,53 @@ const shop_data = [
       setNPC(0x01, this.x, this.y);
       shop_group.splice(shop_group.indexOf(this),1);
     },
+    func_after: function(){},
+  },
+  {
+    id: 0x02,
+    name: "行商メレン",
+    dialogue_intro: "買っておくれ...　何か買っておくれよ...",
+    dialogue_outro: "すまないねぇ...　ヒヒヒッ... ",
+    random_flag: true,
+    item_num: 5,  // 販売品の個数(テーブルからランダム)
+    item_table: [
+      {id: 0x500, price: 30,},
+      {id: 0x100, price: 50,},
+      {id: 0x200, price: 50,},
+      {id: 0x300, price: 50,},
+      {id: 0x400, price: 150,},
+      {id: 0x800, price: 20,},
+    ],
+    func_before: function(){},
+    func_buy: function(){},
+    func_after: function(){},
+  },
+  {
+    id: 0x03,
+    name: "孤高なガヴァラン",
+    dialogue_intro: "オマエ　ガヴァラン　ショウダイ？　...ショウバイ！",
+    dialogue_outro: "マイダ...　マイドアリ！",
+    random_flag: false,
+    item_table: [
+      {id: 0x011, price: 20,},
+      {id: 0x021, price: 20,},
+      {id: 0x030, price: 10,},
+
+      {id: 0x010, price: -2,},
+      {id: 0x011, price: -6,},
+      {id: 0x012, price: -15,},
+      {id: 0x020, price: -5,},
+      {id: 0x021, price: -10,},
+      {id: 0x030, price: -2,},
+      {id: 0x100, price: -30,},
+      {id: 0x200, price: -30,},
+      {id: 0x300, price: -30,},
+      {id: 0x400, price: -100,},
+      {id: 0x500, price: -20,},
+      {id: 0x700, price: -1,},
+    ],
+    func_before: function(){},
+    func_buy: function(){},
     func_after: function(){},
   },
 ];

@@ -61,6 +61,9 @@ function inputName(){
       ctx.fillText(" "+lang[i][j], canvas.width/2-font_size*9+font_size*2*j, font_size*2*(i+2));
     }
 
+  // 操作説明
+  ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.width/2, font_size*2*(lang.length+2));
+
   // 決定キー
   if(key_input.apply){
     audio_apply.play();
@@ -322,14 +325,14 @@ function eventPlayer(){
   // sub
   if(key_input.sub){
     if(!player_info.bow){
-      addLog("弓を装備していない");
+      addLog("射撃武器を装備していない");
       return false;
     }
     else if(!player_info.ammo){
-      addLog("矢を装備していない");
+      addLog("弾薬を装備していない");
       return false;
     }
-    addLog("弓を構えた");
+    addLog(player_info.weapon.name+" を構えた");
     audio_apply.play();
     shot_flag = true;
     return false;
@@ -364,12 +367,14 @@ function move(who, direction){
 function sprint(direction){
   if(!canMove(player.x+direction.x, player.y+direction.y))
     return;
-  for(let i=-2; i<=2; i++)
-    for(let j=-2; j<=2; j++)
-      if(isEnemy(player.x+j, player.y+i))
-        return;
-  if(isItem(player.x+direction.x, player.y+direction.y))
+
+  if(map_draw[player.y+direction.y][player.x+direction.x] == char_map.door)
     return;
+
+  for(let i=-1; i<=1; i++)
+    for(let j=-1; j<=1; j++)
+      if(isAnyObject(player.x+j, player.y+i))
+        return;
   
   move(player, direction);
   eventEnemy();
@@ -380,6 +385,10 @@ function sprint(direction){
   updateSight();
   updateMapDraw();
   updateMDWall();
+  updateMDItem();
+  updateMDEnemyGroup();
+  updateMDShopGroup();
+  updateMDNPCGroup();
 
   sprint(direction);
 }
@@ -422,6 +431,7 @@ function eventUI(){
 
 // ショップイベント
 function eventShop(){
+  shop_using.func_before();
   // 上下
   if(key_input.up && shop_cursor > 0){
     shop_cursor--;
@@ -433,17 +443,42 @@ function eventShop(){
   }
   // apply
   if(key_input.apply){
-    if(player_info.gold >= shop_using.item[shop_cursor].price){
-      if(addItem(shop_using.item[shop_cursor].id)){
-        audio_apply.play();
-        player_info.gold -= shop_using.item[shop_cursor].price;
-        shop_using.item.splice(shop_cursor, 1);
-        shop_using.func_buy();
+    // buy
+    if(shop_using.item[shop_cursor].price >= 0){
+      if(player_info.gold >= shop_using.item[shop_cursor].price){
+        if(addItem(shop_using.item[shop_cursor].id)){
+          audio_apply.play();
+          player_info.gold -= shop_using.item[shop_cursor].price;
+          //shop_using.item.splice(shop_cursor, 1);
+          shop_using.func_buy();
+        }
       }
+      else
+        addLog("金貨が足りない");
+      return true;
     }
-    else
-      addLog("金貨が足りない");
-    return false;
+    // sell
+    else{
+      if(inventory.find(v=>v.id==shop_using.item[shop_cursor].id)){
+        let item_sell = inventory[inventory.indexOf(inventory.find(v=>v.id==shop_using.item[shop_cursor].id))]
+        if(stack_type.includes(item_sell.type)){
+          if(item_sell.stack_num > 0) item_sell.stack_num--;
+          if(item_sell.stack_num <= 0){
+            inventory.splice(inventory.indexOf(item_sell), 1);
+          }
+          player_info.gold += -shop_using.item[shop_cursor].price;
+        }
+        else{
+          inventory.splice(inventory.indexOf(item_sell), 1);
+          player_info.gold += -shop_using.item[shop_cursor].price;
+        }
+      }
+      else
+        addLog("持っていない");
+      
+      audio_apply.play();
+      return true;
+    }
   }
   // cancel
   if(key_input.cancel){
@@ -452,7 +487,7 @@ function eventShop(){
     shop_using = undefined;
     shop_cursor = -1;
     shop_flag = false;
-    return true;
+    return false;
   }
 }
 
@@ -465,13 +500,21 @@ function setShop(id, x, y){
   let shop_info = {};
   let item = [];
 
-  if(shop.random_flag)
+  if(shop.random_flag){
+    if(shop.item_num > shop.item_table.length)
+      shop.item_num = shop.item_table.length;
+
     for(let n=0; n<shop.item_num; n++){
       let i = shop.item_table[Math.floor(Math.random()*shop.item_table.length)];
+      if(item.find(v=>v.id==i.id)){
+        n--;
+        continue;
+      }
       let item_info = {};
       Object.assign(item_info, item_data.find(v=>v.id==i.id), {price: i.price});
       item.push(item_info);
     }
+  }
   else
     for(let i of shop.item_table){
       let item_info = {};
@@ -568,7 +611,7 @@ function shot(who, item, direction, throwing_dmg){
 
 function shotDmg(from, to, throwing_dmg){
   let dmg = Math.floor(from.atk/2)-(to.def+to.def_offset)+throwing_dmg;
-  if(dmg < 0) dmg = 0;
+  if(dmg < 1) dmg = 1;
   addHP(to, -dmg);
   addLog(to.name+" に "+dmg+" のダメージ");
 }
@@ -650,6 +693,8 @@ function eventMagic(){
     addLog("構えを解いた");
     magic_flag = false;
     magic_using = undefined;
+    inv_cursor = -1;
+    ui_flag = false;
     return false;
   }
 }
@@ -1011,6 +1056,9 @@ function nextFloor(){
   floor_cnt++;
   clairvoyance_flag = false;
 
+  // テスト用
+  //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+
   if(um = unique_map.find(v=>v.id==floor_cnt)){
     generateUniqueMap(um);
     
@@ -1061,7 +1109,7 @@ function eventEnemy(){
       }
     }
     // 射撃
-    else if(isSameRoom(enemy.x, enemy.y, player.x, player.y)){
+    else if(isSameRoom(enemy.x, enemy.y, player.x, player.y) && enemy.chase_flag){
       for(let d in key_direction){
         let xy = straightRecursive(enemy.x, enemy.y, key_direction[d]);
         if(xy.x+key_direction[d].x == player.x && xy.y+key_direction[d].y == player.y){
@@ -1084,14 +1132,17 @@ function eventEnemy(){
       }
     }
 
+    // 発見
+    if(isSameRoom(enemy.x, enemy.y, player.x, player.y))
+      enemy.chase_flag = true;
+
     // 移動
-    for(let cnt=0; cnt<enemy.speed; cnt++)
-      if(isSameRoom(enemy.x, enemy.y, player.x, player.y) || enemy.chase_flag){
-        enemy.chase_flag = true;
+    for(let cnt=0; cnt<enemy.speed; cnt++){
+      if(enemy.chase_flag)
         moveEnemyChase(enemy);
-      }
       else
         moveEnemyRand(enemy);
+    }
       
     // 毒沼
     if(map[enemy.y][enemy.x] == id_map.poison){
@@ -1269,22 +1320,39 @@ function drawMap(){
         ctx.fillStyle = "gray";
       }
       else if(map_shotrange[i][j]){
-        ctx.fillStyle = "pink";
+        ctx.fillStyle = "green";
       }
       else if(map[i][j] == id_map.poison){
         ctx.fillStyle = "purple";
       }
       else{
-        if(map_draw[i][j].match(/[a-zA-Z]/))
-          ctx.fillStyle = "red";
-        else if(map_draw[i][j].match(/#|\.|\+|\||\-/))
+        if(map_draw[i][j]==char_map[id_map.path]
+          || map_draw[i][j]==char_map[id_map.room]
+          || map_draw[i][j]==char_map.door
+          || map_draw[i][j]==char_map.wall_h
+          || map_draw[i][j]==char_map.wall_v)
           ctx.fillStyle = "white";
-        else if(map_draw[i][j].match(/\%|\<|\^/))
+        else if(map_draw[i][j]==char_map[id_map.stair]
+          || map_draw[i][j]==char_map[id_map.portal]
+          || map_draw[i][j]==char_map[id_map.trap])
           ctx.fillStyle = "blue";
-        else
+        else if(map_draw[i][j]==char_map.player
+          || map_draw[i][j]==char_map.npc
+          || map_draw[i][j]==char_map.gold
+          || map_draw[i][j]==char_map.consume
+          || map_draw[i][j]==char_map.food
+          || map_draw[i][j]==char_map.weapon
+          || map_draw[i][j]==char_map.armor
+          || map_draw[i][j]==char_map.ring
+          || map_draw[i][j]==char_map.scroll
+          || map_draw[i][j]==char_map.staff
+          || map_draw[i][j]==char_map.ammo
+          || map_draw[i][j]==char_map.unique)
           ctx.fillStyle = "yellow";
+        else
+          ctx.fillStyle = "red";
       }
-      ctx.fillText(map_draw[i][j], font_size/2*j, font_size*i);
+      ctx.fillText(map_draw[i][j], cell_width*j, cell_height*i);
     }
   }
 }
@@ -1356,7 +1424,7 @@ function updateMapDraw(){
       if(map_sight[i][j])
         map_draw[i][j] = char_map[map[i][j]];
       else if(map[i][j] != id_map.none
-        && map_draw[i][j] != char_map[0])
+        && map_draw[i][j] != char_map[id_map.none])
         map_draw[i][j] = char_map[map[i][j]];
 }
 
@@ -1385,7 +1453,7 @@ function updateMDWall(){
                 map_draw[i][j] = char_map.wall_h;
       }
       // 扉
-      else if(map_draw[i][j] == char_map[2]){
+      else if(map_draw[i][j] == char_map[id_map.path]){
         for(let n of [-1, 1])
           for(let m of [-1, 1])
             if(isInMap(j+m, i+n) && ![id_map.none, id_map.path].includes(map[i+n][j+m]))
@@ -1427,23 +1495,66 @@ function updateMDNPCGroup(){
 // アイテム描画
 function updateMDItem(){
   for(let i of item_group)
-    if(map_sight[i.y][i.x])
-      map_draw[i.y][i.x] = i.char;
+    if(map_sight[i.y][i.x]){
+      if(i.type=="stack")
+        map_draw[i.y][i.x] = char_map[item_data.find(v=>v.id==i.item_id).type];
+      else
+        map_draw[i.y][i.x] = char_map[i.type];
+    }
 }
 
-// 射撃・投擲・魔法の射程 //TODO
+// 射撃・投擲・魔法の射程
 function updateShotRange(){
   map_shotrange = initMap(map_shotrange, false);
-  for(let i=0; i<SIZEY; i++)
-    for(let j=0; j<SIZEX; j++)
-      if(!(i==player.y && j==player.x))
-         if((i-player.y)==(j-player.x) || -(i-player.y)==(j-player.x)
-          || i==player.y || j==player.x){
-          if(!(map[i][j]==id_map.none))
-            map_shotrange[i][j] = true;
-          else
-            map_shotrange[i][j] = false;
-      }
+
+  // 左上
+  for(let cnt = 1;; cnt++){
+    if(map[player.y-cnt][player.x-cnt]==id_map.none)
+      break;
+    map_shotrange[player.y-cnt][player.x-cnt] = true;
+  }
+  // 上
+  for(let cnt = 1;; cnt++){
+    if(map[player.y-cnt][player.x]==id_map.none)
+      break;
+    map_shotrange[player.y-cnt][player.x] = true;
+  }
+  // 右上
+  for(let cnt = 1;; cnt++){
+    if(map[player.y-cnt][player.x+cnt]==id_map.none)
+      break;
+    map_shotrange[player.y-cnt][player.x+cnt] = true;
+  }
+  // 左
+  for(let cnt = 1;; cnt++){
+    if(map[player.y][player.x-cnt]==id_map.none)
+      break;
+    map_shotrange[player.y][player.x-cnt] = true;
+  }
+  // 右
+  for(let cnt = 1;; cnt++){
+    if(map[player.y][player.x+cnt]==id_map.none)
+      break;
+    map_shotrange[player.y][player.x+cnt] = true;
+  }
+  // 左下
+  for(let cnt = 1;; cnt++){
+    if(map[player.y+cnt][player.x-cnt]==id_map.none)
+      break;
+    map_shotrange[player.y+cnt][player.x-cnt] = true;
+  }
+  // 下
+  for(let cnt = 1;; cnt++){
+    if(map[player.y+cnt][player.x]==id_map.none)
+      break;
+    map_shotrange[player.y+cnt][player.x] = true;
+  }
+  // 右下
+  for(let cnt = 1;; cnt++){
+    if(map[player.y+cnt][player.x+cnt]==id_map.none)
+      break;
+    map_shotrange[player.y+cnt][player.x+cnt] = true;
+  }
 }
 
 function isInMap(x, y){
@@ -1488,6 +1599,20 @@ function canMove(x, y){
   )
     return true;
   return false;
+}
+
+function isAnyObject(x, y){
+  if(map_draw[y][x] == char_map[id_map.none]
+    || map_draw[y][x] == char_map[id_map.room]
+    || map_draw[y][x] == char_map[id_map.path]
+    || map_draw[y][x] == char_map.player
+    || map_draw[y][x] == char_map.wall_h
+    || map_draw[y][x] == char_map.wall_v
+    || map_draw[y][x] == char_map.door){
+      console.log(x+","+y+" false");
+    return false;
+  }
+  return true;
 }
 
 // 千里眼
