@@ -1608,10 +1608,8 @@ function isAnyObject(x, y){
     || map_draw[y][x] == char_map.player
     || map_draw[y][x] == char_map.wall_h
     || map_draw[y][x] == char_map.wall_v
-    || map_draw[y][x] == char_map.door){
-      console.log(x+","+y+" false");
+    || map_draw[y][x] == char_map.door)
     return false;
-  }
   return true;
 }
 
