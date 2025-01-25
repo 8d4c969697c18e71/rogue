@@ -989,6 +989,7 @@ const shop_data = [
       shop_flag = false;
       setNPC(0x01, this.x, this.y);
       shop_group.splice(shop_group.indexOf(this),1);
+      useItem([inventory.length-1]);
     },
     func_after: function(){},
   },
