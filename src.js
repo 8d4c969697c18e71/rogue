@@ -447,20 +447,26 @@ function eventShop(){
     if(shop_using.item[shop_cursor].price >= 0){
       if(player_info.gold >= shop_using.item[shop_cursor].price){
         if(addItem(shop_using.item[shop_cursor].id)){
-          audio_apply.play();
           player_info.gold -= shop_using.item[shop_cursor].price;
           //shop_using.item.splice(shop_cursor, 1);
           shop_using.func_buy();
         }
+        audio_apply.play();
+        return true;
       }
       else
         addLog("金貨が足りない");
-      return true;
+      return false;
     }
     // sell
     else{
       if(inventory.find(v=>v.id==shop_using.item[shop_cursor].id)){
         let item_sell = inventory[inventory.indexOf(inventory.find(v=>v.id==shop_using.item[shop_cursor].id))]
+        if(item_sell.equip_flag){
+          addLog("装備中だ");
+          return false;
+        }
+          
         if(stack_type.includes(item_sell.type)){
           if(item_sell.stack_num > 0) item_sell.stack_num--;
           if(item_sell.stack_num <= 0){
@@ -472,12 +478,13 @@ function eventShop(){
           inventory.splice(inventory.indexOf(item_sell), 1);
           player_info.gold += -shop_using.item[shop_cursor].price;
         }
+        audio_apply.play();
+        addLog(item_sell.name+" を売った");
+        return true;
       }
       else
         addLog("持っていない");
-      
-      audio_apply.play();
-      return true;
+      return false;
     }
   }
   // cancel
@@ -567,7 +574,7 @@ function eventShot(){
       shot(player, ammo, kd[k], ammo.dmg);
       if(ammo.stack_num > 0) ammo.stack_num--;
       if(ammo.stack_num <= 0){
-        equipPlayer(inventory.indexOf(ammo));
+        equip(inventory.indexOf(ammo));
         log_reserve.pop();
         inventory.splice(inventory.indexOf(ammo), 1);
       }
@@ -810,7 +817,7 @@ function isDead(who){
 // アイテム使用
 function useItem(index){
   if(equip_type.includes(inventory[index].type)){
-    return equipPlayer(index);
+    return equip(index);
   }
   else{
     return inventory[index].func();
@@ -818,7 +825,7 @@ function useItem(index){
 }
 
 // プレイヤー装備切り替え
-function equipPlayer(index){
+function equip(index){
   let equip_item = inventory[index];
   // 装備する
   if(!(equip_item.equip_flag)){
@@ -1056,8 +1063,8 @@ function nextFloor(){
   floor_cnt++;
   clairvoyance_flag = false;
 
-  // テスト用
-  //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+  // テスト用 //FIXME
+  generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
   if(um = unique_map.find(v=>v.id==floor_cnt)){
     generateUniqueMap(um);
