@@ -53,8 +53,10 @@ function drawInfo(){
   // インベントリ
   info.insertAdjacentHTML("beforeend", "INVENTORY<br>");
   for(let i=0; i<inventory_size; i++){
-    if(i == inv_cursor)
+    if(i == inv_cursor && i<10)
       info.insertAdjacentHTML("beforeend", ">&nbsp; ");
+    else if(i == inv_cursor)
+      info.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
     else
       info.insertAdjacentHTML("beforeend", i+": ");
     if(i < inventory.length){
@@ -75,8 +77,10 @@ function drawInfo(){
   if(shop_flag){
     info.insertAdjacentHTML("beforeend", "SHOP<br>");
     for(let i=0; i<shop_using.item.length; i++){
-      if(i == shop_cursor)
+      if(i == shop_cursor && i<10)
         info.insertAdjacentHTML("beforeend", ">&nbsp; ");
+      else if(i == shop_cursor)
+        info.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
       else
         info.insertAdjacentHTML("beforeend", i+": ");
       if(shop_using.item[i].price>=0){
