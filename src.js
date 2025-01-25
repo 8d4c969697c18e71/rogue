@@ -1090,7 +1090,7 @@ function eventEnemy(){
     let enemy = enemy_group[e];
     if(isDead(enemy)) continue;
     // 攻撃
-    if(!enemy.throwing){
+    if(!enemy.throwing && enemy.chase_flag){
       for(let d in key_direction){
         let x = enemy.x + key_direction[d].x;
         let y = enemy.y + key_direction[d].y;
