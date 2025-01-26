@@ -84,10 +84,10 @@ let key_input = {
   key: "",
 };
 const key_direction = {
-  left: {x:-1,y:0},
-  right: {x:1,y:0},
   up: {x:0,y:-1},
   down: {x:0,y:1},
+  left: {x:-1,y:0},
+  right: {x:1,y:0},
 };
 const key_direction_diagonal = {
   up_left: {x:-1,y:-1},
@@ -406,6 +406,7 @@ const item_data = [
     id: 0x100,
     name: "ショートソード",
     type: "weapon",
+    equip_flag: false,
     func_equip: function(){
       player.atk_offset += 2;
     },
@@ -418,6 +419,7 @@ const item_data = [
     id: 0x200,
     name: "狩猟弓",
     type: "weapon",
+    equip_flag: false,
     func_equip: function(){
       player.atk_offset -= 2;
       player_info.bow = true;
@@ -439,6 +441,7 @@ const item_data = [
     id: 0x300,
     name: "レザーアーマー",
     type: "armor",
+    equip_flag: false,
     func_equip: function(){
       player.def_offset += 1;
     },
@@ -446,11 +449,24 @@ const item_data = [
       player.def_offset -= 1;
     },
   },
+  {
+    id: 0x380,
+    name: "黒金糸のローブ",
+    type: "armor",
+    equip_flag: false,
+    func_equip: function(){
+      player.mp_max += 10;
+    },
+    func_unequip: function(){
+      player.mp_max -= 10;
+    },
+  },
   // 指輪 0x4XX
   {
     id: 0x400,
     name: "生命の指輪",
     type: "ring",
+    equip_flag: false,
     func_equip: function(){
       player.hp_max += 10;
     },
@@ -498,6 +514,7 @@ const item_data = [
     id: 0x700,
     name: "木の矢",
     type: "ammo",
+    equip_flag: false,
     dmg: 4,
     func_equip: function(){},
     func_unequip: function(){},
@@ -586,9 +603,11 @@ const item_data = [
         player.mp += 20;
         player.atk += 1;
         player.def += 2;
-        player_info.mp_regen_rate += 4;
+        player_info.sight_range += 2;
+        player_info.mp_regen_rate += 6;
         addItem(0x600);
-        addItem(0x010);
+        addItem(0x380);
+        addItem(0x020);
         addItem(0x021);
         inventory.splice(inventory.indexOf(this), 1);
         return true;
@@ -612,7 +631,7 @@ let magic_using = undefined;
 let item_group = [];
 const item_group_table = [
   [
-    0x000,
+    0x000, 0x000, 0x000,
     0x010, 0x020, 0x030,
     0x500, 0x800,
   ],
@@ -963,8 +982,8 @@ const shop_data = [
     item_table: [
       {id: 0x010, price: 10,},
       {id: 0x011, price: 20,},
-      {id: 0x020, price: 20,},
-      {id: 0x030, price: 10,},
+      {id: 0x020, price: 10,},
+      {id: 0x030, price: 5,},
     ],
     func_before: function(){},
     func_buy: function(){},
@@ -1014,8 +1033,8 @@ const shop_data = [
   },
   {
     id: 0x03,
-    name: "孤高なガヴァラン",
-    dialogue_intro: "オマエ　ガヴァラン　ショウダイ？　...ショウバイ！",
+    name: "孤高なガヴァ",
+    dialogue_intro: "オマエ　ガヴァ　ショウダイ？　...ショウバイ！",
     dialogue_outro: "マイダ...　マイドアリ！",
     random_flag: false,
     item_table: [
@@ -1023,12 +1042,12 @@ const shop_data = [
       {id: 0x021, price: 20,},
       {id: 0x030, price: 10,},
 
-      {id: 0x010, price: -2,},
+      {id: 0x010, price: -5,},
       {id: 0x011, price: -6,},
       {id: 0x012, price: -15,},
       {id: 0x020, price: -5,},
       {id: 0x021, price: -10,},
-      {id: 0x030, price: -2,},
+      {id: 0x030, price: -5,},
       {id: 0x100, price: -30,},
       {id: 0x200, price: -30,},
       {id: 0x300, price: -30,},

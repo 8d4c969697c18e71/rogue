@@ -355,7 +355,7 @@ function attack(from, to){
 function move(who, direction){
   let new_x = who.x + direction.x;
   let new_y = who.y + direction.y;
-  if(canMove(new_x,new_y)){
+  if(canMove(new_x,new_y) && canMoveDiagonal(who.x, who.y, direction.x, direction.y)){
     who.x = new_x;
     who.y = new_y;
     return true;
@@ -365,7 +365,7 @@ function move(who, direction){
 
 // 高速移動
 function sprint(direction){
-  if(!canMove(player.x+direction.x, player.y+direction.y))
+  if(!canMove(player.x+direction.x, player.y+direction.y) && canMoveDiagonal(player.x, player.y, direction.x, direction.y))
     return;
 
   if(map_draw[player.y+direction.y][player.x+direction.x] == char_map.door)
@@ -915,9 +915,10 @@ function addItem(id){
   let item_info = {};
   Object.assign(item_info, item);
   // 装備品
-  if(equip_type.includes(item.type)){
-    Object.assign(item_info, {equip_flag: false});
-  }
+  //if(equip_type.includes(item.type)){
+  //  Object.assign(item_info, {equip_flag: false});
+  //}
+  
   // スタック可能アイテム
   if(stack_type.includes(item.type)){
     let index = getStackIndex(item);
@@ -1063,7 +1064,7 @@ function nextFloor(){
   floor_cnt++;
   clairvoyance_flag = false;
 
-  // テスト用
+  // テスト用FIXME
   //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
   if(um = unique_map.find(v=>v.id==floor_cnt)){
@@ -1204,7 +1205,8 @@ function asterRecursiveEight(node, x, y, dst_x, dst_y){
         return;
       }
       // 探索
-      else if(canMove(x+j, y+i) 
+      else if(canMove(x+j, y+i)
+        && canMoveDiagonal(x, y, i, j)
         && !(node.find(v=>(v.x==x+j && v.y==y+i)))){
         // 移動コスト
         if(map[y+i][x+j] == id_map.poison)
@@ -1606,6 +1608,17 @@ function canMove(x, y){
   )
     return true;
   return false;
+}
+
+// 斜め移動の判定
+function canMoveDiagonal(x, y, dir_x, dir_y){
+  if(dir_x==0 || dir_y==0)
+    return true;
+
+  if(map[y+dir_y][x]==id_map.none || map[y][x+dir_x]==id_map.none)
+    return false;
+
+  return true;
 }
 
 function isAnyObject(x, y){
