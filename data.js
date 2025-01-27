@@ -519,7 +519,7 @@ const item_data = [
       return false;
     },
     func_cast: function(dir){
-      player.mp -= 5;
+      player.mp -= 4;
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
       magic(player, player.mp_max/3, dir);
@@ -729,9 +729,9 @@ const enemy_data = [
     name: "亡者兵士",
     char: "兵",
     lv:2,
-    hp:15, hp_max:15,
+    hp:13, hp_max:13,
     mp:0, mp_max:0,
-    atk:7, def:7,
+    atk:7, def:6,
     speed:1,
     escape_flag: false,
     sight_range:4,
@@ -759,7 +759,7 @@ const enemy_data = [
     lv:3,
     hp:9, hp_max:9,
     mp:5, mp_max:5,
-    atk:10, def:4,
+    atk:10, def:3,
     speed:1,
     escape_flag: false,
     sight_range:3,
