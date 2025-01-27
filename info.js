@@ -1,16 +1,24 @@
 const info = document.getElementById("info");
 const log = document.getElementById("log");
 const note = document.getElementById("note");
+const shop = document.getElementById("shop");
 
-info.style.width = '250px';
+info.style.width = '175px';
 info.style.paddingLeft = '5px';
 
 let log_reserve = [];
-const log_reserve_size = 5;
+const log_reserve_size = 10;
 log.style.height = font_size*(log_reserve_size+1)+'px';
-log.style.paddingBottom = '25px';
+log.style.paddingTop = '25px';
+log.style.paddingLeft = '50px';
+log.style.paddingRight = '5px';
 
-note.style.paddingLeft = '5px';
+note.style.paddingRight = '5px';
+
+shop.style.width = '250px';
+shop.style.paddingTop = '25px';
+shop.style.paddingLeft = '5px';
+shop.style.paddingRight = '50px';
 
 //=========================INFO=========================
 
@@ -19,7 +27,7 @@ function drawInfo(){
 
   // マップ情報
   info.insertAdjacentHTML("beforeend", floor_cnt+"F");
-  info.insertAdjacentHTML("beforeend", " POS: ("+player.x+", "+player.y+")<br>");
+  //info.insertAdjacentHTML("beforeend", " POS: ("+player.x+", "+player.y+")<br>");
   info.insertAdjacentHTML("beforeend", " TURN: "+turn_cnt+"<br>");
   info.insertAdjacentHTML("beforeend", "<br>");
 
@@ -33,7 +41,9 @@ function drawInfo(){
   // ステータス
   info.insertAdjacentHTML("beforeend", "STATUS<br>");
   info.insertAdjacentHTML("beforeend", "NAME: "+player.name+"<br>");
-  info.insertAdjacentHTML("beforeend", "JOB : "+player_info.job+"<br>");
+  info.insertAdjacentHTML("beforeend", "JOB : "+player.job_name+"<br>");
+  info.insertAdjacentHTML("beforeend", "LV&nbsp; : "+player.lv+"<br>");
+  info.insertAdjacentHTML("beforeend", "EXP : "+player.exp+"<br>");
   info.insertAdjacentHTML("beforeend", "HP&nbsp; : "+player.hp+" / "+player.hp_max+"<br>");
   info.insertAdjacentHTML("beforeend", "MP&nbsp; : "+player.mp+" / "+player.mp_max+"<br>");
   info.insertAdjacentHTML("beforeend", "ATK : "+player.atk);
@@ -46,19 +56,19 @@ function drawInfo(){
     info.insertAdjacentHTML("beforeend", " + "+player.def_offset+"<br>");
   else
     info.insertAdjacentHTML("beforeend", " - "+Math.abs(player.def_offset)+"<br>");
-  info.insertAdjacentHTML("beforeend", "HUNG: "+player_info.hung+" / "+player_info.hung_max+"<br>");
-  info.insertAdjacentHTML("beforeend", "GOLD: "+player_info.gold+"<br>");
+  info.insertAdjacentHTML("beforeend", "HUNG: "+player.hung+" / "+player.hung_max+"<br>");
+  info.insertAdjacentHTML("beforeend", "GOLD: "+player.gold+"<br>");
   info.insertAdjacentHTML("beforeend", "<br>");
 
   // インベントリ
   info.insertAdjacentHTML("beforeend", "INVENTORY<br>");
   for(let i=0; i<inventory_size; i++){
-    if(i == inv_cursor && i<10)
-      info.insertAdjacentHTML("beforeend", ">&nbsp; ");
-    else if(i == inv_cursor)
+    if(i == inv_cursor)
       info.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+    else if(i<9)
+      info.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
     else
-      info.insertAdjacentHTML("beforeend", i+": ");
+      info.insertAdjacentHTML("beforeend", (i+1)+": ");
     if(i < inventory.length){
       if(inventory[i].equip_flag)
         info.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
@@ -72,28 +82,32 @@ function drawInfo(){
     info.insertAdjacentHTML("beforeend", "<br>");
   }
   info.insertAdjacentHTML("beforeend", "<br>");
+}
 
-  // ショップ
+//=========================SHOP=========================
+
+function drawShop(){
+  shop.innerHTML = "";
   if(shop_flag){
-    info.insertAdjacentHTML("beforeend", "SHOP<br>");
+    shop.insertAdjacentHTML("beforeend", "SHOP<br>");
     for(let i=0; i<shop_using.item.length; i++){
-      if(i == shop_cursor && i<10)
-        info.insertAdjacentHTML("beforeend", ">&nbsp; ");
-      else if(i == shop_cursor)
-        info.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+      if(i == shop_cursor)
+        shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+      else if(i<9)
+        shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
       else
-        info.insertAdjacentHTML("beforeend", i+": ");
+        shop.insertAdjacentHTML("beforeend", (i+1)+": ");
       if(shop_using.item[i].price>=0){
-        info.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-        info.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
+        shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+        shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
       }
       else{
-        info.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
-        info.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+        shop.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
+        shop.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
       }
-      info.insertAdjacentHTML("beforeend", "<br>");
+      shop.insertAdjacentHTML("beforeend", "<br>");
     }
-    info.insertAdjacentHTML("beforeend", "<br>");
+    shop.insertAdjacentHTML("beforeend", "<br>");
   }
 }
 
@@ -148,17 +162,17 @@ function drawNote(){
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("赤字", "red")+": エネミー<br>");
+    colorUI("&nbsp;赤 ", "red")+": エネミー<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.npc+"&nbsp;", "yellow")+": NPC<br>");
+    colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map[id_map.stair]+"&nbsp;", "blue")+": 階段<br>");;
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map[id_map.portal]+"&nbsp;", "blue")+": 帰還ゲート<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map[id_map.trap]+"&nbsp;", "blue")+": 罠<br>");
-  note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map[id_map.poison]+"&nbsp;", "purple")+": 毒沼<br>");
+    colorUI("&nbsp;"+char_map.trap+"&nbsp;", "blue")+": 罠<br>");
+  //note.insertAdjacentHTML("beforeend", 
+  //  colorUI("&nbsp;"+char_map[id_map.poison]+"&nbsp;", "purple")+": 毒沼<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.gold+"&nbsp;", "yellow")+": 金貨<br>");
   note.insertAdjacentHTML("beforeend", 

@@ -28,6 +28,7 @@ const audio_portal = new Audio("sound/portal.wav");
 const audio_hit = new Audio("sound/hit.wav");
 const audio_shot = new Audio("sound/shot.wav");
 const audio_fire = new Audio("sound/fire.wav");
+const audio_ray = new Audio("sound/ray.wav");
 
 // 日付
 const month_list = [
@@ -57,7 +58,7 @@ const katakana = [
   ["ッ","ャ","ュ","ョ","゛","゜","　","消","ｶﾅ","終",],
 ];
 let input_name_pos = {x:0, y:0};
-let name_max_length = 10;
+let name_max_length = 12;
 let input_name_flag = true;
 let hiragana_katakana = true;
 
@@ -81,7 +82,6 @@ let key_input = {
   cancel: false,
   sub: false,
   esc: false,
-  key: "",
 };
 const key_direction = {
   up: {x:0,y:-1},
@@ -121,7 +121,6 @@ const id_map = {
   stair: 3,
   portal: 4,
   poison: 5,
-  trap: 6,
 };
 let map_draw = [];  // 描画用
 //const char_map = {
@@ -131,12 +130,11 @@ let map_draw = [];  // 描画用
 //  3: "%",
 //  4: "<",
 //  5: ".",
-//  6: "^",
 //  player: "@",
-//  npc: "0",
 //  wall_v: "|",
 //  wall_h: "—",
 //  door: "+",
+//  trap: "^",
 //  // item
 //  gold: "$",
 //  consume: "!",
@@ -156,12 +154,11 @@ const char_map = {
   3: "％",
   4: "＜",
   5: "．",
-  6: "＾",
   player: "＠",
-  npc: "Ｃ",
   wall_v: "｜",
   wall_h: "―",
   door: "＋",
+  trap: "＾",
   // item
   gold: "＄",
   consume: "！",
@@ -174,7 +171,6 @@ const char_map = {
   ammo: "”",
   unique: "＆",
 };
-let map_sight = []; // 視界
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let unique_map = [  // 固有マップ
   {
@@ -203,6 +199,7 @@ let unique_map = [  // 固有マップ
       setItem(0x800,1+x_offset, 1);
       setItem(0xf00,2+x_offset, 1);
       setShop(0x03, 9+x_offset, 1);
+      setTrap(0x00, 1+x_offset, 5);
     }
   },
   {
@@ -247,7 +244,7 @@ let unique_map = [  // 固有マップ
     ],
     func: function(x_offset){
       setShop(0x00, 1+x_offset, 7);
-      if(player_info.job == "持たざる者") setShop(0x01, 7+x_offset, 6);
+      if(player.job == 0xf00) setShop(0x01, 7+x_offset, 6);
       else setNPC(0x01, 7+x_offset, 6);
       setNPC(0x00, 2+x_offset, 9);
       setNPC(0x02, 7+x_offset, 11);
@@ -274,32 +271,42 @@ let magic_flag = false;
 let turn_flag = false;  // ターン経過
 let safe_flag = false;  // 空腹度無効化
 let clairvoyance_flag = false;  // 透視
+let bow_flag = false;
 
 // プレイヤー
 let player = {
-  name: "",
   x: 0, y: 0,
-  hp:0, hp_max:0,
-  mp:0, mp_max:0,
-  atk:0, atk_offset:0,
-  def:0, def_offset:0,
-};
-let player_info = {
-  job: "持たざる者",
-  hung:0, hung_max:0,
-  hunger_rate: 5, // 空腹度の減り具合 /turn
-  hp_regen_rate: 10,
-  mp_regen_rate: 10,
-  sight_range: 1, // 視界距離
+
+  name: "",
+  lv: 1,
+  job: 0xf00,
+  job_name: "持たざる者",
+  exp:0, next_exp:100,
+  hp:10, hp_max:10, hp_max_offset:0,
+  mp:0, mp_max:0, mp_max_offset:0,
+  atk:1, atk_offset:0,
+  def:1, def_offset:0,
+
+  hung:100, hung_max:100, hung_max_offset: 0,
+  hung_rate: 5, hung_rate_offset: 0, // 空腹度の減り具合 /turn
+  hp_regen_rate: 10, hp_regen_rate_offset: 0,
+  mp_regen_rate: 10, mp_regen_rate_offset: 0,
+  sight_range: 1, sight_range_offset: 0, // 視界距離
+
+  // 成長率
+  lvup: {hp_max: 3, mp_max: 3},
+
   gold: 0,
   weapon: undefined,
   ammo: undefined,
   armor: undefined,
   ring1: undefined,
   ring2: undefined,
-  bow: false,
+  
+  map_sight: [], // 視界 //TODO: 全域のt/fを保存するのは非効率
 };
 const multiple_slot = ["ring"];
+let magic_using = undefined;
 
 //==================================================ITEM==================================================
 
@@ -319,8 +326,10 @@ const item_data = [
         addLog("使う必要はない");
         return false;
       }
-      addHP(player, 10);
-      addLog(this.name+" を飲んだ　HP が 10 回復した");
+      let value = 10;
+      addHP(player, value);
+      addHung(5);
+      addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -334,8 +343,10 @@ const item_data = [
         addLog("使う必要はない");
         return false;
       }
-      addHP(player, 20);
-      addLog(this.name+" を飲んだ　HP が 20 回復した");
+      let value = 20;
+      addHP(player, value);
+      addHung(5);
+      addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -349,53 +360,58 @@ const item_data = [
         addLog("使う必要はない");
         return false;
       }
-      addHP(player, 30);
-      addLog(this.name+" を飲んだ　HP が 30 回復した");
+      let value = 30;
+      addHP(player, value);
+      addHung(5);
+      addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
   },
   {
     id: 0x020,
-    name: "新鮮な香料",
+    name: "香料",
     type: "consume",
     func: function(){
       if(player.mp >= player.mp_max){
         addLog("使う必要はない");
         return false;
       }
-      addMP(player, 10);
-      addLog(this.name+" を嗅いだ　MP が 10 回復した");
+      let value = 15;
+      addMP(player, value);
+      addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
   },
   {
     id: 0x021,
-    name: "古びた香料",
+    name: "芳しい香料",
     type: "consume",
     func: function(){
       if(player.mp >= player.mp_max){
         addLog("使う必要はない");
         return false;
       }
-      addMP(player, 20);
-      addLog(this.name+" を嗅いだ　MP が 20 回復した");
+      let value = 30;
+      addMP(player, value);
+      addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
   },
   {
     id: 0x030,
-    name: "パン",
+    name: "糧食",
     type: "food",
     func: function(){
-      if(player_info.hung >= player_info.hung_max){
+      if(player.hung >= player.hung_max){
         addLog("満腹だ");
         return false;
       }
-      addHung(20);
-      addLog(this.name+" を食べた　空腹度 が 20 回復した");
+      let value = 30;
+      addHung(value);
+      addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -422,18 +438,18 @@ const item_data = [
     equip_flag: false,
     func_equip: function(){
       player.atk_offset -= 2;
-      player_info.bow = true;
-      if(!player_info.ammo)
+      bow_flag = true;
+      if(!player.ammo)
         for(let i of inventory){
           if(i.type=="ammo"){
-            equipPlayer(inventory.indexOf(i));
+            equip(inventory.indexOf(i));
             break;
           }
         }
     },
     func_unequip: function(){
       player.atk_offset += 2;
-      player_info.bow = false;
+      bow_flag = false;
     },
   },
   // 鎧 0x3XX
@@ -451,14 +467,14 @@ const item_data = [
   },
   {
     id: 0x380,
-    name: "黒金糸のローブ",
+    name: "レアルのローブ",
     type: "armor",
     equip_flag: false,
     func_equip: function(){
-      player.mp_max += 10;
+      player.mp_max += 3;
     },
     func_unequip: function(){
-      player.mp_max -= 10;
+      player.mp_max -= 3;
     },
   },
   // 指輪 0x4XX
@@ -490,7 +506,7 @@ const item_data = [
   // 杖 0x6XX
   {
     id: 0x600,
-    name: "火球の杖",
+    name: "ソウルの杖",
     type: "staff",
     func: function(){
       if(player.mp < 5){
@@ -504,9 +520,9 @@ const item_data = [
     },
     func_cast: function(dir){
       player.mp -= 5;
-      addLog(player.name+" は 火球 を放った");
-      audio_fire.play();
-      shot(player, undefined, dir, player.mp_max/2);
+      addLog(player.name+" はソウルの光を放った");
+      audio_ray.play();
+      magic(player, player.mp_max/3, dir);
     }
   },
   // 弾薬 0x7XX
@@ -538,20 +554,49 @@ const item_data = [
   // ユニーク 0xfXX
   {
     id: 0xf00,
-    name: "戦士キット",
+    name: "持たざる者",
     type: "unique",
+    hp: 10,
+    hp_max: 10,
+    mp: 5,
+    mp_max: 5,
+    atk: 1,
+    def: 1,
+    hung_rate: 20,
+    hp_regen_rate: 10,
+    mp_regen_rate: 10,
+    sight_range: 1,
+    lvup: {hp_max: 3, mp_max: 3},
     func: function(){
-      if(inventory_size-inventory.length >= 4){
-        player_info.job = "戦士";
-        player.hp_max += 20;
-        player.hp += 20;
-        player.mp_max += 0;
-        player.mp += 0;
-        player.atk += 5;
-        player.def += 5;
+      player.job = this.id;
+      backLv();
+
+      inventory.splice(inventory.indexOf(this), 1);
+      return true;
+    },
+  },
+  {
+    id: 0xf01,
+    name: "戦士",
+    type: "unique",
+    hp: 20,
+    hp_max: 20,
+    mp: 0,
+    mp_max: 0,
+    atk: 4,
+    def: 3,
+    hung_rate: 5,
+    hp_regen_rate: 10,
+    mp_regen_rate: 10,
+    sight_range: 1,
+    lvup: {hp_max: 5, mp_max: 0},
+    func: function(){
+      if(inventory_size-inventory.length >= 3){
+        player.job = this.id;
+        backLv();
+
         addItem(0x100);
         addItem(0x300);
-        addItem(0x400);
         addItem(0x011);
         inventory.splice(inventory.indexOf(this), 1);
         return true;
@@ -563,21 +608,26 @@ const item_data = [
     },
   },
   {
-    id: 0xf01,
-    name: "弓兵キット",
+    id: 0xf02,
+    name: "弓兵",
     type: "unique",
+    hp: 15,
+    hp_max: 15,
+    mp: 10,
+    mp_max: 10,
+    atk: 3,
+    def: 1,
+    hung_rate: 5,
+    hp_regen_rate: 10,
+    mp_regen_rate: 10,
+    sight_range: 5,
+    lvup: {hp_max: 3, mp_max: 2},
     func: function(){
-      if(inventory_size-inventory.length >= 5){
-        player_info.job = "弓兵";
-        player.hp_max += 10;
-        player.hp += 10;
-        player.mp_max += 10;
-        player.mp += 10;
-        player.atk += 3;
-        player.def += 3;
-        player_info.sight_range += 4;
+      if(inventory_size-inventory.length >= 3){
+        player.job = this.id;
+        backLv();
+
         addItem(0x200);
-        addItem(0x300);
         for(let i=0; i<8; i++)
           addItem(0x800);
         addItem(0x010);
@@ -591,24 +641,31 @@ const item_data = [
     },
   },
   {
-    id: 0xf02,
-    name: "魔法キット",
+    id: 0xf03,
+    name: "魔法使い",
     type: "unique",
+    lv: 1,
+    hp: 10,
+    hp_max: 10,
+    mp: 20,
+    mp_max: 20,
+    atk: 2,
+    def: 0,
+    exp: 0,
+    next_exp: 100,
+    hung_rate: 5,
+    hp_regen_rate: 10,
+    mp_regen_rate: 7,
+    sight_range: 3,
+    lvup: {hp_max: 1, mp_max: 4},
     func: function(){
-      if(inventory_size-inventory.length >= 4){
-        player_info.job = "魔法使い";
-        player.hp_max += 5;
-        player.hp += 5;
-        player.mp_max += 20;
-        player.mp += 20;
-        player.atk += 1;
-        player.def += 2;
-        player_info.sight_range += 2;
-        player_info.mp_regen_rate += 6;
+      if(inventory_size-inventory.length >= 3){
+        player.job = this.id;
+        backLv();
+
         addItem(0x600);
         addItem(0x380);
         addItem(0x020);
-        addItem(0x021);
         inventory.splice(inventory.indexOf(this), 1);
         return true;
       }
@@ -622,291 +679,137 @@ const item_data = [
 const equip_type = ["weapon", "armor", "ring", "ammo"];
 const stack_type = ["ammo"];
 const stack_max = 64;
-let inventory = [];  // 所持アイテム
-const inventory_size = 10;
+let inventory = [];
+const inventory_size = 15;
 let inv_cursor = -1;
-let magic_using = undefined;
 
 // 落ちてるアイテム
-let item_group = [];
-const item_group_table = [
+const item_table = [
   [
     0x000, 0x000, 0x000,
     0x010, 0x020, 0x030,
     0x500, 0x800,
   ],
 ];
+let item_group = [];
 
 //==================================================ENEMY==================================================
 
 const enemy_data = [
   {
-    id: 0x00,
-    name: "",
-    char: "A",
-    hp:0, hp_max:0, 
+    id: 0x000,
+    name: "亡者",
+    char: "亡",
+    lv:1,
+    hp:5, hp_max:5, 
     mp:0, mp_max:0, 
-    atk:0, def:0,
+    atk:4, def:2,
     speed:1,
+    escape_flag: false,
+    sight_range:5,
     throwing: undefined,
+    exp:2,
   },
   {
-    id: 0x01,
-    name: "",
-    char: "B",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x02,
-    name: "",
-    char: "C",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x03,
-    name: "",
-    char: "D",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x04,
-    name: "",
-    char: "E",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x05,
+    id: 0x001,
     name: "ミランダフラワー",
-    char: "花",//"F",
-    hp:3, hp_max:3, 
+    char: "ミ",
+    lv:1,
+    hp:1, hp_max:1, 
     mp:0, mp_max:0, 
     atk:6, def:0,
     speed:0,
+    escape_flag: false,
+    sight_range:10,
     throwing: 0x7f0,
+    exp:1,
   },
   {
-    id: 0x06,
-    name: "ゴブリン",
-    char: "ゴ",//"G",
-    hp:8, hp_max:8, 
-    mp:0, mp_max:0, 
-    atk:8, def:2,
+    id: 0x002,
+    name: "亡者兵士",
+    char: "兵",
+    lv:2,
+    hp:10, hp_max:10,
+    mp:0, mp_max:0,
+    atk:5, def:3,
     speed:1,
+    escape_flag: false,
+    sight_range:4,
     throwing: undefined,
+    exp:4,
   },
   {
-    id: 0x07,
-    name: "",
-    char: "H",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
+    id: 0x003,
+    name: "白人",
+    char: "白",
+    lv:3,
+    hp:9, hp_max:9, 
+    mp:15, mp_max:15,
+    atk:4, def:1,
     speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x08,
-    name: "",
-    char: "I",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x09,
-    name: "",
-    char: "J",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x0A,
-    name: "",
-    char: "K",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x0B,
-    name: "",
-    char: "L",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x0C,
-    name: "",
-    char: "M",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:0,
-    throwing: undefined,
-  },
-  {
-    id: 0x0D,
-    name: "",
-    char: "N",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x0E,
-    name: "",
-    char: "O",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x0F,
-    name: "",
-    char: "P",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x10,
-    name: "",
-    char: "Q",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x11,
-    name: "リリパット",
-    char: "リ",//"R",
-    hp:4, hp_max:4, 
-    mp:0, mp_max:0, 
-    atk:4, def:0,
-    speed:1,
+    escape_flag: true,
+    sight_range:7,
     throwing: 0x700,
+    exp:4,
   },
   {
-    id: 0x12,
-    name: "",
-    char: "S",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
+    id: 0x004,
+    name: "スケルトン",
+    char: "ス",
+    lv:3,
+    hp:5, hp_max:5,
+    mp:5, mp_max:5,
+    atk:6, def:1,
     speed:1,
+    escape_flag: false,
+    sight_range:3,
     throwing: undefined,
-  },
-  {
-    id: 0x13,
-    name: "",
-    char: "T",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x14,
-    name: "",
-    char: "U",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x15,
-    name: "",
-    char: "V",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x16,
-    name: "",
-    char: "W",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x17,
-    name: "",
-    char: "X",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x18,
-    name: "",
-    char: "Y",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
-  },
-  {
-    id: 0x19,
-    name: "",
-    char: "Z",
-    hp:0, hp_max:0, 
-    mp:0, mp_max:0, 
-    atk:0, def:0,
-    speed:1,
-    throwing: undefined,
+    exp:6,
   },
 ];
-let enemy_group = [];
 const enemy_table = [
   [
-    0x06, 0x06, 0x06, 0x06, 0x05,
+    0x000, 0x000, 0x000, 0x000, 0x001,
+  ],
+  [
+    0x001, 0x002, 0x002, 0x003,
+  ],
+  [
+    0x002, 0x003, 0x004,
   ],
 ];
+let enemy_group = [];
+const chase_count_init = 5;
+
+//==================================================TRAP==================================================
+const trap_data = [
+  {
+    id:0x00,
+    name: "トラばさみ",
+    func: function(who){
+      let dmg = 5;
+      addHP(who, -dmg);
+      addLog(who.name+" はトラばさみにかかった　"+dmg+" のダメージ");
+      audio_hit.play();
+    },
+  },
+];
+const trap_table = [
+  [],
+  [
+    0x00,
+  ],
+  [
+    0x00,
+  ],
+  [
+    0x00,
+  ],
+  [
+    0x00,
+  ],
+];
+let trap_group = [];
 
 //==================================================NPC==================================================
 
@@ -915,6 +818,7 @@ const npc_data = [
   {
     id: 0x00,
     name: "案内人",
+    char: "案",
     dialogue: [
       "左が薬屋、右が職安、正面がダンジョンだ",
       "薬屋には治癒士もいるぞ",
@@ -929,6 +833,7 @@ const npc_data = [
   {
     id: 0x01,
     name: "職安",
+    char: "職",
     dialogue: [
       "頑張れよ",
     ],
@@ -938,17 +843,26 @@ const npc_data = [
   {
     id: 0x02,
     name: "助言者",
+    char: "助",
     dialogue: [
-      "5階層毎にここに戻れるよ",
+      "助言するよ",
+      // ダンジョン
+      "待機すると周りにある罠を看破できるよ",
+      "モンスターは君が見えなくなってしばらくすると追跡を諦めるよ",
+      // 職業
+      "戦士は基礎ステータスが高いよ",
+      "弓兵は視界が広いよ",
+      "魔法使いはMPの自然回復が速いよ",
+      "職業毎にHPとMPの成長率が違うよ",
       "指輪は2つ装備できるよ",
       "弓を装備すると、一番上の矢が自動的に装備されるよ",
       "弓は近距離戦闘が苦手だよ",
       "基本的に杖の威力は最大MP依存だよ",
-      "戦士は基礎ステータスが高いよ",
-      "弓兵は弓を持ってて、視界が広いよ",
-      "魔法使いはMPの自然回復が速いよ",
       "職業で装備できるものに差はないよ",
-      "一部の敵は武器とか防具を装備するよ",
+      // 拠点
+      "10階層毎にここに戻れるよ",
+      "戻ってくるとレベルは1に戻るよ",
+      "メレンは物を買ってくれるよ",
       "このメッセージは表示されないはずだよ",
     ],
     dialogue_cnt: 0,
@@ -959,7 +873,8 @@ const npc_data = [
   },
   {
     id: 0x03,
-    name: "ちゆし",
+    name: "治癒士",
+    char: "癒",
     dialogue: [
       "回復します",
     ],
@@ -976,13 +891,14 @@ const shop_data = [
   {
     id: 0x00,
     name: "薬屋",
+    char: "薬",
     dialogue_intro: "いらっしゃい",
     dialogue_outro: "またどうぞ",
     random_flag: false,
     item_table: [
-      {id: 0x010, price: 10,},
-      {id: 0x011, price: 20,},
-      {id: 0x020, price: 10,},
+      {id: 0x010, price: 5,},
+      {id: 0x011, price: 10,},
+      {id: 0x020, price: 5,},
       {id: 0x030, price: 5,},
     ],
     func_before: function(){},
@@ -992,15 +908,23 @@ const shop_data = [
   {
     id: 0x01,
     name: "職安",
+    char: "職",
     dialogue_intro: "3つから選んでくれ",
     dialogue_outro: "頑張れよ",
     random_flag: false,
     item_table: [
-      {id: 0xf00, price: 0,},
       {id: 0xf01, price: 0,},
       {id: 0xf02, price: 0,},
+      {id: 0xf03, price: 0,},
     ],
-    func_before: function(){},
+    func_before: function(){
+      if(inventory_size-inventory.length < 4){
+        addLog(shop_using.name+"「...持ちきれないぞ」");
+        shop_using = undefined;
+        shop_cursor = -1;
+        shop_flag = false;
+      }
+    },
     func_buy: function(){
       addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
       shop_using = undefined;
@@ -1015,17 +939,23 @@ const shop_data = [
   {
     id: 0x02,
     name: "行商メレン",
-    dialogue_intro: "買っておくれ...　何か買っておくれよ...",
+    char: "メ",
+    dialogue_intro: "売っておくれ...　何か売っておくれよ...",
     dialogue_outro: "すまないねぇ...　ヒヒヒッ... ",
-    random_flag: true,
-    item_num: 5,  // 販売品の個数(テーブルからランダム)
+    random_flag: false,
     item_table: [
-      {id: 0x500, price: 30,},
-      {id: 0x100, price: 50,},
-      {id: 0x200, price: 50,},
-      {id: 0x300, price: 50,},
-      {id: 0x400, price: 150,},
-      {id: 0x800, price: 20,},
+      {id: 0x010, price: -3,},
+      {id: 0x011, price: -6,},
+      {id: 0x012, price: -9,},
+      {id: 0x020, price: -4,},
+      {id: 0x021, price: -8,},
+      {id: 0x030, price: -3,},
+      {id: 0x100, price: -30,},
+      {id: 0x200, price: -30,},
+      {id: 0x300, price: -30,},
+      {id: 0x400, price: -100,},
+      {id: 0x500, price: -20,},
+      {id: 0x700, price: -1,},
     ],
     func_before: function(){},
     func_buy: function(){},
@@ -1034,26 +964,20 @@ const shop_data = [
   {
     id: 0x03,
     name: "孤高なガヴァ",
+    char: "ガ",
     dialogue_intro: "オマエ　ガヴァ　ショウダイ？　...ショウバイ！",
     dialogue_outro: "マイダ...　マイドアリ！",
-    random_flag: false,
+    random_flag: true,
+    item_num: 5,  // 販売品の個数(テーブルからランダム)
     item_table: [
-      {id: 0x011, price: 20,},
-      {id: 0x021, price: 20,},
-      {id: 0x030, price: 10,},
-
-      {id: 0x010, price: -5,},
-      {id: 0x011, price: -6,},
-      {id: 0x012, price: -15,},
-      {id: 0x020, price: -5,},
-      {id: 0x021, price: -10,},
-      {id: 0x030, price: -5,},
-      {id: 0x100, price: -30,},
-      {id: 0x200, price: -30,},
-      {id: 0x300, price: -30,},
-      {id: 0x400, price: -100,},
-      {id: 0x500, price: -20,},
-      {id: 0x700, price: -1,},
+      {id: 0x011, price: 5,},
+      {id: 0x021, price: 15,},
+      {id: 0x100, price: 50,},
+      {id: 0x200, price: 50,},
+      {id: 0x300, price: 50,},
+      {id: 0x400, price: 150,},
+      {id: 0x800, price: 20,},
+      {id: 0x030, price: -15,},
     ],
     func_before: function(){},
     func_buy: function(){},

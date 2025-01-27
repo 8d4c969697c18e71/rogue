@@ -23,15 +23,24 @@
       flex-direction: column;
       width: auto;
     }
+    .sub2{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: auto;
+    }
   </style>
 </head>
 <body>
+  <div id="note"></div>
   <div class="sub1">
-    <div id="log"></div>
     <canvas id="canvas"></canvas>
+    <div class="sub2">
+      <div id="log"></div>
+      <div id="shop"></div>
+    </div>
   </div>
   <div id="info"></div>
-  <div id="note"></div>
   <script src="data.js"></script>
   <script src="src.js"></script>
   <script src="info.js"></script>
