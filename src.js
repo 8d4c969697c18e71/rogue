@@ -149,6 +149,7 @@ function initStatus(){
   player.hp_regen_rate_offset = 0;
   player.mp_regen_rate_offset = 0;
   player.sight_range_offset = 0;
+  player.condition = [];
   inventory = [];
 }
 
@@ -343,11 +344,7 @@ function eventPlayer(){
 // http://000.la.coocan.jp/torneco/damage.html
 function attack(from, to){
   let dmg;
-  let atk_offset = 0, def_offset = 0;
-  if('atk_offset' in from) atk_offset = from.atk_offset;
-  if('def_offset' in to) def_offset = to.def_offset;
-
-  dmg = (3*from.lv)*(from.atk+atk_offset+8)/16*(15/16)**(to.def+def_offset);
+  dmg = (3*from.lv)*(from.atk+from.atk_offset+8)/16*(15/16)**(to.def+to.def_offset);
   let rand = Math.random() * dmg/4 - dmg/8;
   dmg += rand;
   dmg = Math.round(dmg);
@@ -631,10 +628,7 @@ function shot(who, ammo, direction){
 
 function shotDmg(from, to, ammo){
   let dmg;
-  let def_offset = 0;
-  if('def_offset' in to) def_offset = to.def_offset
-
-  dmg = (3*from.lv)*(ammo.dmg+8)/16*(15/16)**(to.def+def_offset);
+  dmg = (3*from.lv)*(ammo.dmg+8)/16*(15/16)**(to.def+to.def_offset);
   let rand = Math.random() * dmg/4 - dmg/8;
   dmg += rand;
   dmg = Math.round(dmg);
@@ -934,6 +928,17 @@ function backLv(){
   player.hung_max = 100;
 }
 
+// 状態異常
+function setCondition(who, id){
+  let cond = condition_data.find(v=>v.id==id);
+  if(!cond || !('condition' in who)){
+    console.warn("setCondition: id or who.condtion not found");
+    return false;
+  }
+  who.condition.push(cond);
+  cond.func_be(who);
+}
+
 // 全回復
 function fullRecovery(who){
   addLog(who.name+" は全快した");
@@ -1108,7 +1113,7 @@ function setItem(id, x, y){
 
 // マップ内アイテム
 function setItemGroup(){
-  let num = Math.floor(Math.random() * (room_num*1 - room_num*0) + room_num*0);
+  let num = Math.floor(Math.random() * (room_num*2 - room_num*1) + room_num*1);
   let table = [];
   
   if(Math.floor(floor_cnt/3) in item_table)
@@ -1161,12 +1166,14 @@ function eventEnv(){
     }
   }
 
-  // 毒沼
-  if(map[player.y][player.x] == id_map.poison){
-    let dmg = Math.floor(Math.random() * (3 - 1) + 1);
-    addHP(player, -dmg);
-    addLog("毒沼だ　"+dmg+" のダメージ");
-    audio_hit.play();
+  // 状態異常
+  for(let cond of player.condition){
+    cond.func_during(player);
+    cond.turn--;
+    if(cond.turn<=0){
+      player.condition.splice(player.condition.indexOf(cond), 1);
+      cond.func_heal(player);
+    }
   }
 
   // 罠
@@ -1175,6 +1182,20 @@ function eventEnv(){
         t.func(player);
         trap_group.splice(trap_group.indexOf(t), 1);
       }
+
+  // エネミー
+  for(let enemy of enemy_group){
+    // 状態異常
+    for(let cond of enemy.condition){
+      cond.func_during(enemy);
+      cond.turn--;
+      if(cond.turn<=0){
+        enemy.condition.splice(enemy.condition.indexOf(cond), 1);
+        cond.func_heal(enemy);
+      }
+    }
+    isDead(enemy)
+  }
 
   // 死亡判定
   isDead(player);
@@ -1232,11 +1253,11 @@ function nextFloor(){
     generateMap();
 
     setStair();
-    setPoisonFloor();
     setTrapGroup();
     setItemGroup();
-    setEnemyGroup();
+
     setPlayerPos();
+    setEnemyGroup();
 
     safe_flag = false;
   }
@@ -1246,7 +1267,6 @@ function nextFloor(){
 function setTrap(id, x, y){
   if(!canMove(x, y)
     || map[y][x] == id_map.path
-    || map[y][x] == id_map.poison
     || trap_group.find(v=>(v.x==x && v.y==y)))
     return false;
 
@@ -1302,13 +1322,12 @@ function checkTrap(x, y){
 
 // エネミーイベント
 function eventEnemy(){
-  for(let e in enemy_group){
-    let enemy = enemy_group[e];
+  for(let enemy of enemy_group){
     // 死亡判定
     if(isDead(enemy)) continue;
     if(enemy.chase_flag){
       // 攻撃
-      if(!enemy.throwing){
+      if(!enemy.shot){
         for(let d in key_direction){
           let x = enemy.x + key_direction[d].x;
           let y = enemy.y + key_direction[d].y;
@@ -1332,8 +1351,8 @@ function eventEnemy(){
           let xy = straightRecursive(enemy.x, enemy.y, key_direction[d]);
           if(xy.x+key_direction[d].x == player.x
             && xy.y+key_direction[d].y == player.y
-            && isInSight(enemy, player)){
-            let ammo = item_data.find(v=>v.id==enemy.throwing);
+            && isInSight(enemy, player.x, player.y)){
+            let ammo = item_data.find(v=>v.id==enemy.shot);
             addLog(enemy.name+" は "+ammo.name+" を放った");
             audio_shot.play();
             shot(enemy, ammo, key_direction[d]);
@@ -1344,8 +1363,8 @@ function eventEnemy(){
           let xy = straightRecursive(enemy.x, enemy.y, key_direction_diagonal[d]);
           if(xy.x+key_direction_diagonal[d].x == player.x
             && xy.y+key_direction_diagonal[d].y == player.y
-            && isInSight(enemy, player)){
-            let ammo = item_data.find(v=>v.id==enemy.throwing);
+            && isInSight(enemy, player.x, player.y)){
+            let ammo = item_data.find(v=>v.id==enemy.shot);
             addLog(enemy.name+" は "+ammo.name+" を放った");
             audio_shot.play();
             shot(enemy, ammo, key_direction_diagonal[d]);
@@ -1358,7 +1377,7 @@ function eventEnemy(){
     // 発見
     enemy.map_sight = initMap(enemy.map_sight, false);
     getSight(enemy);
-    if(isInSight(enemy, player)){
+    if(isInSight(enemy, player.x, player.y)){
       enemy.chase_flag = true;
       enemy.chase_count = chase_count_init;
     }
@@ -1373,13 +1392,6 @@ function eventEnemy(){
         moveEnemyChase(enemy);
       else
         moveEnemyTravel(enemy);
-    }
-      
-    // 毒沼
-    if(map[enemy.y][enemy.x] == id_map.poison){
-      let dmg = Math.floor(Math.random() * (3 - 1) + 1);
-      addHP(enemy, -dmg);
-      if(isDead(enemy)) continue;
     }
   }
 }
@@ -1416,10 +1428,10 @@ function getSightPath(x, y, sight_range, map_sight){
 }
 
 // 視界内のtarget有無
-function isInSight(who, target){
+function isInSight(who, target_x, target_y){
   for(let i=0; i<SIZEY; i++)
     for(let j=0; j<SIZEX; j++){
-      if(who.map_sight[i][j] && j==target.x && i==target.y)
+      if(who.map_sight[i][j] && j==target_x && i==target_y)
         return true;
     }
   return false;
@@ -1474,10 +1486,8 @@ function asterRecursiveEight(node, x, y, dst_x, dst_y, escape_flag){
       else if(canMove(x+j, y+i) && canDiagonal(x, y, j, i)
         && !(node.find(v=>(v.x==x+j && v.y==y+i)))){
         // 移動コスト
-        if(map[y+i][x+j] == id_map.poison)
-          movement_cost = 3;
-        else
-          movement_cost = 1;
+        movement_cost = 1;
+
         let a_cost = node.find(v=>(v.x==x && v.y==y)).a_cost + movement_cost;
         let h_cost = Math.max(Math.abs(dst_x-(x+j)), Math.abs(dst_y-(y+i)));
         node.push({x:x+j, y:y+i, status:"open", a_cost:a_cost, h_cost:h_cost, parent:{x:x,y:y}});
@@ -1589,12 +1599,22 @@ function moveEnemyRand(enemy){
 
 // エネミー追加
 function setEnemy(id, x, y){
-  if(map[y][x] != id_map.room || isEnemy(x,y))
+  if(isEnemy(x,y))
     return false;
 
   let enemy = enemy_data.find(v=>v.id==id);
   let enemy_info = {};
-  Object.assign(enemy_info, enemy, {x: x, y: y, chase_flag: false, map_sight: [], chase_count: 5, travel_x:x, travel_y:y});
+  Object.assign(enemy_info, enemy, 
+    {x: x, y: y, map_sight: [], condition: [],
+    chase_flag: false, chase_count: 5, travel_x:x, travel_y:y, 
+    hp_max_offset: 0, mp_max_offset: 0, atk_offset: 0, def_offset: 0, sight_range_offset: 0,}
+  );
+
+  // 特殊情報の付与
+  if(!('shot' in enemy_info))
+    Object.assign(enemy_info, {shot: undefined});
+  if(!('escape_flag' in enemy_info))
+    Object.assign(enemy_info, {escape_flag: false});
 
   enemy_group.push(enemy_info);
   return true;
@@ -1618,6 +1638,28 @@ function setEnemyGroup(){
     const x = Math.floor(Math.random() * (SIZEX-1 - 1) + 1);
     const y = Math.floor(Math.random() * (SIZEY-1 - 1) + 1);
     const enemy = Math.floor(Math.random() * table.length);
+
+    // 配置制限
+    // 部屋の中
+    if(map[y][x] != id_map.room){
+      i--;
+      continue;
+    }
+    // PLの視界外
+    if(isInSight(player, x, y)){
+      i--;
+      continue;
+    }
+    // 壁が隣に無い
+    let next_wall_flag = false;
+    for(let i=-1; i<=1; i++)
+      for(let j=-1; j<=1; j++)
+        if(map[y+i][x+j] == id_map.none)
+          next_wall_flag = true;
+    if(next_wall_flag){
+      i--;
+      continue;
+    }
     
     if(!setEnemy(table[enemy], x, y))
       i--;
@@ -1652,9 +1694,6 @@ function drawMap(){
       }
       else if(map_shotrange[i][j]){
         ctx.fillStyle = "green";
-      }
-      else if(map[i][j] == id_map.poison){
-        ctx.fillStyle = "purple";
       }
       else{
         if(map_draw[i][j]==char_map[id_map.path]
@@ -1703,8 +1742,6 @@ function updateMap(){
   updateMapDraw();
   // 壁追加
   updateMDWall();
-  // 毒沼
-  updateMDPoison();
   // 罠
   updateMDTrap();
   // 射撃・投擲・魔法
@@ -1776,15 +1813,6 @@ function updateMDWall(){
             if(isInMap(j+m, i+n) && ![id_map.none, id_map.path].includes(map[i+n][j+m]))
               map_draw[i][j] = char_map.door;
       }
-    }
-}
-
-// 毒沼
-function updateMDPoison(){
-  for(let i=0; i<SIZEY; i++)
-    for(let j=0; j<SIZEX; j++){
-      if(map_draw[i][j] == id_map.poison)
-        map_draw[i][j] = id_map.room;
     }
 }
 
@@ -1966,12 +1994,12 @@ function setPlayerPos(){
 
   if(canMove(x, y)
     && map[y][x]==id_map.room
-    && map[y][x]!=id_map.poison
     && map[y][x]!=id_map.stair
     && !isItem(x, y)
     && !isTrap(x, y)){
     player.x = x;
     player.y = y;
+    updateSight();
     return;
   }
   setPlayerPos();
@@ -1980,6 +2008,7 @@ function setPlayerPos(){
 function setPlayerPosManual(x, y){
   player.x = x;
   player.y = y;
+  updateSight();
 }
 
 // 階段
@@ -1992,20 +2021,6 @@ function setStair(){
     return;
   }
   setStair();
-}
-
-// 毒沼
-function setPoisonFloor(){
-  let num = Math.floor( Math.random() * room_num);
-  for(let n=0; n<num; n++){
-    let x = Math.floor( Math.random() * (SIZEX-2 - 2) + 2);
-    let y = Math.floor( Math.random() * (SIZEY-2 - 2) + 2);
-    
-    for(let i=-1; i<=1; i++)
-      for(let j=-1; j<=1; j++)
-        if(map[y+i][x+j] == id_map.room)
-          map[y+i][x+j] = id_map.poison;
-  }
 }
 
 // マップ自動生成

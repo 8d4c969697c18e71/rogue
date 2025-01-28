@@ -44,6 +44,9 @@ function drawInfo(){
   info.insertAdjacentHTML("beforeend", "JOB : "+player.job_name+"<br>");
   info.insertAdjacentHTML("beforeend", "LV&nbsp; : "+player.lv+"<br>");
   info.insertAdjacentHTML("beforeend", "EXP : "+player.exp+"<br>");
+  let cond_info = "";
+  for(let cond of player.condition) cond_info += cond.name+" "
+  info.insertAdjacentHTML("beforeend", "COND: "+cond_info+"<br>");
   info.insertAdjacentHTML("beforeend", "HP&nbsp; : "+player.hp+" / "+player.hp_max+"<br>");
   info.insertAdjacentHTML("beforeend", "MP&nbsp; : "+player.mp+" / "+player.mp_max+"<br>");
   info.insertAdjacentHTML("beforeend", "ATK : "+player.atk);
@@ -171,8 +174,6 @@ function drawNote(){
     colorUI("&nbsp;"+char_map[id_map.portal]+"&nbsp;", "blue")+": 帰還ゲート<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.trap+"&nbsp;", "blue")+": 罠<br>");
-  //note.insertAdjacentHTML("beforeend", 
-  //  colorUI("&nbsp;"+char_map[id_map.poison]+"&nbsp;", "purple")+": 毒沼<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.gold+"&nbsp;", "yellow")+": 金貨<br>");
   note.insertAdjacentHTML("beforeend", 

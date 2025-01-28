@@ -120,7 +120,6 @@ const id_map = {
   path: 2,
   stair: 3,
   portal: 4,
-  poison: 5,
 };
 let map_draw = [];  // 描画用
 //const char_map = {
@@ -129,7 +128,6 @@ let map_draw = [];  // 描画用
 //  2: "#",
 //  3: "%",
 //  4: "<",
-//  5: ".",
 //  player: "@",
 //  wall_v: "|",
 //  wall_h: "—",
@@ -153,7 +151,6 @@ const char_map = {
   2: "＃",
   3: "％",
   4: "＜",
-  5: "．",
   player: "＠",
   wall_v: "｜",
   wall_h: "―",
@@ -273,6 +270,9 @@ let safe_flag = false;  // 空腹度無効化
 let clairvoyance_flag = false;  // 透視
 let bow_flag = false;
 
+const multiple_slot = ["ring"];
+let magic_using = undefined;
+
 // プレイヤー
 let player = {
   x: 0, y: 0,
@@ -288,10 +288,11 @@ let player = {
   def:1, def_offset:0,
 
   hung:100, hung_max:100, hung_max_offset: 0,
-  hung_rate: 5, hung_rate_offset: 0, // 空腹度の減り具合 /turn
+  hung_rate: 10, hung_rate_offset: 0, // 空腹度の減り具合 /turn
   hp_regen_rate: 10, hp_regen_rate_offset: 0,
   mp_regen_rate: 10, mp_regen_rate_offset: 0,
   sight_range: 1, sight_range_offset: 0, // 視界距離
+  condition: [], // 状態異常
 
   // 成長率
   lvup: {hp_max: 3, mp_max: 3},
@@ -305,8 +306,54 @@ let player = {
   
   map_sight: [], // 視界 //TODO: 全域のt/fを保存するのは非効率
 };
-const multiple_slot = ["ring"];
-let magic_using = undefined;
+
+// 状態異常
+const condition_data = [
+  {
+    id: 0x00,
+    name: "毒",
+    turn: 5,
+    func_be: function(who){
+      addLog(who.name+" は毒に侵された");
+    },
+    func_during: function(who){
+      let dmg = 2;
+      addHP(who, -2);
+      addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
+    },
+    func_heal: function(who){
+      addLog(who.name+" の毒は取り除かれた");
+    },
+  },
+  {
+    id: 0x01,
+    name: "盲",
+    turn: 10,
+    func_be: function(who){
+      addLog(who.name+" は前が見えない");
+      who.sight_range_offset = -who.sight_range;
+    },
+    func_during: function(who){
+    },
+    func_heal: function(who){
+      addLog(who.name+" の視力は回復した");
+      who.sight_range_offset = 0;
+    },
+  },
+  {
+    id: 0xff,
+    name: "テンプレート",
+    turn: 0,
+    func_be: function(who){
+      addLog(who.name+" ");
+    },
+    func_during: function(who){
+    },
+    func_heal: function(who){
+      addLog(who.name+" ");
+    },
+  },
+];
 
 //==================================================ITEM==================================================
 
@@ -562,11 +609,11 @@ const item_data = [
     mp_max: 5,
     atk: 1,
     def: 1,
-    hung_rate: 20,
+    hung_rate: 30,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
     sight_range: 1,
-    lvup: {hp_max: 3, mp_max: 3},
+    lvup: {hp_max: 2, mp_max: 2},
     func: function(){
       player.job = this.id;
       backLv();
@@ -585,7 +632,7 @@ const item_data = [
     mp_max: 0,
     atk: 4,
     def: 3,
-    hung_rate: 5,
+    hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
     sight_range: 1,
@@ -617,7 +664,7 @@ const item_data = [
     mp_max: 10,
     atk: 3,
     def: 1,
-    hung_rate: 5,
+    hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
     sight_range: 5,
@@ -644,16 +691,13 @@ const item_data = [
     id: 0xf03,
     name: "魔法使い",
     type: "unique",
-    lv: 1,
     hp: 10,
     hp_max: 10,
     mp: 20,
     mp_max: 20,
     atk: 2,
     def: 0,
-    exp: 0,
-    next_exp: 100,
-    hung_rate: 5,
+    hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 7,
     sight_range: 3,
@@ -705,9 +749,7 @@ const enemy_data = [
     mp:0, mp_max:0, 
     atk:4, def:2,
     speed:1,
-    escape_flag: false,
     sight_range:5,
-    throwing: undefined,
     exp:2,
   },
   {
@@ -719,9 +761,8 @@ const enemy_data = [
     mp:0, mp_max:0, 
     atk:6, def:0,
     speed:0,
-    escape_flag: false,
     sight_range:10,
-    throwing: 0x7f0,
+    shot: 0x7f0,
     exp:1,
   },
   {
@@ -733,9 +774,7 @@ const enemy_data = [
     mp:0, mp_max:0,
     atk:7, def:6,
     speed:1,
-    escape_flag: false,
     sight_range:4,
-    throwing: undefined,
     exp:4,
   },
   {
@@ -749,7 +788,7 @@ const enemy_data = [
     speed:1,
     escape_flag: true,
     sight_range:7,
-    throwing: 0x700,
+    shot: 0x700,
     exp:4,
   },
   {
@@ -759,12 +798,22 @@ const enemy_data = [
     lv:3,
     hp:9, hp_max:9,
     mp:5, mp_max:5,
-    atk:10, def:3,
+    atk:8, def:3,
     speed:1,
-    escape_flag: false,
     sight_range:3,
-    throwing: undefined,
     exp:6,
+  },
+  {
+    id: 0xfff,
+    name: "テンプレート",
+    char: "",
+    lv:0,
+    hp:0, hp_max:0,
+    mp:0, mp_max:0,
+    atk:8, def:0,
+    speed:0,
+    sight_range:0,
+    exp:0,
   },
 ];
 const enemy_table = [
@@ -779,12 +828,20 @@ const enemy_table = [
   ],
 ];
 let enemy_group = [];
-const chase_count_init = 5;
+const chase_count_init = 10;
 
 //==================================================TRAP==================================================
 const trap_data = [
   {
     id:0x00,
+    name: "毒床",
+    func: function(who){
+      setCondition(who, 0x00);
+      addLog(who.name+" は毒の床を踏んだ　");
+    },
+  },
+  {
+    id:0x01,
     name: "トラばさみ",
     func: function(who){
       let dmg = 5;
@@ -800,13 +857,13 @@ const trap_table = [
     0x00,
   ],
   [
-    0x00,
+    0x00, 0x01,
   ],
   [
-    0x00,
+    0x00, 0x01,
   ],
   [
-    0x00,
+    0x01,
   ],
 ];
 let trap_group = [];
@@ -849,6 +906,7 @@ const npc_data = [
       // ダンジョン
       "待機すると周りにある罠を看破できるよ",
       "モンスターは君が見えなくなってしばらくすると追跡を諦めるよ",
+      "3階以降は罠があるよ",
       // 職業
       "戦士は基礎ステータスが高いよ",
       "弓兵は視界が広いよ",
