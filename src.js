@@ -290,7 +290,7 @@ function eventPlayer(){
       if(!key_input.shift)
         return move(player, kd[k]);
       else{
-        sprint(kd[k]);
+        if(!(sprint(kd[k]))) move(player, kd[k]);
         return false;
       }
     }
@@ -373,15 +373,15 @@ function move(who, direction){
 // 高速移動
 function sprint(direction){
   if(!canMove(player.x+direction.x, player.y+direction.y) && canDiagonal(player.x, player.y, direction.x, direction.y))
-    return;
+    return false;
 
   if(map_draw[player.y+direction.y][player.x+direction.x] == char_map.door)
-    return;
+    return false;
 
   for(let i=-1; i<=1; i++)
     for(let j=-1; j<=1; j++)
       if(isAnyObject(player.x+j, player.y+i))
-        return;
+        return false;
   
   move(player, direction);
   eventEnemy();
@@ -398,6 +398,7 @@ function sprint(direction){
   updateMDNPCGroup();
 
   sprint(direction);
+  return true;
 }
 
 // UIイベント
