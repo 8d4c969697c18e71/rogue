@@ -1,24 +1,27 @@
 const info = document.getElementById("info");
+const inv = document.getElementById("inv");
 const log = document.getElementById("log");
 const note = document.getElementById("note");
 const shop = document.getElementById("shop");
 
-info.style.width = '175px';
-info.style.paddingLeft = '5px';
+info.style.width = "175px";
+info.style.paddingLeft = "5px";
+
+inv.style.paddingLeft = "5px";
 
 let log_reserve = [];
 const log_reserve_size = 10;
-log.style.height = font_size*(log_reserve_size+1)+'px';
-log.style.paddingTop = '25px';
-log.style.paddingLeft = '50px';
-log.style.paddingRight = '5px';
+log.style.height = font_size*(log_reserve_size+1)+"px";
+log.style.marginTop = "25px";
+log.style.marginLeft = "50px";
+log.style.paddingRight = "5px";
 
-note.style.paddingRight = '5px';
+note.style.paddingRight = "5px";
 
-shop.style.width = '250px';
-shop.style.paddingTop = '25px';
-shop.style.paddingLeft = '5px';
-shop.style.paddingRight = '50px';
+shop.style.width = "250px";
+shop.style.marginTop = "25px";
+shop.style.paddingLeft = "5px";
+shop.style.marginRight = "50px";
 
 //=========================INFO=========================
 
@@ -31,7 +34,7 @@ function drawInfo(){
   info.insertAdjacentHTML("beforeend", " TURN: "+turn_cnt+"<br>");
   info.insertAdjacentHTML("beforeend", "<br>");
 
-  // キー
+  // キー入力
   //info.insertAdjacentHTML("beforeend", "KEY:<br>");
   //for(let k in key_input)
   //  if(key_input[k])
@@ -47,8 +50,8 @@ function drawInfo(){
   let cond_info = "";
   for(let cond of player.condition) cond_info += cond.name+" "
   info.insertAdjacentHTML("beforeend", "COND: "+cond_info+"<br>");
-  info.insertAdjacentHTML("beforeend", "HP&nbsp; : "+player.hp+" / "+player.hp_max+"<br>");
-  info.insertAdjacentHTML("beforeend", "MP&nbsp; : "+player.mp+" / "+player.mp_max+"<br>");
+  info.insertAdjacentHTML("beforeend", "HP&nbsp; : "+player.hp+" / "+(player.hp_max+player.hp_max_offset)+"<br>");
+  info.insertAdjacentHTML("beforeend", "MP&nbsp; : "+player.mp+" / "+(player.mp_max+player.mp_max_offset)+"<br>");
   info.insertAdjacentHTML("beforeend", "ATK : "+player.atk);
   if(player.atk_offset >= 0)
     info.insertAdjacentHTML("beforeend", " + "+player.atk_offset+"<br>");
@@ -59,38 +62,47 @@ function drawInfo(){
     info.insertAdjacentHTML("beforeend", " + "+player.def_offset+"<br>");
   else
     info.insertAdjacentHTML("beforeend", " - "+Math.abs(player.def_offset)+"<br>");
-  info.insertAdjacentHTML("beforeend", "HUNG: "+player.hung+" / "+player.hung_max+"<br>");
+  info.insertAdjacentHTML("beforeend", "HUNG: "+player.hung+" / "+(player.hung_max+player.hung_max_offset)+"<br>");
   info.insertAdjacentHTML("beforeend", "GOLD: "+player.gold+"<br>");
   info.insertAdjacentHTML("beforeend", "<br>");
+}
 
-  // インベントリ
-  info.insertAdjacentHTML("beforeend", "INVENTORY<br>");
+//=========================INVENTORY=========================
+
+function drawInv(){
+  inv.innerHTML = "";
+  if(ui_flag) inv.style.border = "solid 1px white";
+  else inv.style.border = "solid 1px black";
+
+  inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
   for(let i=0; i<inventory_size; i++){
     if(i == inv_cursor)
-      info.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+      inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
     else if(i<9)
-      info.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+      inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
     else
-      info.insertAdjacentHTML("beforeend", (i+1)+": ");
+      inv.insertAdjacentHTML("beforeend", (i+1)+": ");
     if(i < inventory.length){
       if(inventory[i].equip_flag)
-        info.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
+        inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
       else
-        info.insertAdjacentHTML("beforeend", inventory[i].name);
+        inv.insertAdjacentHTML("beforeend", inventory[i].name);
       if(inventory[i].stack_num)
-        info.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
+        inv.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
     }
     else
-      info.insertAdjacentHTML("beforeend", "------");
-    info.insertAdjacentHTML("beforeend", "<br>");
+      inv.insertAdjacentHTML("beforeend", "------");
+    inv.insertAdjacentHTML("beforeend", "<br>");
   }
-  info.insertAdjacentHTML("beforeend", "<br>");
 }
 
 //=========================SHOP=========================
 
 function drawShop(){
   shop.innerHTML = "";
+  if(shop_flag) shop.style.border = "solid 1px white";
+  else shop.style.border = "solid 1px black";
+
   if(shop_flag){
     shop.insertAdjacentHTML("beforeend", "SHOP<br>");
     for(let i=0; i<shop_using.item.length; i++){
@@ -110,7 +122,6 @@ function drawShop(){
       }
       shop.insertAdjacentHTML("beforeend", "<br>");
     }
-    shop.insertAdjacentHTML("beforeend", "<br>");
   }
 }
 
@@ -156,6 +167,10 @@ function addLog(text){
   log_reserve.push(addSpaceAfterBreak(turn_cnt + ": " + text));
   if(log_reserve.length>log_reserve_size)
     log_reserve.shift();
+}
+
+function addLogSameLine(text){
+  log_reserve[log_reserve.length-1] += "　" + text;
 }
 
 //=========================NOTE=========================

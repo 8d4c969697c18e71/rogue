@@ -60,7 +60,7 @@ const katakana = [
 let input_name_pos = {x:0, y:0};
 let name_max_length = 12;
 let input_name_flag = true;
-let hiragana_katakana = true;
+let syllabary = hiragana;
 
 // キー
 let key_input = {
@@ -195,8 +195,9 @@ let unique_map = [  // 固有マップ
     func: function(x_offset){
       setItem(0x800,1+x_offset, 1);
       setItem(0xf00,2+x_offset, 1);
-      setShop(0x03, 9+x_offset, 1);
+      setShop(0x05, 9+x_offset, 1);
       setTrap(0x00, 1+x_offset, 5);
+      setTrap(0x02, 2+x_offset, 5);
     }
   },
   {
@@ -215,38 +216,39 @@ let unique_map = [  // 固有マップ
     "000000000",
     ],
     func: function(x_offset){
-      setShop(0x03, 6+x_offset, 4);
+      setShop(0x05, 6+x_offset, 4);
     }
   },
   {
     id: 0,
-    pl_x: 4, pl_y: 11,
+    pl_x: 5, pl_y: 11,
     safe_flag: true,
     map: [
-    "000000000",
-    "000111000",
-    "000131000",
-    "000111000",
-    "000020000",
-    "011010110",
-    "011212110",
-    "011010110",
-    "000010000",
-    "011111110",
-    "011111110",
-    "011111110",
-    "011111110",
-    "011111110",
-    "000000000",
+    "00000000000",
+    "00001110000",
+    "00001310000",
+    "00001110000",
+    "00000200000",
+    "01101110110",
+    "01121112110",
+    "01101110110",
+    "00001110000",
+    "01111111110",
+    "01111111110",
+    "01111111110",
+    "01111111110",
+    "01111111110",
+    "00000000000",
     ],
     func: function(x_offset){
+      setNPC(0x00, 7+x_offset, 9);
+      setNPC(0x02, 9+x_offset, 9);
+      setNPC(0x03, 4+x_offset, 5);
       setShop(0x00, 1+x_offset, 7);
-      if(player.job == 0xf00) setShop(0x01, 7+x_offset, 6);
-      else setNPC(0x01, 7+x_offset, 6);
-      setNPC(0x00, 2+x_offset, 9);
-      setNPC(0x02, 7+x_offset, 11);
-      setNPC(0x03, 1+x_offset, 5);
-      setShop(0x02, 1+x_offset, 13);
+      if(player.job == 0xf00) setShop(0x01, 9+x_offset, 6);
+      else setNPC(0x01, 9+x_offset, 6);
+      setShop(0x02, 1+x_offset, 9);
+      setShop(0x03, 1+x_offset, 6);
     }
   },
 ];
@@ -271,31 +273,34 @@ let clairvoyance_flag = false;  // 透視
 let bow_flag = false;
 
 const multiple_slot = ["ring"];
-let magic_using = undefined;
+const throwing_range = 5;
+const magic_range = 10;
 
 // プレイヤー
 let player = {
   x: 0, y: 0,
 
   name: "",
-  lv: 1,
-  job: 0xf00,
-  job_name: "持たざる者",
-  exp:0, next_exp:100,
-  hp:10, hp_max:10, hp_max_offset:0,
+  lv: 0,
+  job: undefined,
+  job_name: "",
+  exp:0, next_exp:0,
+  hp:0, hp_max:0, hp_max_offset:0,
   mp:0, mp_max:0, mp_max_offset:0,
-  atk:1, atk_offset:0,
-  def:1, def_offset:0,
+  atk:0, atk_offset:0,
+  def:0, def_offset:0,
 
-  hung:100, hung_max:100, hung_max_offset: 0,
-  hung_rate: 10, hung_rate_offset: 0, // 空腹度の減り具合 /turn
-  hp_regen_rate: 10, hp_regen_rate_offset: 0,
-  mp_regen_rate: 10, mp_regen_rate_offset: 0,
-  sight_range: 1, sight_range_offset: 0, // 視界距離
+  hung:0, hung_max:0, hung_max_offset: 0,
+  hung_rate: 0, hung_rate_offset: 0, // 空腹度の減り具合 /turn
+  hp_regen_rate: 0, hp_regen_rate_offset: 0,
+  mp_regen_rate: 0, mp_regen_rate_offset: 0,
+  sight_range: 0, sight_range_offset: 0, // 視界距離
   condition: [], // 状態異常
+  cannot_action_flag: false, // 行動不能
+  cannot_move_flag: false, // 移動不能
 
   // 成長率
-  lvup: {hp_max: 3, mp_max: 3},
+  lvup: {},
 
   gold: 0,
   weapon: undefined,
@@ -303,12 +308,15 @@ let player = {
   armor: undefined,
   ring1: undefined,
   ring2: undefined,
+  magic_using: undefined,
   
-  map_sight: [], // 視界 //TODO: 全域のt/fを保存するのは非効率
+  // 視界
+  map_sight: [], //TODO: 全域のt/fを保存するのは非効率
 };
 
 // 状態異常
 const condition_data = [
+  // デバフ 0x00~
   {
     id: 0x00,
     name: "毒",
@@ -321,12 +329,29 @@ const condition_data = [
       addHP(who, -2);
       addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
     },
-    func_heal: function(who){
+    func_recovery: function(who){
       addLog(who.name+" の毒は取り除かれた");
     },
   },
   {
     id: 0x01,
+    name: "眠",
+    turn: 5,
+    func_be: function(who){
+      addLog(who.name+" は眠りに落ちた");
+      who.cannot_action_flag = true;
+    },
+    func_during: function(who){
+      addLog(who.name+" は眠っている");
+      who.cannot_action_flag = true;
+    },
+    func_recovery: function(who){
+      addLog(who.name+" は目を覚ました");
+      who.cannot_action_flag = false;
+    },
+  },
+  {
+    id: 0x02,
     name: "盲",
     turn: 10,
     func_be: function(who){
@@ -335,9 +360,42 @@ const condition_data = [
     },
     func_during: function(who){
     },
-    func_heal: function(who){
+    func_recovery: function(who){
       addLog(who.name+" の視力は回復した");
       who.sight_range_offset = 0;
+    },
+  },
+  {
+    id: 0x03,
+    name: "縛",
+    turn: 10,
+    func_be: function(who){
+      addLog(who.name+" は身動きがとれない");
+      who.cannot_move_flag = true;
+    },
+    func_during: function(who){
+    },
+    func_recovery: function(who){
+      addLog(who.name+" は動けるようになった");
+      who.cannot_move_flag = false;
+    },
+  },
+  // バフ 0x80~
+  {
+    id: 0x80,
+    name: "受",
+    turn: 2,
+    func_be: function(who){
+      addLog(who.name+" は受け流しの構えをとった");
+      who.cannot_action_flag = true;
+      if(who == player) turn--;
+    },
+    func_during: function(who){
+      who.cannot_action_flag = true;
+    },
+    func_recovery: function(who){
+      addLog(who.name+" は受け流しの構えを解いた");
+      who.cannot_action_flag = false;
     },
   },
   {
@@ -349,11 +407,63 @@ const condition_data = [
     },
     func_during: function(who){
     },
-    func_heal: function(who){
+    func_recovery: function(who){
       addLog(who.name+" ");
     },
   },
 ];
+
+//==================================================TRAP==================================================
+const trap_data = [
+  {
+    id:0x00,
+    name: "毒床",
+    func: function(who){
+      setCondition(who, 0x00);
+      addLog(who.name+" は毒の床を踏んだ");
+    },
+  },
+  {
+    id:0x01,
+    name: "睡眠ガス",
+    func: function(who){
+      setCondition(who, 0x01);
+      addLog(who.name+" は睡眠ガスに包まれた");
+    },
+  },
+  {
+    id:0x02,
+    name: "黒い霧",
+    func: function(who){
+      setCondition(who, 0x02);
+      addLog(who.name+" の周囲が黒い霧に包まれた");
+    },
+  },
+  {
+    id:0x03,
+    name: "トラばさみ",
+    func: function(who){
+      setCondition(who, 0x03)
+      addLog(who.name+" はトラばさみにかかった");
+    },
+  },
+];
+const trap_table = [
+  [],
+  [
+    0x00,
+  ],
+  [
+    0x00, 0x01,
+  ],
+  [
+    0x00, 0x02,
+  ],
+  [
+    0x01, 0x02, 0x03,
+  ],
+];
+let trap_group = [];
 
 //==================================================ITEM==================================================
 
@@ -416,6 +526,40 @@ const item_data = [
     },
   },
   {
+    id: 0x013,
+    name: "満月草",
+    type: "consume",
+    func: function(){
+      if(player.hp >= player.hp_max){
+        addLog("使う必要はない");
+        return false;
+      }
+      let value = 50;
+      addHP(player, value);
+      addHung(5);
+      addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      inventory.splice(inventory.indexOf(this), 1);
+      return true;
+    },
+  },
+  {
+    id: 0x014,
+    name: "新月草",
+    type: "consume",
+    func: function(){
+      if(player.hp >= player.hp_max){
+        addLog("使う必要はない");
+        return false;
+      }
+      let value = player.hp_max;
+      addHP(player, value);
+      addHung(5);
+      addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      inventory.splice(inventory.indexOf(this), 1);
+      return true;
+    },
+  },
+  {
     id: 0x020,
     name: "香料",
     type: "consume",
@@ -448,6 +592,22 @@ const item_data = [
     },
   },
   {
+    id: 0x022,
+    name: "祝福された香料",
+    type: "consume",
+    func: function(){
+      if(player.mp >= player.mp_max){
+        addLog("使う必要はない");
+        return false;
+      }
+      let value = player.mp_max;
+      addMP(player, value);
+      addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+      inventory.splice(inventory.indexOf(this), 1);
+      return true;
+    },
+  },
+  {
     id: 0x030,
     name: "糧食",
     type: "food",
@@ -469,20 +629,31 @@ const item_data = [
     id: 0x100,
     name: "ショートソード",
     type: "weapon",
-    equip_flag: false,
     func_equip: function(){
       player.atk_offset += 2;
     },
     func_unequip: function(){
       player.atk_offset -= 2;
     },
+    func_attack: function(to){},
+  },
+  {
+    id: 0x101,
+    name: "ブロードソード",
+    type: "weapon",
+    func_equip: function(){
+      player.atk_offset += 3;
+    },
+    func_unequip: function(){
+      player.atk_offset -= 3;
+    },
+    func_attack: function(to){},
   },
   // 射撃武器 0x2XX
   {
     id: 0x200,
     name: "狩猟弓",
     type: "weapon",
-    equip_flag: false,
     func_equip: function(){
       player.atk_offset -= 2;
       bow_flag = true;
@@ -498,44 +669,67 @@ const item_data = [
       player.atk_offset += 2;
       bow_flag = false;
     },
+    func_attack: function(to){},
   },
   // 鎧 0x3XX
   {
     id: 0x300,
     name: "レザーアーマー",
     type: "armor",
-    equip_flag: false,
     func_equip: function(){
       player.def_offset += 1;
     },
     func_unequip: function(){
       player.def_offset -= 1;
     },
+    func_attacked: function(from){},
   },
   {
     id: 0x380,
     name: "レアルのローブ",
     type: "armor",
-    equip_flag: false,
     func_equip: function(){
-      player.mp_max += 3;
+      player.mp_max_offset += 3;
     },
     func_unequip: function(){
-      player.mp_max -= 3;
+      player.mp_max_offset -= 3;
     },
+    func_attacked: function(from){},
   },
   // 指輪 0x4XX
   {
     id: 0x400,
-    name: "生命の指輪",
+    name: "小生命の指輪",
     type: "ring",
-    equip_flag: false,
     func_equip: function(){
-      player.hp_max += 10;
+      player.hp_max_offset += 10;
     },
     func_unequip: function(){
-      player.hp_max -= 10;
-      if(player.hp > player.hp_max) player.hp = player.hp_max;
+      player.hp_max_offset -= 10;
+      addHP(player, 0);
+    },
+  },
+  {
+    id: 0x401,
+    name: "竜印の指輪",
+    type: "ring",
+    func_equip: function(){
+      player.mp_max_offset += 20;
+    },
+    func_unequip: function(){
+      player.mp_max_offset -= 20;
+      addMP(player, 0);
+    },
+  },
+  {
+    id: 0x402,
+    name: "緑草の指輪",
+    type: "ring",
+    func_equip: function(){
+      player.hung_rate_offset += 5;
+    },
+    func_unequip: function(){
+      player.hung_rate_offset -= 5;
     },
   },
   // 巻物 0x5XX
@@ -545,7 +739,6 @@ const item_data = [
     type: "scroll",
     func: function(){
       clairvoyance();
-      clairvoyance_flag = true;
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -562,7 +755,7 @@ const item_data = [
       }
       addLog(this.name+" を構えた");
       magic_flag = true;
-      magic_using = this;
+      player.magic_using = this;
       return false;
     },
     func_cast: function(dir){
@@ -577,8 +770,8 @@ const item_data = [
     id: 0x700,
     name: "木の矢",
     type: "ammo",
-    equip_flag: false,
     dmg: 4,
+    range: 10,
     func_equip: function(){},
     func_unequip: function(){},
   },
@@ -586,7 +779,8 @@ const item_data = [
     id: 0x7f0,
     name: "胞子",
     type: "ammo",
-    dmg: 4,
+    dmg: -2,
+    range: 2,
     func_equip: function(){},
     func_unequip: function(){},
   },
@@ -750,7 +944,13 @@ const enemy_data = [
     atk:4, def:2,
     speed:1,
     sight_range:5,
+    escape_flag: false,
+    distance: 0,
+    group_spawn_flag: false,
     exp:2,
+    func_spawn: function(me){},
+    func_died: function(){},
+    skill: [],
   },
   {
     id: 0x001,
@@ -759,11 +959,24 @@ const enemy_data = [
     lv:1,
     hp:1, hp_max:1, 
     mp:0, mp_max:0, 
-    atk:6, def:0,
-    speed:0,
-    sight_range:10,
-    shot: 0x7f0,
+    atk:1, def:0,
+    speed:1,
+    sight_range:2,
+    escape_flag: false,
+    distance: 0,
+    group_spawn_flag: true,
     exp:1,
+    func_spawn: function(me){
+      setConditionTurn(me, 0x03, 1000);
+      log_reserve.splice(log_reserve.length-1, 1);
+    },
+    func_died: function(){},
+    skill: [
+      {
+        id: 0x000,
+        ammo: 0x7f0,
+      },
+    ],
   },
   {
     id: 0x002,
@@ -775,7 +988,13 @@ const enemy_data = [
     atk:7, def:6,
     speed:1,
     sight_range:4,
+    escape_flag: false,
+    distance: 0,
+    group_spawn_flag: false,
     exp:4,
+    func_spawn: function(me){},
+    func_died: function(){},
+    skill: [],
   },
   {
     id: 0x003,
@@ -786,10 +1005,19 @@ const enemy_data = [
     mp:15, mp_max:15,
     atk:4, def:2,
     speed:1,
-    escape_flag: true,
-    sight_range:7,
-    shot: 0x700,
+    sight_range:5,
+    escape_flag: false,
+    distance:3,
+    group_spawn_flag: false,
     exp:4,
+    func_spawn: function(me){},
+    func_died: function(){},
+    skill: [
+      {
+        id: 0x000,
+        ammo: 0x700,
+      },
+    ],
   },
   {
     id: 0x004,
@@ -801,7 +1029,17 @@ const enemy_data = [
     atk:8, def:3,
     speed:1,
     sight_range:3,
+    escape_flag: false,
+    distance: 0,
+    group_spawn_flag: false,
     exp:6,
+    func_spawn: function(me){},
+    func_died: function(){},
+    skill: [
+      {
+        id:0x001,
+      },
+    ],
   },
   {
     id: 0xfff,
@@ -813,60 +1051,74 @@ const enemy_data = [
     atk:8, def:0,
     speed:0,
     sight_range:0,
+    escape_flag: false,
+    distance: 0,
+    group_spawn_flag: false,
     exp:0,
+    func_spawn: function(me){},
+    func_died: function(){},
+    skill: [],
   },
 ];
+const other_enemy_info = {
+  //x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], 
+  cannot_action_flag: false, cannot_move_flag: false,
+  chase_flag: false, chase_count: 5,
+  hp_max_offset: 0, mp_max_offset: 0, atk_offset: 0, def_offset: 0, sight_range_offset: 0,
+};
 const enemy_table = [
   [
-    0x000, 0x000, 0x000, 0x000, 0x001,
+    0x000, 0x000, 0x001,
   ],
   [
-    0x001, 0x002, 0x002, 0x003,
+    0x001, 0x001, 0x002, 0x002, 0x003,
   ],
   [
-    0x002, 0x003, 0x004,
+    0x002, 0x002, 0x002, 0x003, 0x004,
   ],
 ];
 let enemy_group = [];
 const chase_count_init = 10;
 
-//==================================================TRAP==================================================
-const trap_data = [
+//==================================================SKILL==================================================
+
+const skill_data = [
   {
-    id:0x00,
-    name: "毒床",
-    func: function(who){
-      setCondition(who, 0x00);
-      addLog(who.name+" は毒の床を踏んだ　");
+    id: 0x000,
+    name: "射撃",
+    ammo: undefined,
+    func: function(from, to){
+      for(let d in key_direction){
+        let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
+        let xy = straightRecursive(from.x, from.y, key_direction[d], from.map_sight, ammo.range-1);
+        if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y
+          && isInSight(from, to.x, to.y)){
+          shot(from, ammo, key_direction[d]);
+          return true;
+        }
+      }
+      for(let d in key_direction_diagonal){
+        let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
+        let xy = straightRecursive(from.x, from.y, key_direction_diagonal[d], from.map_sight, ammo.range-1);
+        if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y
+          && isInSight(from, to.x, to.y)){
+          shot(from, ammo, key_direction_diagonal[d]);
+          return true;
+        }
+      }
+      return false;
     },
   },
   {
-    id:0x01,
-    name: "トラばさみ",
-    func: function(who){
-      let dmg = 5;
-      addHP(who, -dmg);
-      addLog(who.name+" はトラばさみにかかった　"+dmg+" のダメージ");
-      audio_hit.play();
-    },
+    id: 0x001,
+    name: "受け流し",
+    func: function(from, to){
+      if(Math.floor(Math.random()+0.5)) return false;
+      setCondition(from, 0x80);
+      return true;
+    }
   },
 ];
-const trap_table = [
-  [],
-  [
-    0x00,
-  ],
-  [
-    0x00, 0x01,
-  ],
-  [
-    0x00, 0x01,
-  ],
-  [
-    0x01,
-  ],
-];
-let trap_group = [];
 
 //==================================================NPC==================================================
 
@@ -876,21 +1128,19 @@ const npc_data = [
     id: 0x00,
     name: "案内人",
     char: "案",
+    loop: true,
     dialogue: [
-      "左が薬屋、右が職安、正面がダンジョンだ",
-      "薬屋には治癒士もいるぞ",
-      "",
+      "左が商店、右が職安、正面がダンジョンだ",
+      "ダンジョンの入り口には治癒士もいるぞ",
     ],
     dialogue_cnt: 0,
-    func: function(){
-      if(this.dialogue_cnt >= this.dialogue.length-1)
-        this.dialogue_cnt = 0;
-    },
+    func: function(){},
   },
   {
     id: 0x01,
     name: "職安",
     char: "職",
+    loop: false,
     dialogue: [
       "頑張れよ",
     ],
@@ -901,12 +1151,15 @@ const npc_data = [
     id: 0x02,
     name: "助言者",
     char: "助",
+    loop: true,
     dialogue: [
       "助言するよ",
       // ダンジョン
+      "射撃で届く距離は弾によって変わるよ",
+      "投擲は5マス先まで投げられるよ",
+      "4階以降は罠があるよ",
       "待機すると周りにある罠を看破できるよ",
       "モンスターは君が見えなくなってしばらくすると追跡を諦めるよ",
-      "3階以降は罠があるよ",
       // 職業
       "戦士は基礎ステータスが高いよ",
       "弓兵は視界が広いよ",
@@ -921,18 +1174,15 @@ const npc_data = [
       "10階層毎にここに戻れるよ",
       "戻ってくるとレベルは1に戻るよ",
       "メレンは物を買ってくれるよ",
-      "このメッセージは表示されないはずだよ",
     ],
     dialogue_cnt: 0,
-    func: function(){
-      if(this.dialogue_cnt >= this.dialogue.length-1)
-        this.dialogue_cnt = 0;
-    },
+    func: function(){},
   },
   {
     id: 0x03,
     name: "治癒士",
     char: "癒",
+    loop: false,
     dialogue: [
       "回復します",
     ],
@@ -1021,6 +1271,24 @@ const shop_data = [
   },
   {
     id: 0x03,
+    name: "商人カレ",
+    char: "商",
+    dialogue_intro: "何か買っていかないか？",
+    dialogue_outro: "よい商いだったよ",
+    random_flag: false,
+    item_table: [//TODO
+      {id: 0x800, price: 15,},
+      {id: 0x500, price: 50,},
+      {id: 0x101, price: 150,},
+      {id: 0x400, price: 300,},
+      {id: 0x401, price: 400,},
+    ],
+    func_before: function(){},
+    func_buy: function(){},
+    func_after: function(){},
+  },
+  {
+    id: 0x05,
     name: "孤高なガヴァ",
     char: "ガ",
     dialogue_intro: "オマエ　ガヴァ　ショウダイ？　...ショウバイ！",
