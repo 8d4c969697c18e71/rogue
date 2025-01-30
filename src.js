@@ -1,8 +1,13 @@
 window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
-  document.body.addEventListener("click", e=>{e.preventDefault()});
-  setCanvasSize();
-  if(isPhone()) setButton();
+  document.addEventListener("dblclick", function(e){ e.preventDefault();}, { passive: false });
+  
+  if(isPhone()){//FIXME
+    setCanvasSizePhone();
+    setButton();
+  }
+  else setCanvasSize();
+
   inputName();
 }
 
@@ -51,6 +56,24 @@ function setCanvasSize(){
   ctx.textBaseline = "top";
 }
 
+// ウィンドウサイズ（スマホ）
+function setCanvasSizePhone(){
+  let canvas_width = DRAW_WIDTH;
+  let canvas_height = DRAW_HEIGHT;
+  note_hidden_flag = true;
+  addLog(canvas_width+", "+DRAW_WIDTH+", "+document.body.clientWidth);
+
+  canvas.style.width = canvas_width+"px";
+  canvas.style.height = canvas_height+"px";
+  const canvas_scale = window.devicePixelRatio;
+  canvas.width = Math.floor(canvas_width*canvas_scale);
+  canvas.height = Math.floor(canvas_height*canvas_scale);
+  ctx.scale(canvas_scale, canvas_scale);
+  ctx.font = FONT_SIZE+"px 'MS Gothic'";
+  ctx.fillStyle = "white";
+  ctx.textBaseline = "top";
+}
+
 // スマホ検出
 function isPhone(){
   if(navigator.userAgent.match(/iPhone|Android.+Mobile/))
@@ -60,7 +83,7 @@ function isPhone(){
 
 // ボタン表示
 function setButton(){
-  button.display = "block";
+  button.style.visibility = "visible";
 }
 
 // 初期化
