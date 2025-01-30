@@ -1,5 +1,6 @@
 window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
+  document.body.addEventListener("click", e=>{e.preventDefault()});
   setCanvasSize();
   if(isPhone()) setButton();
   inputName();
