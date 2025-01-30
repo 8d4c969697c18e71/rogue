@@ -1,26 +1,133 @@
-
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const info = document.getElementById("info");
+const inv = document.getElementById("inv");
+const log = document.getElementById("log");
+const note = document.getElementById("note");
+const shop = document.getElementById("shop");
+const button = document.getElementById("button");
+const btn_z = document.getElementById("btn_z");
+const btn_x = document.getElementById("btn_x");
+const btn_c = document.getElementById("btn_c");
+const arrow = document.getElementById("arrow");
+const btn_left = document.getElementById("btn_left");
+const btn_up = document.getElementById("btn_up");
+const btn_down = document.getElementById("btn_down");
+const btn_right = document.getElementById("btn_right");
+const btn_upleft = document.getElementById("btn_upleft");
+const btn_downleft = document.getElementById("btn_downleft");
+const btn_upright = document.getElementById("btn_upright");
+const btn_downright = document.getElementById("btn_downright");
+const sub2 = document.getElementById("sub2");
 
-const font_size = 16;
+
+const FONT_SIZE = 16;
 // MAP
 const SIZEX = 64;
-const SIZEY = 32;
-const cell_width = font_size;//font_size/2;
-const cell_height = font_size;
+const SIZEY = 64;
+const CELL_WIDTH = FONT_SIZE;//FONT_SIZE/2;
+const CELL_HEIGHT = FONT_SIZE;
 
-const canvas_width = SIZEX*cell_width;
-const canvas_height = SIZEY*cell_height;
-canvas.style.width = canvas_width+'px';
-canvas.style.height = canvas_height+'px';
-const canvas_scale = window.devicePixelRatio;
-canvas.width = Math.floor(canvas_width*canvas_scale);
-canvas.height = Math.floor(canvas_height*canvas_scale);
 
-ctx.scale(canvas_scale, canvas_scale);
-ctx.font = font_size+"px 'MS Gothic'";
-ctx.fillStyle = "white";
-ctx.textBaseline = "top";
+
+const PADDING = 5;
+const MARGIN = 25;
+const NOTE_WIDTH = 150;
+const INFO_WIDTH = 175;
+const SHOP_WIDTH = 250;
+
+note.style.width = NOTE_WIDTH+"px";
+note.style.minWidth = NOTE_WIDTH+"px";
+note.style.PADDINGRight = PADDING+"px";
+
+info.style.width = INFO_WIDTH+"px";
+info.style.PADDINGLeft = PADDING+"px";
+
+inv.style.PADDINGLeft = PADDING+"px";
+
+let log_reserve = [];
+const LOG_RESERVE_SIZE = 10;
+log.style.width = SHOP_WIDTH*1.5+"px";
+log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";
+log.style.MARGINTop = MARGIN+"px";
+log.style.MARGINLeft = MARGIN+"px";
+
+shop.style.width = SHOP_WIDTH+"px";
+shop.style.MARGINTop = MARGIN+"px";
+shop.style.PADDINGLeft = PADDING+"px";
+shop.style.MARGINRight = MARGIN+"px";
+
+// 全描画
+//const DRAW_WIDTH = SIZEX*CELL_WIDTH;
+//const DRAW_HEIGHT = SIZEY*CELL_HEIGHT;
+const DRAW_WIDTH = 512;
+const DRAW_HEIGHT = 512;
+
+let note_hidden_flag = false;
+
+// ボタンサイズ
+const ZXC_SIZE = 50;
+const ARROW_SIZE = 50;
+// zxc
+btn_z.style.width = ZXC_SIZE+"px"; btn_z.style.height = ZXC_SIZE+"px";
+btn_x.style.width = ZXC_SIZE+"px"; btn_x.style.height = ZXC_SIZE+"px";
+btn_c.style.width = ZXC_SIZE+"px"; btn_c.style.height = ZXC_SIZE+"px";
+btn_z.style.minWidth = ZXC_SIZE+"px"; btn_z.style.minHeight = ZXC_SIZE+"px";
+btn_x.style.minWidth = ZXC_SIZE+"px"; btn_x.style.minHeight = ZXC_SIZE+"px";
+btn_c.style.minWidth = ZXC_SIZE+"px"; btn_c.style.minHeight = ZXC_SIZE+"px";
+// 十字
+btn_left.style.width = ARROW_SIZE+"px"; btn_left.style.height = ARROW_SIZE+"px";
+btn_up.style.width = ARROW_SIZE+"px"; btn_up.style.height = ARROW_SIZE+"px";
+btn_down.style.width = ARROW_SIZE+"px"; btn_down.style.height = ARROW_SIZE+"px";
+btn_right.style.width = ARROW_SIZE+"px"; btn_right.style.height = ARROW_SIZE+"px";
+btn_left.style.minWidth = ARROW_SIZE+"px"; btn_left.style.minHeight = ARROW_SIZE+"px";
+btn_up.style.minWidth = ARROW_SIZE+"px"; btn_up.style.minHeight = ARROW_SIZE+"px";
+btn_down.style.minWidth = ARROW_SIZE+"px"; btn_down.style.minHeight = ARROW_SIZE+"px";
+btn_right.style.minWidth = ARROW_SIZE+"px"; btn_right.style.minHeight = ARROW_SIZE+"px";
+// 斜め
+btn_upleft.style.width = ARROW_SIZE+"px"; btn_upleft.style.height = ARROW_SIZE+"px";
+btn_downleft.style.width = ARROW_SIZE+"px"; btn_downleft.style.height = ARROW_SIZE+"px";
+btn_upright.style.width = ARROW_SIZE+"px"; btn_upright.style.height = ARROW_SIZE+"px";
+btn_downright.style.width = ARROW_SIZE+"px"; btn_downright.style.height = ARROW_SIZE+"px";
+btn_upleft.style.minWidth = ARROW_SIZE+"px"; btn_upleft.style.minHeight = ARROW_SIZE+"px";
+btn_downleft.style.minWidth = ARROW_SIZE+"px"; btn_downleft.style.minHeight = ARROW_SIZE+"px";
+btn_upright.style.minWidth = ARROW_SIZE+"px"; btn_upright.style.minHeight = ARROW_SIZE+"px";
+btn_downright.style.minWidth = ARROW_SIZE+"px"; btn_downright.style.minHeight = ARROW_SIZE+"px";
+
+// 矢印位置
+arrow.style.width = ARROW_SIZE*3+"px";
+btn_left.style.position = "relative";
+btn_up.style.position = "relative";
+btn_down.style.position = "relative";
+btn_right.style.position = "relative";
+btn_upleft.style.position = "relative";
+btn_downleft.style.position = "relative";
+btn_upright.style.position = "relative";
+btn_downright.style.position = "relative";
+
+btn_up.style.bottom = ARROW_SIZE+"px";
+btn_down.style.top = ARROW_SIZE+"px";
+btn_down.style.right = ARROW_SIZE+"px";
+btn_right.style.right = ARROW_SIZE+"px";
+
+btn_upleft.style.bottom = ARROW_SIZE+"px";
+btn_upleft.style.right = ARROW_SIZE*4+"px";
+btn_downleft.style.top = ARROW_SIZE+"px";
+btn_downleft.style.right = ARROW_SIZE*5+"px";
+btn_upright.style.bottom = ARROW_SIZE+"px";
+btn_upright.style.right = ARROW_SIZE*4+"px";
+btn_downright.style.top = ARROW_SIZE+"px";
+btn_downright.style.right = ARROW_SIZE*5+"px";
+
+// ボタン位置
+button.style.position = "relative";
+button.style.width = DRAW_WIDTH+"px";
+button.style.top = -ARROW_SIZE*2+"px";
+
+sub2.style.width = DRAW_WIDTH+"px";
+sub2.style.height = DRAW_HEIGHT+"px";
+
+
 
 const audio_apply = new Audio("sound/apply.wav");
 const audio_stair = new Audio("sound/stair.wav");
@@ -29,6 +136,8 @@ const audio_hit = new Audio("sound/hit.wav");
 const audio_shot = new Audio("sound/shot.wav");
 const audio_fire = new Audio("sound/fire.wav");
 const audio_ray = new Audio("sound/ray.wav");
+
+//====================================================================================================
 
 // 日付
 const month_list = [
@@ -111,8 +220,8 @@ const key_code={
 //==================================================MAP==================================================
 
 const ROOMNUM = 10;
-const ROOMSIZEMIN = 4;
-const ROOMSIZEMAX = 8;
+const ROOMSIZEMIN = 6;
+const ROOMSIZEMAX = 10;
 let map = [];
 const id_map = {
   none: 0,
@@ -779,7 +888,7 @@ const item_data = [
     id: 0x7f0,
     name: "胞子",
     type: "ammo",
-    dmg: -2,
+    dmg: 0,
     range: 2,
     func_equip: function(){},
     func_unequip: function(){},
@@ -864,7 +973,7 @@ const item_data = [
     sight_range: 5,
     lvup: {hp_max: 3, mp_max: 2},
     func: function(){
-      if(inventory_size-inventory.length >= 3){
+      if(inventory_size-inventory.length >= 4){
         player.job = this.id;
         backLv();
 
@@ -916,9 +1025,9 @@ const item_data = [
 ];
 const equip_type = ["weapon", "armor", "ring", "ammo"];
 const stack_type = ["ammo"];
-const stack_max = 64;
+const stack_max = 32;
 let inventory = [];
-const inventory_size = 15;
+const inventory_size = 20;
 let inv_cursor = -1;
 
 // 落ちてるアイテム
@@ -1276,7 +1385,7 @@ const shop_data = [
     dialogue_intro: "何か買っていかないか？",
     dialogue_outro: "よい商いだったよ",
     random_flag: false,
-    item_table: [//TODO
+    item_table: [
       {id: 0x800, price: 15,},
       {id: 0x500, price: 50,},
       {id: 0x101, price: 150,},

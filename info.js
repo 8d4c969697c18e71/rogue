@@ -1,28 +1,3 @@
-const info = document.getElementById("info");
-const inv = document.getElementById("inv");
-const log = document.getElementById("log");
-const note = document.getElementById("note");
-const shop = document.getElementById("shop");
-
-info.style.width = "175px";
-info.style.paddingLeft = "5px";
-
-inv.style.paddingLeft = "5px";
-
-let log_reserve = [];
-const log_reserve_size = 10;
-log.style.height = font_size*(log_reserve_size+1)+"px";
-log.style.marginTop = "25px";
-log.style.marginLeft = "50px";
-log.style.paddingRight = "5px";
-
-note.style.paddingRight = "5px";
-
-shop.style.width = "250px";
-shop.style.marginTop = "25px";
-shop.style.paddingLeft = "5px";
-shop.style.marginRight = "50px";
-
 //=========================INFO=========================
 
 function drawInfo(){
@@ -165,7 +140,7 @@ function addSpaceAfterBreak(str){
 
 function addLog(text){
   log_reserve.push(addSpaceAfterBreak(turn_cnt + ": " + text));
-  if(log_reserve.length>log_reserve_size)
+  if(log_reserve.length>LOG_RESERVE_SIZE)
     log_reserve.shift();
 }
 
@@ -176,6 +151,7 @@ function addLogSameLine(text){
 //=========================NOTE=========================
 
 function drawNote(){
+  if(note_hidden_flag) return;
   note.innerHTML = "NOTE<br>";
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.player+"&nbsp;", "yellow")+": "+player.name+"<br>");

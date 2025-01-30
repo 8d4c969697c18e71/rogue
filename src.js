@@ -1,108 +1,65 @@
 window.onload = function(){
+  document.body.addEventListener("keydown", e=>{e.preventDefault()});
+  setCanvasSize();
+  if(isPhone()) setButton();
   inputName();
 }
 
-// 名前入力
-function inputName(){
-  ctx.textAlign = "center";
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  let y_offset = font_size*2;
-  ctx.fillText("名前を入力してください", canvas.width/2, y_offset);
-  
-  // 十字
-  if(key_input.left){
-    if(input_name_pos.x > 0){
-      input_name_pos.x--;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
-        input_name_pos.x--;
-    }
-    else
-      input_name_pos.x = hiragana[0].length-1;
+window.addEventListener("resize", () =>{
+  setCanvasSize();
+  if(input_name_flag) {
+    inputName();
+    return;
   }
-  else if(key_input.right){
-    if(input_name_pos.x < hiragana[0].length-1){
-      input_name_pos.x++;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
-        input_name_pos.x++;
-    }
-    else
-      input_name_pos.x = 0;
+  if(!gameover_flag){
+    updateMap();
+    drawMap();
+    drawInfo();
+    drawInv();
+    drawLog();
+    drawShop();
+    drawNote();
   }
-  else if(key_input.up){
-    if(input_name_pos.y > 0){
-      input_name_pos.y--;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
-        input_name_pos.y--;
-    }
-    else
-      input_name_pos.y = hiragana.length-1;
+});
+
+// ウィンドウサイズ
+function setCanvasSize(){
+  const body_width = document.body.clientWidth;
+  let canvas_width = DRAW_WIDTH;
+  let canvas_height = DRAW_HEIGHT;
+
+  canvas.style.marginLeft = "0px";
+  canvas.style.marginRight = "0px";
+  note.style.display = "block";
+  note_hidden_flag = false;
+  if((canvas_width+NOTE_WIDTH+INFO_WIDTH) > body_width){
+    note_hidden_flag = true;
+    note.style.display = "none";
+    canvas.style.marginLeft = (body_width-(INFO_WIDTH+canvas_width))/2+"px";
+    canvas.style.marginRight = canvas.style.marginLeft;
   }
-  else if(key_input.down){
-    if(input_name_pos.y < hiragana.length-1){
-      input_name_pos.y++;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
-        input_name_pos.y++;
-    }
-    else
-    input_name_pos.y = 0;
-  }
-  // apply
-  if(key_input.apply){
-    audio_apply.play();
-    if(syllabary[input_name_pos.y][input_name_pos.x]=="消")
-      player.name = player.name.slice(0, -1);
 
-    else if(syllabary[input_name_pos.y][input_name_pos.x]=="ｶﾅ"){
-      if(syllabary == katakana) syllabary = hiragana;
-      else syllabary = katakana;
-
-      // 一覧
-      displaySyllabary(y_offset);
-    }
-
-    else if(syllabary[input_name_pos.y][input_name_pos.x]=="終"){
-      ctx.textAlign = "start";
-      input_name_flag = false;
-      init();
-      return;
-    }
-    else
-      player.name += syllabary[input_name_pos.y][input_name_pos.x];
-  }
-  // cancel
-  if(key_input.cancel)
-    player.name = player.name.slice(0, -1);
-
-  // 一覧
-  displaySyllabary(y_offset);
-
-  // 文字数制限
-  let name_length = 0;
-  for(let c of player.name){
-    if(c.match(/^[^\x01-\x7E\xA1-\xDF]+$/)) name_length += 2;
-    else name_length++;
-  }
-  if(name_length > name_max_length) player.name = player.name.slice(0, -1);
-
-  // 名前描画
-  let space = "";
-  for(let i=0; i<name_max_length-name_length; i++)
-    space += "_";
-  ctx.fillText(player.name+space, canvas.width/2, font_size*3/2+y_offset);
-  
-  // 操作説明
-  ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.width/2, font_size*2*(syllabary.length+2)+y_offset);
+  canvas.style.width = canvas_width+"px";
+  canvas.style.height = canvas_height+"px";
+  const canvas_scale = window.devicePixelRatio;
+  canvas.width = Math.floor(canvas_width*canvas_scale);
+  canvas.height = Math.floor(canvas_height*canvas_scale);
+  ctx.scale(canvas_scale, canvas_scale);
+  ctx.font = FONT_SIZE+"px 'MS Gothic'";
+  ctx.fillStyle = "white";
+  ctx.textBaseline = "top";
 }
 
-// 五十音表示
-function displaySyllabary(y_offset){
-  for(let i=0; i<syllabary.length; i++)
-    for(let j=0; j<syllabary[i].length; j++){
-      if(input_name_pos.x == j && input_name_pos.y == i)
-        ctx.fillText(">"+syllabary[i][j], canvas.width/2-font_size*9+font_size*2*j, font_size*2*(i+2)+y_offset);
-      else
-      ctx.fillText(" "+syllabary[i][j], canvas.width/2-font_size*9+font_size*2*j, font_size*2*(i+2)+y_offset);
-    }
+// スマホ検出
+function isPhone(){
+  if(navigator.userAgent.match(/iPhone|Android.+Mobile/))
+    return true;
+  return false;
+}
+
+// ボタン表示
+function setButton(){
+  button.display = "block";
 }
 
 // 初期化
@@ -121,31 +78,6 @@ function init(){
   drawNote();
 }
 
-// ステ初期化
-function initStatus(){
-  player.job = 0xf00;
-  backLv();
-
-  player.hp_max_offset = 0;
-  player.mp_max_offset = 0;
-  player.atk_offset = 0;
-  player.def_offset = 0;
-  player.hung_max_offset = 0;
-  player.hung_rate_offset = 0;
-  player.hp_regen_rate_offset = 0;
-  player.mp_regen_rate_offset = 0;
-  player.sight_range_offset = 0;
-  player.condition = [];
-  player.gold = 15;
-  player.weapon = undefined;
-  player.ammo = undefined;
-  player.armor = undefined;
-  player.ring1 = undefined;
-  player.ring2 = undefined;
-  player.magic_using = undefined;
-  inventory = [];
-}
-
 function initGroups(){
   item_group = [];
   enemy_group = [];
@@ -159,6 +91,104 @@ function initGroups(){
 // 操作、各イベント
 document.addEventListener("keydown", e =>{
   toggleKeyInput(e);
+  events();
+});
+
+// ボタン
+btn_z.addEventListener("click", () =>{
+  key_input.apply = true;
+  events();
+  key_input.apply = false;
+});
+btn_x.addEventListener("click", () =>{
+  key_input.cancel = true;
+  events();
+  key_input.cancel = false;
+});
+btn_c.addEventListener("click", () =>{
+  key_input.sub = true;
+  events();
+  key_input.sub = false;
+});
+btn_left.addEventListener("click", () =>{
+  key_input.left = true;
+  events();
+  key_input.left = false;
+});
+btn_up.addEventListener("click", () =>{
+  key_input.up = true;
+  events();
+  key_input.up = false;
+});
+btn_down.addEventListener("click", () =>{
+  key_input.down = true;
+  events();
+  key_input.down = false;
+});
+btn_right.addEventListener("click", () =>{
+  key_input.right = true;
+  events();
+  key_input.right = false;
+});
+btn_upleft.addEventListener("click", () =>{
+  key_input.up_left = true;
+  events();
+  key_input.up_left = false;
+});
+btn_downleft.addEventListener("click", () =>{
+  key_input.down_left = true;
+  events();
+  key_input.down_left = false;
+});
+btn_upright.addEventListener("click", () =>{
+  key_input.down_left = true;
+  events();
+  key_input.down_left = false;
+});
+btn_downright.addEventListener("click", () =>{
+  key_input.down_right = true;
+  events();
+  key_input.down_right = false;
+});
+
+function toggleKeyInput(e){
+  if(e.key==key_code.left) key_input.left = true;
+  if(e.key==key_code.right) key_input.right = true;
+  if(e.key==key_code.up) key_input.up = true;
+  if(e.key==key_code.down) key_input.down = true;
+  if(key_input.left && key_input.up) key_input.up_left = true;
+  if(key_input.right && key_input.up) key_input.up_right = true;
+  if(key_input.left && key_input.down) key_input.down_left = true;
+  if(key_input.right && key_input.down) key_input.down_right = true;
+  if(e.key==key_code.shift) key_input.shift = true;
+  if(e.key==key_code.ctrl) key_input.ctrl = true;
+  if(e.key==key_code.apply) key_input.apply = true;
+  if(e.key==key_code.cancel) key_input.cancel = true;
+  if(e.key==key_code.sub) key_input.sub = true;
+  if(e.key==key_code.esc) key_input.esc = true;
+}
+
+document.addEventListener("keyup", e=>{
+  if(e.key==key_code.left) key_input.left = false;
+  if(e.key==key_code.right) key_input.right = false;
+  if(e.key==key_code.up) key_input.up = false;
+  if(e.key==key_code.down) key_input.down = false;
+  if(!key_input.left || !key_input.up) key_input.up_left = false;
+  if(!key_input.right || !key_input.up) key_input.up_right = false;
+  if(!key_input.left || !key_input.down) key_input.down_left = false;
+  if(!key_input.right || !key_input.down) key_input.down_right = false;
+  if(e.key==key_code.shift) key_input.shift = false;
+  if(e.key==key_code.ctrl) key_input.ctrl = false;
+  if(e.key==key_code.apply) key_input.apply = false;
+  if(e.key==key_code.cancel) key_input.cancel = false;
+  if(e.key==key_code.sub) key_input.sub = false;
+  if(e.key==key_code.esc) key_input.esc = false;
+});
+
+//==================================================EVENT==================================================
+
+// イベント
+function events(){
   // 名前入力
   if(input_name_flag) {
     inputName();
@@ -214,43 +244,7 @@ document.addEventListener("keydown", e =>{
     drawLog();
     drawShop();
   }
-});
-
-function toggleKeyInput(e){
-  if(e.key==key_code.left) key_input.left = true;
-  if(e.key==key_code.right) key_input.right = true;
-  if(e.key==key_code.up) key_input.up = true;
-  if(e.key==key_code.down) key_input.down = true;
-  if(key_input.left && key_input.up) key_input.up_left = true;
-  if(key_input.right && key_input.up) key_input.up_right = true;
-  if(key_input.left && key_input.down) key_input.down_left = true;
-  if(key_input.right && key_input.down) key_input.down_right = true;
-  if(e.key==key_code.shift) key_input.shift = true;
-  if(e.key==key_code.ctrl) key_input.ctrl = true;
-  if(e.key==key_code.apply) key_input.apply = true;
-  if(e.key==key_code.cancel) key_input.cancel = true;
-  if(e.key==key_code.sub) key_input.sub = true;
-  if(e.key==key_code.esc) key_input.esc = true;
 }
-
-document.addEventListener("keyup", e=>{
-  if(e.key==key_code.left) key_input.left = false;
-  if(e.key==key_code.right) key_input.right = false;
-  if(e.key==key_code.up) key_input.up = false;
-  if(e.key==key_code.down) key_input.down = false;
-  if(!key_input.left || !key_input.up) key_input.up_left = false;
-  if(!key_input.right || !key_input.up) key_input.up_right = false;
-  if(!key_input.left || !key_input.down) key_input.down_left = false;
-  if(!key_input.right || !key_input.down) key_input.down_right = false;
-  if(e.key==key_code.shift) key_input.shift = false;
-  if(e.key==key_code.ctrl) key_input.ctrl = false;
-  if(e.key==key_code.apply) key_input.apply = false;
-  if(e.key==key_code.cancel) key_input.cancel = false;
-  if(e.key==key_code.sub) key_input.sub = false;
-  if(e.key==key_code.esc) key_input.esc = false;
-});
-
-//==================================================EVENT==================================================
 
 // プレイヤーイベント
 // @return: true: ターン経過
@@ -368,8 +362,8 @@ function attack(from, to){
     }
 
   dealDmg(from, to, dmg);
-  if(from == player) from.weapon.func_attack(to);
-  if(to == player) to.armor.func_attacked(from);
+  if("weapon" in from && from.weapon) from.weapon.func_attack(to);
+  if("armor" in to && to.armor) to.armor.func_attacked(from);
   return;
 }
 
@@ -612,7 +606,7 @@ function setShop(id, x, y){
         n--;
         continue;
       }
-      let item = Object.assign(item, item_data.find(v=>v.id==i.id), {price: i.price});
+      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
       items.push(item);
     }
   }
@@ -658,7 +652,8 @@ function eventShot(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
-      shot(player, ammo, kd[k]);
+       let enemy = shot(player, ammo, kd[k]);
+      if(isDead(enemy)) addExp(enemy.exp);
       if(ammo.stack_num > 0) ammo.stack_num--;
       if(ammo.stack_num <= 0){
         equip(inventory.indexOf(ammo));
@@ -682,19 +677,20 @@ function shot(who, ammo, direction){
   addLog(who.name+" は "+ammo.name+" を放った");
   audio_shot.play();
 
-  let dst = straightRecursive(who.x, who.y, direction, who.map_sight, ammo.range);
+  let dst = straightRecursive(who.x, who.y, direction, ammo.range);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     shotDmg(who, enemy, ammo);
-    if(who == player){
-      enemy.chase_flag = true;
-      who.weapon.func_attack(enemy);
-      if(isDead(enemy)) addExp(enemy.exp);
-    }
+    if("weapon" in who && who.weapon) who.weapon.func_attack(enemy);
+    if("armor" in enemy && enemy.armor) enemy.armor.func_attacked(who);
+    if(who == player) enemy.chase_flag = true;
+    return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
     shotDmg(who, player, ammo);
-    player.armor.func_attacked(who);
+    if("weapon" in who && who.weapon) who.weapon.func_attack(player);
+    if("armor" in player && player.armor) player.armor.func_attacked(who);
+    return player;
   }
   else{// 外した
     if(who == player){
@@ -707,7 +703,7 @@ function shot(who, ammo, direction){
               if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)){
                 setItem(ammo.id, dst.x+j, dst.y+i);
                 addLog(ammo.name+" は床に落ちた");
-                return;
+                return undefined;
               }
       }
     }
@@ -725,13 +721,12 @@ function shotDmg(from, to, ammo){
   dealDmg(from, to, dmg);
 }
 
-function straightRecursive(x, y, direction, map_sight, range){
+function straightRecursive(x, y, direction, range){
   if(!canMove(x+direction.x, y+direction.y)
-    || !(map_sight[y+direction.y][x+direction.x])
     || range <= 0
     || map_draw[y+direction.y][x+direction.x] == char_map.door)
     return {x:x, y:y};
-  return straightRecursive(x+direction.x, y+direction.y, direction, map_sight, --range);
+  return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
 
 function straightRecursiveAllMap(x, y, direction){
@@ -781,7 +776,7 @@ function throwing(who, item, direction){
   addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
 
-  let dst = straightRecursive(who.x, who.y, direction, who.map_sight, throwing_range);
+  let dst = straightRecursive(who.x, who.y, direction, throwing_range);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     throwDmg(who, enemy, item);
@@ -859,7 +854,7 @@ function eventMagic(){
 
 // 魔法
 function magic(who, value, direction){
-  let dst = straightRecursive(who.x, who.y, direction, who.map_sight, magic_range);
+  let dst = straightRecursive(who.x, who.y, direction, magic_range);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     magicDmg(who, enemy, value);
@@ -886,7 +881,7 @@ function magicDmg(from, to, value){
 
 // ゲームオーバー
 function gameoverEvent(){
-  if(key_input.esc){
+  if(key_input.apply || key_input.cancel || key_input.sub){
     turn_cnt = 1;
     floor_cnt = -1;
     gameover_flag = false;
@@ -926,20 +921,20 @@ function drawGameover(){
   ctx.textAlign = "center";
   ctx.fillStyle = "white";
   for(let i=0; i<gameover_fig.length-1; i++){
-    ctx.fillText(gameover_fig[i], canvas.width/2, font_size*i);
+    ctx.fillText(gameover_fig[i], canvas.width/2, FONT_SIZE*i);
   }
 
-  ctx.fillText(player.name, canvas.width/2, font_size*7);
-  ctx.fillText(date+" "+month, canvas.width/2, font_size*9);
-  ctx.fillText(year, canvas.width/2, font_size*10);
+  ctx.fillText(player.name, canvas.width/2, FONT_SIZE*7);
+  ctx.fillText(date+" "+month, canvas.width/2, FONT_SIZE*9);
+  ctx.fillText(year, canvas.width/2, FONT_SIZE*10);
 
   ctx.fillStyle = "green";
-  ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.width/2, font_size*(gameover_fig.length-1));
+  ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.width/2, FONT_SIZE*(gameover_fig.length-1));
 
   //Press Esc Key
   ctx.textAlign = "start";
   ctx.fillStyle = "white";
-  ctx.fillText("Press Esc key", canvas.width/2 + gameover_fig.length/2, font_size*(gameover_fig.length));
+  ctx.fillText("Press z/x/c key", canvas.width/2 + gameover_fig.length/2, FONT_SIZE*(gameover_fig.length));
 }
 
 //==================================================STATUS==================================================
@@ -980,11 +975,20 @@ function addExp(value){
   lvUp();
 }
 
+// 全回復
+function fullRecovery(who){
+  addLog(who.name+" は全快した");
+  who.hp = who.hp_max + who.hp_max_offset;
+  who.mp = who.mp_max + who.mp_max_offset;
+  if(who == player) player.hung = player.hung_max + player.hung_max_offset;
+  who.condition = [];
+}
+
 // レベルアップ
 function lvUp(){
   if(player.exp >= player.next_exp){
     player.lv++;
-    player.next_exp = Math.floor((player.next_exp * 1.3 + player.lv * 15) / 2);
+    player.next_exp = player.next_exp + player.lv * 15;
 
     player.hp_max += player.lvup.hp_max;
     player.mp_max += player.lvup.mp_max;
@@ -1020,6 +1024,31 @@ function backLv(){
   player.next_exp = 20;
   player.hung = 100;
   player.hung_max = 100;
+}
+
+// ステ初期化
+function initStatus(){
+  player.job = 0xf00;
+  backLv();
+
+  player.hp_max_offset = 0;
+  player.mp_max_offset = 0;
+  player.atk_offset = 0;
+  player.def_offset = 0;
+  player.hung_max_offset = 0;
+  player.hung_rate_offset = 0;
+  player.hp_regen_rate_offset = 0;
+  player.mp_regen_rate_offset = 0;
+  player.sight_range_offset = 0;
+  player.condition = [];
+  player.gold = 15;
+  player.weapon = undefined;
+  player.ammo = undefined;
+  player.armor = undefined;
+  player.ring1 = undefined;
+  player.ring2 = undefined;
+  player.magic_using = undefined;
+  inventory = [];
 }
 
 // 状態異常
@@ -1061,15 +1090,6 @@ function checkCondition(who){
       cond.turn--;
     }
   }
-}
-
-// 全回復
-function fullRecovery(who){
-  addLog(who.name+" は全快した");
-  who.hp = who.hp_max + who.hp_max_offset;
-  who.mp = who.mp_max + who.mp_max_offset;
-  if(who == player) player.hung = player.hung_max + player.hung_max_offset;
-  who.condition = [];
 }
 
 // 死亡判定
@@ -1157,11 +1177,6 @@ function equip(index){
 
 // アイテム取得
 function addItem(id){
-  if(inventory.length >= inventory_size){
-    addLog("持ちきれない");
-    return false;
-  }
-
   let item = item_data.find(v=>v.id==id);
   // スタックアイテム
   if(item.type=="stack"){
@@ -1202,6 +1217,12 @@ function addItem(id){
       return true;
     }
     Object.assign(it, {stack_num: 1});
+  }
+
+  // 所持数オーバー
+  if(inventory.length >= inventory_size){
+    addLog("持ちきれない");
+    return false;
   }
 
   // 装備品
@@ -1824,7 +1845,57 @@ function removeEnemy(enemy){
 //==================================================MAP==================================================
 
 // 描画
+// PL中心
 function drawMap(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for(let i=-player.y; i<SIZEY-player.y; i++)
+    for(let j=-player.x; j<SIZEX-player.x; j++){
+      if(!player.map_sight[player.y+i][player.x+j]){
+        ctx.fillStyle = "gray";
+      }
+      else if(map_shotrange[player.y+i][player.x+j]){
+        ctx.fillStyle = "green";
+      }
+      else{
+        if(map_draw[player.y+i][player.x+j]==char_map[id_map.path]
+          || map_draw[player.y+i][player.x+j]==char_map[id_map.room]
+          || map_draw[player.y+i][player.x+j]==char_map.door
+          || map_draw[player.y+i][player.x+j]==char_map.wall_h
+          || map_draw[player.y+i][player.x+j]==char_map.wall_v)
+          ctx.fillStyle = "white";
+        else if(map_draw[player.y+i][player.x+j]==char_map[id_map.stair]
+          || map_draw[player.y+i][player.x+j]==char_map[id_map.portal]
+          || map_draw[player.y+i][player.x+j]==char_map.trap)
+          ctx.fillStyle = "blue";
+        else if(map_draw[player.y+i][player.x+j]==char_map.player
+          || map_draw[player.y+i][player.x+j]==char_map.gold
+          || map_draw[player.y+i][player.x+j]==char_map.consume
+          || map_draw[player.y+i][player.x+j]==char_map.food
+          || map_draw[player.y+i][player.x+j]==char_map.weapon
+          || map_draw[player.y+i][player.x+j]==char_map.armor
+          || map_draw[player.y+i][player.x+j]==char_map.ring
+          || map_draw[player.y+i][player.x+j]==char_map.scroll
+          || map_draw[player.y+i][player.x+j]==char_map.staff
+          || map_draw[player.y+i][player.x+j]==char_map.ammo
+          || map_draw[player.y+i][player.x+j]==char_map.unique)
+          ctx.fillStyle = "yellow";
+        else{
+          ctx.fillStyle = "red";
+
+          for(let n of npc_group)
+            if((player.x+j)==n.x && (player.y+i)==n.y)
+              ctx.fillStyle = "yellow";
+          for(let s of shop_group)
+            if((player.x+j)==s.x && (player.y+i)==s.y)
+              ctx.fillStyle = "yellow";
+        }
+      }
+      ctx.fillText(map_draw[player.y+i][player.x+j], CELL_WIDTH*j+canvas.width/2, CELL_HEIGHT*i+canvas.height/2);
+    }
+}
+
+// すべて描画
+function drawMapAll(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for(let i=0; i<SIZEY; i++){
     for(let j=0; j<SIZEX; j++){
@@ -1868,7 +1939,7 @@ function drawMap(){
               ctx.fillStyle = "yellow";
         }
       }
-      ctx.fillText(map_draw[i][j], cell_width*j, cell_height*i);
+      ctx.fillText(map_draw[i][j], CELL_WIDTH*j, CELL_HEIGHT*i);
     }
   }
 }
@@ -2282,4 +2353,112 @@ function initMap(m, v){
     }
   }
   return m;
+}
+
+//==================================================NAME==================================================
+
+// 名前入力
+function inputName(){
+  ctx.textAlign = "center";
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  let y_offset = FONT_SIZE*2;
+  ctx.fillText("名前を入力してください", canvas.width/2, y_offset);
+  
+  // 十字
+  if(key_input.left){
+    if(input_name_pos.x > 0){
+      input_name_pos.x--;
+      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+        input_name_pos.x--;
+    }
+    else
+      input_name_pos.x = hiragana[0].length-1;
+  }
+  else if(key_input.right){
+    if(input_name_pos.x < hiragana[0].length-1){
+      input_name_pos.x++;
+      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+        input_name_pos.x++;
+    }
+    else
+      input_name_pos.x = 0;
+  }
+  else if(key_input.up){
+    if(input_name_pos.y > 0){
+      input_name_pos.y--;
+      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+        input_name_pos.y--;
+    }
+    else
+      input_name_pos.y = hiragana.length-1;
+  }
+  else if(key_input.down){
+    if(input_name_pos.y < hiragana.length-1){
+      input_name_pos.y++;
+      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+        input_name_pos.y++;
+    }
+    else
+    input_name_pos.y = 0;
+  }
+  // apply
+  if(key_input.apply){
+    audio_apply.play();
+    if(syllabary[input_name_pos.y][input_name_pos.x]=="消")
+      player.name = player.name.slice(0, -1);
+
+    else if(syllabary[input_name_pos.y][input_name_pos.x]=="ｶﾅ"){
+      if(syllabary == katakana) syllabary = hiragana;
+      else syllabary = katakana;
+
+      // 一覧
+      displaySyllabary(y_offset+FONT_SIZE*4);
+    }
+
+    else if(syllabary[input_name_pos.y][input_name_pos.x]=="終"){
+      ctx.textAlign = "start";
+      input_name_flag = false;
+      init();
+      return;
+    }
+    else
+      player.name += syllabary[input_name_pos.y][input_name_pos.x];
+  }
+  // cancel
+  if(key_input.cancel)
+    player.name = player.name.slice(0, -1);
+
+  // 一覧
+  displaySyllabary(y_offset+FONT_SIZE*4);
+
+  // 文字数制限
+  let name_length = 0;
+  for(let c of player.name){
+    if(c.match(/^[^\x01-\x7E\xA1-\xDF]+$/)) name_length += 2;
+    else name_length++;
+  }
+  if(name_length > name_max_length) player.name = player.name.slice(0, -1);
+
+  // 名前描画
+  let space = "";
+  for(let i=0; i<name_max_length-name_length; i++)
+    space += "_";
+  ctx.fillText(player.name+space, canvas.width/2, FONT_SIZE*3/2+y_offset);
+  
+  // 操作説明
+  ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.width/2, FONT_SIZE*2*(syllabary.length+2)+y_offset);
+}
+
+// 五十音表示
+function displaySyllabary(y_offset){
+  let FONT_SIZE_tmp = FONT_SIZE;
+  if((FONT_SIZE*2*(syllabary.length-1)+y_offset) > canvas.clientHeight) FONT_SIZE_tmp = Math.floor(FONT_SIZE * (canvas.clientHeight / (FONT_SIZE*2*(syllabary.length-1)+y_offset)) - 3);
+  
+  for(let i=0; i<syllabary.length; i++)
+    for(let j=0; j<syllabary[i].length; j++){
+      if(input_name_pos.x == j && input_name_pos.y == i)
+        ctx.fillText(">"+syllabary[i][j], canvas.width/2-FONT_SIZE_tmp*9+FONT_SIZE_tmp*2*j, FONT_SIZE_tmp*2*i+y_offset);
+      else
+      ctx.fillText(" "+syllabary[i][j], canvas.width/2-FONT_SIZE_tmp*9+FONT_SIZE_tmp*2*j, FONT_SIZE_tmp*2*i+y_offset);
+    }
 }
