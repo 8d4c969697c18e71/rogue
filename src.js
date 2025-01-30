@@ -2,7 +2,7 @@ window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
   document.addEventListener("dblclick", function(e){ e.preventDefault();}, { passive: false });
   
-  if(isPhone()){//FIXME
+  if(isPhone()){
     setCanvasSizePhone();
     setButton();
   }
@@ -61,7 +61,6 @@ function setCanvasSizePhone(){
   let canvas_width = DRAW_WIDTH;
   let canvas_height = DRAW_HEIGHT;
   note_hidden_flag = true;
-  addLog(canvas_width+", "+DRAW_WIDTH+", "+document.body.clientWidth);
 
   canvas.style.width = canvas_width+"px";
   canvas.style.height = canvas_height+"px";
