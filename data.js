@@ -120,7 +120,7 @@ btn_downright.style.top = ARROW_SIZE+"px";
 btn_downright.style.right = ARROW_SIZE*5+"px";
 
 // ボタン全般
-button.style.visibility = "visible";//"visible";
+button.style.visibility = "hidden";//"visible";
 button.style.position = "relative";
 button.style.width = DRAW_WIDTH+"px";
 button.style.top = -ARROW_SIZE*2+"px";
