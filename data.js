@@ -781,7 +781,7 @@ const item_data = [
       player.mp -= 4;
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
-      magic(player, player.mp_max/3, dir);
+      return magic(player, player.mp_max/3, dir);
     }
   },
   // 弾薬 0x7XX
@@ -938,7 +938,7 @@ const stack_type = ["ammo"];
 const stack_max = 32;
 let inventory = [];
 const inventory_size = 20;
-let inv_cursor = -1;
+let inv_cursor = 0;
 
 // 落ちてるアイテム
 const item_table = [
@@ -1109,7 +1109,7 @@ const skill_data = [
     func: function(from, to){
       for(let d in key_direction){
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
-        let xy = straightRecursive(from.x, from.y, key_direction[d], from.map_sight, ammo.range-1);
+        let xy = straightRecursive(from.x, from.y, key_direction[d], ammo.range-1);
         if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y
           && isInSight(from, to.x, to.y)){
           shot(from, ammo, key_direction[d]);
@@ -1118,7 +1118,7 @@ const skill_data = [
       }
       for(let d in key_direction_diagonal){
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
-        let xy = straightRecursive(from.x, from.y, key_direction_diagonal[d], from.map_sight, ammo.range-1);
+        let xy = straightRecursive(from.x, from.y, key_direction_diagonal[d], ammo.range-1);
         if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y
           && isInSight(from, to.x, to.y)){
           shot(from, ammo, key_direction_diagonal[d]);

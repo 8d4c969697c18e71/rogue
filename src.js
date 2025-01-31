@@ -444,7 +444,7 @@ function eventPlayer(){
   // cancel
   if(key_input.cancel){
     audio_apply.play();
-    inv_cursor = 0;
+    //inv_cursor = 0;
     ui_flag = true;
     return false;
   }
@@ -623,13 +623,13 @@ function eventUI(){
   if(key_input.apply)
     if(useItem(inv_cursor)){
       audio_apply.play();
-      inv_cursor = -1;
+      //inv_cursor = -1;
       ui_flag = false;
       return true;
     }
   // cancel
   if(key_input.cancel){
-    inv_cursor = -1;
+    //inv_cursor = -1;
     ui_flag = false;
     return false;
   }
@@ -779,8 +779,8 @@ function eventShot(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
-       let enemy = shot(player, ammo, kd[k]);
-      if(isDead(enemy)) addExp(enemy.exp);
+      let enemy = shot(player, ammo, kd[k]);
+      if(enemy!=undefined && isDead(enemy)) addExp(enemy.exp);
       if(ammo.stack_num > 0) ammo.stack_num--;
       if(ammo.stack_num <= 0){
         equip(inventory.indexOf(ammo));
@@ -871,7 +871,8 @@ function eventThrowing(){
   for(let k in kd)
     if(key_input[k]){
       let item = inventory[inv_cursor]
-      throwing(player, item, kd[k]);
+      let enemy = throwing(player, item, kd[k]);
+      if(enemy!=undefined && isDead(enemy)) addExp(enemy.exp);
       // インベントリから削除
       if(stack_type.includes(item.type)){
         if(item.stack_num > 0) item.stack_num--;
@@ -882,7 +883,7 @@ function eventThrowing(){
       else
         inventory.splice(inv_cursor, 1);
 
-      inv_cursor = -1;
+      //inv_cursor = -1;
       throwing_flag = false;
       ui_flag = false;
       return true;
@@ -891,7 +892,7 @@ function eventThrowing(){
   // cancel
   if(key_input.cancel){
     addLog("投擲をやめた");
-    inv_cursor = -1;
+    //inv_cursor = -1;
     throwing_flag = false;
     ui_flag = false;
     return false;
@@ -907,13 +908,12 @@ function throwing(who, item, direction){
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     throwDmg(who, enemy, item);
-    if(who == player){
-      enemy.chase_flag = true;
-      if(isDead(enemy)) addExp(enemy.exp);
-    }
+    if(who == player) enemy.chase_flag = true;
+    return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
     throwDmg(who, player, item);
+    return player;
   }
   else{  // アイテム化
     if(!isItem(dst.x, dst.y))
@@ -925,7 +925,7 @@ function throwing(who, item, direction){
             if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)){
               setItem(item.id, dst.x+j, dst.y+i);
               addLog(item.name+" は床に落ちた");
-              return;
+              return undefined;
             }
     }
   }
@@ -959,12 +959,13 @@ function eventMagic(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
-      player.magic_using.func_cast(kd[k]);
+      let enemy = player.magic_using.func_cast(kd[k]);
+      if(enemy!=undefined && isDead(enemy)) addExp(enemy.exp);
       
       magic_flag = false;
       player.magic_using = undefined;
       ui_flag = false;
-      inv_cursor = -1;
+      //inv_cursor = -1;
       return true;
     }
   
@@ -973,7 +974,7 @@ function eventMagic(){
     addLog("構えを解いた");
     magic_flag = false;
     player.magic_using = undefined;
-    inv_cursor = -1;
+    //inv_cursor = -1;
     ui_flag = false;
     return false;
   }
@@ -985,13 +986,12 @@ function magic(who, value, direction){
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     magicDmg(who, enemy, value);
-    if(who == player){
-      enemy.chase_flag = true;
-      if(isDead(enemy)) addExp(enemy.exp);
-    }
+    if(who == player) enemy.chase_flag = true;
+    return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
     magicDmg(who, player, value);
+    return player;
   }
 }
 

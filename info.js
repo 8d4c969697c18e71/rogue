@@ -106,9 +106,9 @@ function drawShop(){
 
 function drawShopPhone(){
   inv.innerHTML = "";
-  shop.style.border = "solid 1px black";
+  inv.style.border = "solid 1px black";
   if(shop_flag){
-    shop.style.border = "solid 1px white";
+    inv.style.border = "solid 1px white";
     inv.insertAdjacentHTML("beforeend", "SHOP<br>");
     for(let i=0; i<shop_using.item.length; i++){
       if(i == shop_cursor)
