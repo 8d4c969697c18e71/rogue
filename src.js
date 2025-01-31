@@ -3,6 +3,7 @@ window.onload = function(){
   
   if(!isPhone()){
     setCanvasSize();
+    button.style.display = "none"
     inputName();
   }
   else{
@@ -15,7 +16,7 @@ window.onload = function(){
 }
 
 window.addEventListener("resize", () =>{
-  if(!isPhone)
+  if(!isPhone())
     setCanvasSize();
   else{
     setCanvasSizePhone();
@@ -64,9 +65,6 @@ function setCanvasSize(){
   ctx.textBaseline = "top";
 
 
-
-  log.style.width = SHOP_WIDTH*1.5+"px";
-  shop.style.width = SHOP_WIDTH+"px";
   
   note.style.width = NOTE_WIDTH+"px";
   note.style.PADDINGRight = PADDING+"px";
@@ -81,7 +79,7 @@ function setCanvasSize(){
   log.style.MARGINTop = MARGIN+"px";
   log.style.MARGINLeft = MARGIN+"px";
 
-  shop.style.width = canvas_width/3+"px";
+  shop.style.width = canvas_width*2/3+"px";
   shop.style.MARGINTop = MARGIN+"px";
   shop.style.PADDINGLeft = PADDING+"px";
   shop.style.MARGINRight = MARGIN+"px";
@@ -89,7 +87,13 @@ function setCanvasSize(){
 
 // ウィンドウサイズ（スマホ）
 function setCanvasSizePhone(){
-  canvas_width = screen.width - INFO_WIDTH;
+  document.body.style.paddingTop = 0+"px";
+  info.style.fontSize = 12+"px";
+  log.style.fontSize = 12+"px";
+  inv.style.fontSize = 12+"px";
+  shop.style.display = "none";
+
+  canvas_width = screen.width - INFO_WIDTH*12/16;
   canvas_height = canvas_width*1.5;
 
   canvas.style.width = canvas_width+"px";
@@ -102,18 +106,15 @@ function setCanvasSizePhone(){
   ctx.fillStyle = "white";
   ctx.textBaseline = "top";
   
-  document.body.style.paddingTop = 0+"px";
-  log.style.fontSize = 12+"px";
   log.style.width = canvas_width+"px";
-  inv.style.fontSize = 12+"px";
   inv.style.width = screen.width-log.clientWidth-5+"px";
-  shop.style.display = "none";
 }
 
 // スマホ検出
 function isPhone(){
   if(navigator.userAgent.match(/iPhone|Android.+Mobile/))
     return true;
+
   return false;
 }
 

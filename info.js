@@ -74,51 +74,58 @@ function drawInv(){
 //=========================SHOP=========================
 
 function drawShop(){
+  if(isPhone() && shop_flag){
+    drawShopPhone();
+    return;
+  }
+
   shop.innerHTML = "";
   shop.style.border = "solid 1px black";
-
   if(shop_flag){
-    if(!isPhone()){
-      shop.style.border = "solid 1px white";
-      shop.insertAdjacentHTML("beforeend", "SHOP<br>");
-      for(let i=0; i<shop_using.item.length; i++){
-        if(i == shop_cursor)
-          shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
-        else if(i<9)
-          shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
-        else
-          shop.insertAdjacentHTML("beforeend", (i+1)+": ");
-        if(shop_using.item[i].price>=0){
-          shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-          shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
-        }
-        else{
-          shop.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
-          shop.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
-        }
-        shop.insertAdjacentHTML("beforeend", "<br>");
+    shop.style.border = "solid 1px white";
+    shop.insertAdjacentHTML("beforeend", "SHOP<br>");
+    for(let i=0; i<shop_using.item.length; i++){
+      if(i == shop_cursor)
+        shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+      else if(i<9)
+        shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+      else
+        shop.insertAdjacentHTML("beforeend", (i+1)+": ");
+      if(shop_using.item[i].price>=0){
+        shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+        shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
       }
+      else{
+        shop.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
+        shop.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+      }
+      shop.insertAdjacentHTML("beforeend", "<br>");
     }
-    else{
-      inv.innerHTML = "";
-      inv.insertAdjacentHTML("beforeend", "SHOP<br>");
-      for(let i=0; i<shop_using.item.length; i++){
-        if(i == shop_cursor)
-          inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
-        else if(i<9)
-          inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
-        else
-          inv.insertAdjacentHTML("beforeend", (i+1)+": ");
-        if(shop_using.item[i].price>=0){
-          inv.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-          inv.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
-        }
-        else{
-          inv.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
-          inv.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
-        }
-        inv.insertAdjacentHTML("beforeend", "<br>");
+  }
+}
+
+function drawShopPhone(){
+  inv.innerHTML = "";
+  shop.style.border = "solid 1px black";
+  if(shop_flag){
+    shop.style.border = "solid 1px white";
+    inv.insertAdjacentHTML("beforeend", "SHOP<br>");
+    for(let i=0; i<shop_using.item.length; i++){
+      if(i == shop_cursor)
+        inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+      else if(i<9)
+        inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+      else
+        inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+      if(shop_using.item[i].price>=0){
+        inv.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+        inv.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
       }
+      else{
+        inv.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
+        inv.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+      }
+      inv.insertAdjacentHTML("beforeend", "<br>");
     }
   }
 }

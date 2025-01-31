@@ -34,7 +34,6 @@ const PADDING = 5;
 const MARGIN = 25;
 const NOTE_WIDTH = 150;
 const INFO_WIDTH = 175;
-const SHOP_WIDTH = 250;
 
 button.style.visibility = "hidden";//"visible";
 
