@@ -45,12 +45,47 @@ function drawInfo(){
 //=========================INVENTORY=========================
 
 function drawInv(){
+  if(isPhone()){
+    drawInvPhone();
+    return;
+  }
+
   inv.innerHTML = "";
   if(ui_flag) inv.style.border = "solid 1px white";
   else inv.style.border = "solid 1px black";
 
   inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
   for(let i=0; i<inventory_size; i++){
+    if(i == inv_cursor)
+      inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+    else if(i<9)
+      inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+    else
+      inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+    if(i < inventory.length){
+      if(inventory[i].equip_flag)
+        inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
+      else
+        inv.insertAdjacentHTML("beforeend", inventory[i].name);
+      if(inventory[i].stack_num)
+        inv.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
+    }
+    else
+      inv.insertAdjacentHTML("beforeend", "------");
+    inv.insertAdjacentHTML("beforeend", "<br>");
+  }
+}
+
+function drawInvPhone(){
+  inv.innerHTML = "";
+  if(ui_flag) inv.style.border = "solid 1px white";
+  else inv.style.border = "solid 1px black";
+
+  if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
+  if(inv_cursor >= inv_display_size_phone + inv_start_offset) inv_start_offset = inv_cursor - inv_display_size_phone + 1;
+
+  inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
+  for(let i=inv_start_offset; i<inv_display_size_phone+inv_start_offset; i++){
     if(i == inv_cursor)
       inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
     else if(i<9)
@@ -107,10 +142,14 @@ function drawShop(){
 function drawShopPhone(){
   inv.innerHTML = "";
   inv.style.border = "solid 1px black";
+
+  if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
+  if(shop_cursor >= inv_display_size_phone + shop_start_offset) shop_start_offset = shop_cursor - inv_display_size_phone + 1;
+
   if(shop_flag){
     inv.style.border = "solid 1px white";
     inv.insertAdjacentHTML("beforeend", "SHOP<br>");
-    for(let i=0; i<shop_using.item.length; i++){
+    for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_size_phone+shop_start_offset; i++){
       if(i == shop_cursor)
         inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
       else if(i<9)
@@ -122,7 +161,7 @@ function drawShopPhone(){
         inv.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
       }
       else{
-        inv.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
+        inv.insertAdjacentHTML("beforeend", "売: "+shop_using.item[i].name);
         inv.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
       }
       inv.insertAdjacentHTML("beforeend", "<br>");
@@ -133,8 +172,20 @@ function drawShopPhone(){
 //=========================LOG=========================
 
 function drawLog(){
+  if(isPhone()){
+    drawLogPhone();
+    return;
+  }
+
   log.innerHTML = "";
   for(let i=0; i<log_reserve.length; i++)
+    log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
+  log.insertAdjacentHTML("afterbegin","LOG<br>");
+}
+
+function drawLogPhone(){
+  log.innerHTML = "";
+  for(let i=0; i<log_reserve.length && i<log_display_size_phone; i++)
     log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
   log.insertAdjacentHTML("afterbegin","LOG<br>");
 }

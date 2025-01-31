@@ -2,13 +2,13 @@ window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
   
   if(!isPhone()){
-    setCanvasSize();
     button.style.display = "none"
+    setCanvasSize();
     inputName();
   }
   else{
-    setCanvasSizePhone();
     setButton();
+    setCanvasSizePhone();
     player.name = "あなた";
     input_name_flag = false;
     init();
@@ -43,15 +43,11 @@ function setCanvasSize(){
   let canvas_height = 512;
   const body_width = document.body.clientWidth;
 
-  canvas.style.marginLeft = "0px";
-  canvas.style.marginRight = "0px";
   note.style.display = "block";
   note_hidden_flag = false;
   if((canvas_width+NOTE_WIDTH+INFO_WIDTH) > body_width){
     note_hidden_flag = true;
     note.style.display = "none";
-    canvas.style.marginLeft = (body_width-(INFO_WIDTH+canvas_width))/2+"px";
-    canvas.style.marginRight = canvas.style.marginLeft;
   }
 
   canvas.style.width = canvas_width+"px";
@@ -64,35 +60,29 @@ function setCanvasSize(){
   ctx.fillStyle = "white";
   ctx.textBaseline = "top";
 
-
-  
+  // note
   note.style.width = NOTE_WIDTH+"px";
-  note.style.PADDINGRight = PADDING+"px";
-
+  note.style.paddingRight = PADDING+"px";
+  // info
   info.style.width = INFO_WIDTH+"px";
-  info.style.PADDINGLeft = PADDING+"px";
-
-  inv.style.PADDINGLeft = PADDING+"px"; 
-  
+  info.style.paddingLeft = PADDING+"px";
+  // inv
+  inv.style.paddingLeft = PADDING+"px"; 
+  // log
   log.style.width = canvas_width*2/3+"px";
   log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";
-  log.style.MARGINTop = MARGIN+"px";
-  log.style.MARGINLeft = MARGIN+"px";
-
+  log.style.marginTop = MARGIN+"px";
+  log.style.marginLeft = MARGIN+"px";
+  // shop
   shop.style.width = canvas_width*2/3+"px";
-  shop.style.MARGINTop = MARGIN+"px";
-  shop.style.PADDINGLeft = PADDING+"px";
-  shop.style.MARGINRight = MARGIN+"px";
+  shop.style.marginTop = MARGIN+"px";
+  shop.style.paddingLeft = PADDING+"px";
+  shop.style.marginRight = MARGIN+"px";
 }
 
 // ウィンドウサイズ（スマホ）
 function setCanvasSizePhone(){
   document.body.style.paddingTop = 0+"px";
-  info.style.fontSize = 12+"px";
-  log.style.fontSize = 12+"px";
-  inv.style.fontSize = 12+"px";
-  shop.style.display = "none";
-
   canvas_width = screen.width - INFO_WIDTH*12/16;
   canvas_height = canvas_width*1.5;
 
@@ -106,8 +96,12 @@ function setCanvasSizePhone(){
   ctx.fillStyle = "white";
   ctx.textBaseline = "top";
   
+  info.style.fontSize = 12+"px";
+  log.style.fontSize = 12+"px";
   log.style.width = canvas_width+"px";
+  inv.style.fontSize = 12+"px";
   inv.style.width = screen.width-log.clientWidth-5+"px";
+  shop.style.display = "none";
 }
 
 // スマホ検出

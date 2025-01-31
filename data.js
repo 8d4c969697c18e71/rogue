@@ -35,9 +35,12 @@ const MARGIN = 25;
 const NOTE_WIDTH = 150;
 const INFO_WIDTH = 175;
 
+// スマホ用
 button.style.visibility = "hidden";//"visible";
-
-
+const log_display_size_phone = 5;
+const inv_display_size_phone = 15;
+let inv_start_offset = 0;
+let shop_start_offset = 0;
 
 const audio_apply = new Audio("sound/apply.wav");
 const audio_stair = new Audio("sound/stair.wav");
@@ -704,6 +707,30 @@ const item_data = [
     func_attacked: function(from){},
   },
   {
+    id: 0x301,
+    name: "チェインメイル",
+    type: "armor",
+    func_equip: function(){
+      player.def_offset += 2;
+    },
+    func_unequip: function(){
+      player.def_offset -= 2;
+    },
+    func_attacked: function(from){},
+  },
+  {
+    id: 0x302,
+    name: "無名騎士の鎧",
+    type: "armor",
+    func_equip: function(){
+      player.def_offset += 3;
+    },
+    func_unequip: function(){
+      player.def_offset -= 3;
+    },
+    func_attacked: function(from){},
+  },
+  {
     id: 0x380,
     name: "レアルのローブ",
     type: "armor",
@@ -791,6 +818,15 @@ const item_data = [
     type: "ammo",
     dmg: 4,
     range: 10,
+    func_equip: function(){},
+    func_unequip: function(){},
+  },
+  {
+    id: 0x701,
+    name: "鉄の矢",
+    type: "ammo",
+    dmg: 6,
+    range: 8,
     func_equip: function(){},
     func_unequip: function(){},
   },
