@@ -265,10 +265,10 @@ btn_downleft.addEventListener("click", () =>{
 });
 btn_upright.addEventListener("click", () =>{
   key_input.ctrl = true;
-  key_input.down_left = true;
+  key_input.up_right = true;
   events();
   key_input.ctrl = false;
-  key_input.down_left = false;
+  key_input.up_right = false;
 });
 btn_downright.addEventListener("click", () =>{
   key_input.ctrl = true;
