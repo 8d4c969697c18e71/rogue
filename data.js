@@ -18,7 +18,7 @@ const btn_upleft = document.getElementById("btn_upleft");
 const btn_downleft = document.getElementById("btn_downleft");
 const btn_upright = document.getElementById("btn_upright");
 const btn_downright = document.getElementById("btn_downright");
-const sub2 = document.getElementById("sub2");
+const sub1 = document.getElementById("sub1");
 
 
 const FONT_SIZE = 16;
@@ -28,7 +28,8 @@ const SIZEY = 64;
 const CELL_WIDTH = FONT_SIZE;//FONT_SIZE/2;
 const CELL_HEIGHT = FONT_SIZE;
 
-
+let log_reserve = [];
+const LOG_RESERVE_SIZE = 10;
 
 const PADDING = 5;
 const MARGIN = 25;
@@ -36,97 +37,7 @@ const NOTE_WIDTH = 150;
 const INFO_WIDTH = 175;
 const SHOP_WIDTH = 250;
 
-note.style.width = NOTE_WIDTH+"px";
-note.style.minWidth = NOTE_WIDTH+"px";
-note.style.PADDINGRight = PADDING+"px";
-
-info.style.width = INFO_WIDTH+"px";
-info.style.PADDINGLeft = PADDING+"px";
-
-inv.style.PADDINGLeft = PADDING+"px";
-
-let log_reserve = [];
-const LOG_RESERVE_SIZE = 10;
-log.style.width = SHOP_WIDTH*1.5+"px";
-log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";
-log.style.MARGINTop = MARGIN+"px";
-log.style.MARGINLeft = MARGIN+"px";
-
-shop.style.width = SHOP_WIDTH+"px";
-shop.style.MARGINTop = MARGIN+"px";
-shop.style.PADDINGLeft = PADDING+"px";
-shop.style.MARGINRight = MARGIN+"px";
-
-// 全描画
-//const DRAW_WIDTH = SIZEX*CELL_WIDTH;
-//const DRAW_HEIGHT = SIZEY*CELL_HEIGHT;
-const DRAW_WIDTH = 512;
-const DRAW_HEIGHT = 512;
-
-let note_hidden_flag = false;
-
-// ボタンサイズ
-const ZXC_SIZE = 50;
-const ARROW_SIZE = 50;
-// zxc
-btn_z.style.width = ZXC_SIZE+"px"; btn_z.style.height = ZXC_SIZE+"px";
-btn_x.style.width = ZXC_SIZE+"px"; btn_x.style.height = ZXC_SIZE+"px";
-btn_c.style.width = ZXC_SIZE+"px"; btn_c.style.height = ZXC_SIZE+"px";
-btn_z.style.minWidth = ZXC_SIZE+"px"; btn_z.style.minHeight = ZXC_SIZE+"px";
-btn_x.style.minWidth = ZXC_SIZE+"px"; btn_x.style.minHeight = ZXC_SIZE+"px";
-btn_c.style.minWidth = ZXC_SIZE+"px"; btn_c.style.minHeight = ZXC_SIZE+"px";
-// 十字
-btn_left.style.width = ARROW_SIZE+"px"; btn_left.style.height = ARROW_SIZE+"px";
-btn_up.style.width = ARROW_SIZE+"px"; btn_up.style.height = ARROW_SIZE+"px";
-btn_down.style.width = ARROW_SIZE+"px"; btn_down.style.height = ARROW_SIZE+"px";
-btn_right.style.width = ARROW_SIZE+"px"; btn_right.style.height = ARROW_SIZE+"px";
-btn_left.style.minWidth = ARROW_SIZE+"px"; btn_left.style.minHeight = ARROW_SIZE+"px";
-btn_up.style.minWidth = ARROW_SIZE+"px"; btn_up.style.minHeight = ARROW_SIZE+"px";
-btn_down.style.minWidth = ARROW_SIZE+"px"; btn_down.style.minHeight = ARROW_SIZE+"px";
-btn_right.style.minWidth = ARROW_SIZE+"px"; btn_right.style.minHeight = ARROW_SIZE+"px";
-// 斜め
-btn_upleft.style.width = ARROW_SIZE+"px"; btn_upleft.style.height = ARROW_SIZE+"px";
-btn_downleft.style.width = ARROW_SIZE+"px"; btn_downleft.style.height = ARROW_SIZE+"px";
-btn_upright.style.width = ARROW_SIZE+"px"; btn_upright.style.height = ARROW_SIZE+"px";
-btn_downright.style.width = ARROW_SIZE+"px"; btn_downright.style.height = ARROW_SIZE+"px";
-btn_upleft.style.minWidth = ARROW_SIZE+"px"; btn_upleft.style.minHeight = ARROW_SIZE+"px";
-btn_downleft.style.minWidth = ARROW_SIZE+"px"; btn_downleft.style.minHeight = ARROW_SIZE+"px";
-btn_upright.style.minWidth = ARROW_SIZE+"px"; btn_upright.style.minHeight = ARROW_SIZE+"px";
-btn_downright.style.minWidth = ARROW_SIZE+"px"; btn_downright.style.minHeight = ARROW_SIZE+"px";
-
-// 矢印位置
-arrow.style.width = ARROW_SIZE*3+"px";
-btn_left.style.position = "relative";
-btn_up.style.position = "relative";
-btn_down.style.position = "relative";
-btn_right.style.position = "relative";
-btn_upleft.style.position = "relative";
-btn_downleft.style.position = "relative";
-btn_upright.style.position = "relative";
-btn_downright.style.position = "relative";
-
-btn_up.style.bottom = ARROW_SIZE+"px";
-btn_down.style.top = ARROW_SIZE+"px";
-btn_down.style.right = ARROW_SIZE+"px";
-btn_right.style.right = ARROW_SIZE+"px";
-
-btn_upleft.style.bottom = ARROW_SIZE+"px";
-btn_upleft.style.right = ARROW_SIZE*4+"px";
-btn_downleft.style.top = ARROW_SIZE+"px";
-btn_downleft.style.right = ARROW_SIZE*5+"px";
-btn_upright.style.bottom = ARROW_SIZE+"px";
-btn_upright.style.right = ARROW_SIZE*4+"px";
-btn_downright.style.top = ARROW_SIZE+"px";
-btn_downright.style.right = ARROW_SIZE*5+"px";
-
-// ボタン全般
 button.style.visibility = "hidden";//"visible";
-button.style.position = "relative";
-button.style.width = DRAW_WIDTH+"px";
-button.style.top = -ARROW_SIZE*2+"px";
-
-sub2.style.width = DRAW_WIDTH+"px";
-sub2.style.height = DRAW_HEIGHT+"px";
 
 
 

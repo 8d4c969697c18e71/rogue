@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
   <title>Rogue</title>
   <style>
     body{
@@ -28,8 +29,6 @@
     .button{
       display: flex;
       flex-direction: row;
-      flex-wrap: nowrap;
-      justify-content: space-evenly; 
     }
     .arrow{
       display: flex;
@@ -48,26 +47,8 @@
 </head>
 <body>
   <div id="note"></div>
-  <div class="sub1">
-    <div class="sub2" id="sub2">
-      <canvas id="canvas"></canvas>
-      <div class="button" id="button">
-        <button id="btn_z">Z</button>
-        <button id="btn_x">X</button>
-        <button id="btn_c">C</button>
-        <div></div>
-        <div class="arrow" id="arrow">
-          <button id="btn_left">←</button>
-          <button id="btn_up">↑</button>
-          <button id="btn_down">↓</button>
-          <button id="btn_right">→</button>
-          <button id="btn_upleft">↖</button>
-          <button id="btn_downleft">↙</button>
-          <button id="btn_upright">↗</button>
-          <button id="btn_downright">↘</button>
-        </div>
-      </div>
-    </div>
+  <div class="sub1" id="sub1">
+    <canvas id="canvas"></canvas>
     <div class="sub3">
       <div id="log"></div>
       <div id="shop"></div>
@@ -76,6 +57,22 @@
   <div class="sub4">
     <div id="info"></div>
     <div id="inv"></div>
+  </div>
+  <div class="button" id="button">
+    <button id="btn_z">Z</button>
+    <button id="btn_x">X</button>
+    <button id="btn_c">C</button>
+    <div></div>
+    <div class="arrow" id="arrow">
+      <button id="btn_left">←</button>
+      <button id="btn_up">↑</button>
+      <button id="btn_down">↓</button>
+      <button id="btn_right">→</button>
+      <button id="btn_upleft">↖</button>
+      <button id="btn_downleft">↙</button>
+      <button id="btn_upright">↗</button>
+      <button id="btn_downright">↘</button>
+    </div>
   </div>
   
   <script src="data.js"></script>

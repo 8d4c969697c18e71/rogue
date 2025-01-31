@@ -1,18 +1,23 @@
 window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
-  document.addEventListener("dblclick", function(e){ e.preventDefault();}, { passive: false });
   
-  if(isPhone()){
+  if(!isPhone())
+    setCanvasSize();
+  else{
     setCanvasSizePhone();
     setButton();
   }
-  else setCanvasSize();
 
   inputName();
 }
 
 window.addEventListener("resize", () =>{
-  setCanvasSize();
+  if(!isPhone)
+    setCanvasSize();
+  else{
+    setCanvasSizePhone();
+    setButton();
+  }
   if(input_name_flag) {
     inputName();
     return;
@@ -30,9 +35,9 @@ window.addEventListener("resize", () =>{
 
 // ウィンドウサイズ
 function setCanvasSize(){
+  let canvas_width = 512;
+  let canvas_height = 512;
   const body_width = document.body.clientWidth;
-  let canvas_width = DRAW_WIDTH;
-  let canvas_height = DRAW_HEIGHT;
 
   canvas.style.marginLeft = "0px";
   canvas.style.marginRight = "0px";
@@ -54,13 +59,35 @@ function setCanvasSize(){
   ctx.font = FONT_SIZE+"px 'MS Gothic'";
   ctx.fillStyle = "white";
   ctx.textBaseline = "top";
+
+
+
+  log.style.width = SHOP_WIDTH*1.5+"px";
+  shop.style.width = SHOP_WIDTH+"px";
+  
+  note.style.width = NOTE_WIDTH+"px";
+  note.style.PADDINGRight = PADDING+"px";
+
+  info.style.width = INFO_WIDTH+"px";
+  info.style.PADDINGLeft = PADDING+"px";
+
+  inv.style.PADDINGLeft = PADDING+"px"; 
+  
+  log.style.width = canvas_width*2/3+"px";
+  log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";
+  log.style.MARGINTop = MARGIN+"px";
+  log.style.MARGINLeft = MARGIN+"px";
+
+  shop.style.width = canvas_width/3+"px";
+  shop.style.MARGINTop = MARGIN+"px";
+  shop.style.PADDINGLeft = PADDING+"px";
+  shop.style.MARGINRight = MARGIN+"px";
 }
 
 // ウィンドウサイズ（スマホ）
 function setCanvasSizePhone(){
-  let canvas_width = DRAW_WIDTH;
-  let canvas_height = DRAW_HEIGHT;
-  note_hidden_flag = true;
+  canvas_width = screen.width - INFO_WIDTH;
+  canvas_height = canvas_width*screen.height/screen.width;
 
   canvas.style.width = canvas_width+"px";
   canvas.style.height = canvas_height+"px";
@@ -71,6 +98,13 @@ function setCanvasSizePhone(){
   ctx.font = FONT_SIZE+"px 'MS Gothic'";
   ctx.fillStyle = "white";
   ctx.textBaseline = "top";
+  
+  document.body.style.paddingTop = 0+"px";
+  log.style.fontSize = 12+"px";
+  log.style.width = canvas_width+"px";
+  inv.style.fontSize = 12+"px";
+  inv.style.width = screen.width-log.clientWidth-5+"px";
+  shop.style.display = "none";
 }
 
 // スマホ検出
@@ -83,6 +117,64 @@ function isPhone(){
 // ボタン表示
 function setButton(){
   button.style.visibility = "visible";
+
+  // ボタンサイズ
+  const ZXC_SIZE = screen.width/6;
+  const ARROW_SIZE = ZXC_SIZE;
+  // zxc
+  btn_z.style.width = ZXC_SIZE+"px"; btn_z.style.height = ZXC_SIZE+"px";
+  btn_x.style.width = ZXC_SIZE+"px"; btn_x.style.height = ZXC_SIZE+"px";
+  btn_c.style.width = ZXC_SIZE+"px"; btn_c.style.height = ZXC_SIZE+"px";
+  btn_z.style.minWidth = ZXC_SIZE+"px"; btn_z.style.minHeight = ZXC_SIZE+"px";
+  btn_x.style.minWidth = ZXC_SIZE+"px"; btn_x.style.minHeight = ZXC_SIZE+"px";
+  btn_c.style.minWidth = ZXC_SIZE+"px"; btn_c.style.minHeight = ZXC_SIZE+"px";
+  // 十字
+  btn_left.style.width = ARROW_SIZE+"px"; btn_left.style.height = ARROW_SIZE+"px";
+  btn_up.style.width = ARROW_SIZE+"px"; btn_up.style.height = ARROW_SIZE+"px";
+  btn_down.style.width = ARROW_SIZE+"px"; btn_down.style.height = ARROW_SIZE+"px";
+  btn_right.style.width = ARROW_SIZE+"px"; btn_right.style.height = ARROW_SIZE+"px";
+  btn_left.style.minWidth = ARROW_SIZE+"px"; btn_left.style.minHeight = ARROW_SIZE+"px";
+  btn_up.style.minWidth = ARROW_SIZE+"px"; btn_up.style.minHeight = ARROW_SIZE+"px";
+  btn_down.style.minWidth = ARROW_SIZE+"px"; btn_down.style.minHeight = ARROW_SIZE+"px";
+  btn_right.style.minWidth = ARROW_SIZE+"px"; btn_right.style.minHeight = ARROW_SIZE+"px";
+  // 斜め
+  btn_upleft.style.width = ARROW_SIZE+"px"; btn_upleft.style.height = ARROW_SIZE+"px";
+  btn_downleft.style.width = ARROW_SIZE+"px"; btn_downleft.style.height = ARROW_SIZE+"px";
+  btn_upright.style.width = ARROW_SIZE+"px"; btn_upright.style.height = ARROW_SIZE+"px";
+  btn_downright.style.width = ARROW_SIZE+"px"; btn_downright.style.height = ARROW_SIZE+"px";
+  btn_upleft.style.minWidth = ARROW_SIZE+"px"; btn_upleft.style.minHeight = ARROW_SIZE+"px";
+  btn_downleft.style.minWidth = ARROW_SIZE+"px"; btn_downleft.style.minHeight = ARROW_SIZE+"px";
+  btn_upright.style.minWidth = ARROW_SIZE+"px"; btn_upright.style.minHeight = ARROW_SIZE+"px";
+  btn_downright.style.minWidth = ARROW_SIZE+"px"; btn_downright.style.minHeight = ARROW_SIZE+"px";
+  
+  // ボタン全般
+  button.style.position = "fixed";
+  button.style.top = screen.height - ARROW_SIZE*2+"px";
+
+  // 矢印位置
+  arrow.style.width = ARROW_SIZE*3+"px";
+  btn_left.style.position = "relative";
+  btn_up.style.position = "relative";
+  btn_down.style.position = "relative";
+  btn_right.style.position = "relative";
+  btn_upleft.style.position = "relative";
+  btn_downleft.style.position = "relative";
+  btn_upright.style.position = "relative";
+  btn_downright.style.position = "relative";
+
+  btn_up.style.bottom = ARROW_SIZE+"px";
+  btn_down.style.top = ARROW_SIZE+"px";
+  btn_down.style.right = ARROW_SIZE+"px";
+  btn_right.style.right = ARROW_SIZE+"px";
+
+  btn_upleft.style.bottom = ARROW_SIZE+"px";
+  btn_upleft.style.right = ARROW_SIZE*4+"px";
+  btn_downleft.style.top = ARROW_SIZE+"px";
+  btn_downleft.style.right = ARROW_SIZE*5+"px";
+  btn_upright.style.bottom = ARROW_SIZE+"px";
+  btn_upright.style.right = ARROW_SIZE*4+"px";
+  btn_downright.style.top = ARROW_SIZE+"px";
+  btn_downright.style.right = ARROW_SIZE*5+"px";
 }
 
 // 初期化
@@ -1913,7 +2005,7 @@ function drawMap(){
               ctx.fillStyle = "yellow";
         }
       }
-      ctx.fillText(map_draw[player.y+i][player.x+j], CELL_WIDTH*j+canvas.width/2, CELL_HEIGHT*i+canvas.height/2);
+      ctx.fillText(map_draw[player.y+i][player.x+j], CELL_WIDTH*j+canvas.clientWidth/2, CELL_HEIGHT*i+canvas.clientHeight/2);
     }
 }
 

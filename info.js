@@ -75,27 +75,50 @@ function drawInv(){
 
 function drawShop(){
   shop.innerHTML = "";
-  if(shop_flag) shop.style.border = "solid 1px white";
-  else shop.style.border = "solid 1px black";
+  shop.style.border = "solid 1px black";
 
   if(shop_flag){
-    shop.insertAdjacentHTML("beforeend", "SHOP<br>");
-    for(let i=0; i<shop_using.item.length; i++){
-      if(i == shop_cursor)
-        shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
-      else if(i<9)
-        shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
-      else
-        shop.insertAdjacentHTML("beforeend", (i+1)+": ");
-      if(shop_using.item[i].price>=0){
-        shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-        shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
+    if(!isPhone()){
+      shop.style.border = "solid 1px white";
+      shop.insertAdjacentHTML("beforeend", "SHOP<br>");
+      for(let i=0; i<shop_using.item.length; i++){
+        if(i == shop_cursor)
+          shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+        else if(i<9)
+          shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+        else
+          shop.insertAdjacentHTML("beforeend", (i+1)+": ");
+        if(shop_using.item[i].price>=0){
+          shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+          shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
+        }
+        else{
+          shop.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
+          shop.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+        }
+        shop.insertAdjacentHTML("beforeend", "<br>");
       }
-      else{
-        shop.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
-        shop.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+    }
+    else{
+      inv.innerHTML = "";
+      inv.insertAdjacentHTML("beforeend", "SHOP<br>");
+      for(let i=0; i<shop_using.item.length; i++){
+        if(i == shop_cursor)
+          inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+        else if(i<9)
+          inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+        else
+          inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+        if(shop_using.item[i].price>=0){
+          inv.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+          inv.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
+        }
+        else{
+          inv.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
+          inv.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+        }
+        inv.insertAdjacentHTML("beforeend", "<br>");
       }
-      shop.insertAdjacentHTML("beforeend", "<br>");
     }
   }
 }
@@ -151,7 +174,8 @@ function addLogSameLine(text){
 //=========================NOTE=========================
 
 function drawNote(){
-  if(note_hidden_flag) return;
+  if(isPhone()) return;
+
   note.innerHTML = "NOTE<br>";
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
