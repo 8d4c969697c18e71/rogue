@@ -1,14 +1,18 @@
 window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
   
-  if(!isPhone())
+  if(!isPhone()){
     setCanvasSize();
+    inputName();
+  }
   else{
     setCanvasSizePhone();
     setButton();
+    player.name = "あなた";
+    input_name_flag = false;
+    init();
   }
 
-  inputName();
 }
 
 window.addEventListener("resize", () =>{
@@ -2566,14 +2570,11 @@ function inputName(){
 
 // 五十音表示
 function displaySyllabary(y_offset){
-  let FONT_SIZE_tmp = FONT_SIZE;
-  if((FONT_SIZE*2*(syllabary.length-1)+y_offset) > canvas.clientHeight) FONT_SIZE_tmp = Math.floor(FONT_SIZE * (canvas.clientHeight / (FONT_SIZE*2*(syllabary.length-1)+y_offset)) - 3);
-  
   for(let i=0; i<syllabary.length; i++)
     for(let j=0; j<syllabary[i].length; j++){
       if(input_name_pos.x == j && input_name_pos.y == i)
-        ctx.fillText(">"+syllabary[i][j], canvas.width/2-FONT_SIZE_tmp*9+FONT_SIZE_tmp*2*j, FONT_SIZE_tmp*2*i+y_offset);
+        ctx.fillText(">"+syllabary[i][j], canvas.width/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
       else
-      ctx.fillText(" "+syllabary[i][j], canvas.width/2-FONT_SIZE_tmp*9+FONT_SIZE_tmp*2*j, FONT_SIZE_tmp*2*i+y_offset);
+      ctx.fillText(" "+syllabary[i][j], canvas.width/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
     }
 }
