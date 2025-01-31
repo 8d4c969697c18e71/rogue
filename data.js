@@ -18,7 +18,6 @@ const btn_upleft = document.getElementById("btn_upleft");
 const btn_downleft = document.getElementById("btn_downleft");
 const btn_upright = document.getElementById("btn_upright");
 const btn_downright = document.getElementById("btn_downright");
-const sub1 = document.getElementById("sub1");
 
 
 const FONT_SIZE = 16;

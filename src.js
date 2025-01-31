@@ -12,7 +12,6 @@ window.onload = function(){
     input_name_flag = false;
     init();
   }
-
 }
 
 window.addEventListener("resize", () =>{
@@ -91,7 +90,7 @@ function setCanvasSize(){
 // ウィンドウサイズ（スマホ）
 function setCanvasSizePhone(){
   canvas_width = screen.width - INFO_WIDTH;
-  canvas_height = canvas_width*screen.height/screen.width;
+  canvas_height = canvas_width*1.5;
 
   canvas.style.width = canvas_width+"px";
   canvas.style.height = canvas_height+"px";
@@ -153,7 +152,7 @@ function setButton(){
   
   // ボタン全般
   button.style.position = "fixed";
-  button.style.top = screen.height - ARROW_SIZE*2+"px";
+  button.style.top = window.innerHeight-ARROW_SIZE*2+"px";
 
   // 矢印位置
   arrow.style.width = ARROW_SIZE*3+"px";
@@ -1966,7 +1965,7 @@ function removeEnemy(enemy){
 // 描画
 // PL中心
 function drawMap(){
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   for(let i=-player.y; i<SIZEY-player.y; i++)
     for(let j=-player.x; j<SIZEX-player.x; j++){
       if(!player.map_sight[player.y+i][player.x+j]){
@@ -2015,7 +2014,7 @@ function drawMap(){
 
 // すべて描画
 function drawMapAll(){
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   for(let i=0; i<SIZEY; i++){
     for(let j=0; j<SIZEX; j++){
       if(!player.map_sight[i][j]){
@@ -2479,9 +2478,9 @@ function initMap(m, v){
 // 名前入力
 function inputName(){
   ctx.textAlign = "center";
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   let y_offset = FONT_SIZE*2;
-  ctx.fillText("名前を入力してください", canvas.width/2, y_offset);
+  ctx.fillText("名前を入力してください", canvas.clientWidth/2, y_offset);
   
   // 十字
   if(key_input.left){
@@ -2565,7 +2564,7 @@ function inputName(){
   ctx.fillText(player.name+space, canvas.width/2, FONT_SIZE*3/2+y_offset);
   
   // 操作説明
-  ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.width/2, FONT_SIZE*2*(syllabary.length+2)+y_offset);
+  ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.clientWidth/2, FONT_SIZE*2*(syllabary.length+2)+y_offset);
 }
 
 // 五十音表示
@@ -2573,8 +2572,8 @@ function displaySyllabary(y_offset){
   for(let i=0; i<syllabary.length; i++)
     for(let j=0; j<syllabary[i].length; j++){
       if(input_name_pos.x == j && input_name_pos.y == i)
-        ctx.fillText(">"+syllabary[i][j], canvas.width/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
+        ctx.fillText(">"+syllabary[i][j], canvas.clientWidth/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
       else
-      ctx.fillText(" "+syllabary[i][j], canvas.width/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
+      ctx.fillText(" "+syllabary[i][j], canvas.clientWidth/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
     }
 }
