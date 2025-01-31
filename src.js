@@ -250,23 +250,31 @@ btn_right.addEventListener("click", () =>{
   key_input.right = false;
 });
 btn_upleft.addEventListener("click", () =>{
+  key_input.ctrl = true;
   key_input.up_left = true;
   events();
+  key_input.ctrl = false;
   key_input.up_left = false;
 });
 btn_downleft.addEventListener("click", () =>{
+  key_input.ctrl = true;
   key_input.down_left = true;
   events();
+  key_input.ctrl = false;
   key_input.down_left = false;
 });
 btn_upright.addEventListener("click", () =>{
+  key_input.ctrl = true;
   key_input.down_left = true;
   events();
+  key_input.ctrl = false;
   key_input.down_left = false;
 });
 btn_downright.addEventListener("click", () =>{
+  key_input.ctrl = true;
   key_input.down_right = true;
   events();
+  key_input.ctrl = false;
   key_input.down_right = false;
 });
 
