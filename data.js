@@ -20,6 +20,7 @@ const btn_upright = document.getElementById("btn_upright");
 const btn_downright = document.getElementById("btn_downright");
 
 
+
 const FONT_SIZE = 16;
 // MAP
 const SIZEX = 64;
@@ -41,6 +42,8 @@ const log_display_size_phone = 5;
 const inv_display_size_phone = 15;
 let inv_start_offset = 0;
 let shop_start_offset = 0;
+
+
 
 const audio_apply = new Audio("sound/apply.wav");
 const audio_stair = new Audio("sound/stair.wav");
@@ -864,6 +867,7 @@ const item_data = [
     sight_range: 1,
     lvup: {hp_max: 2, mp_max: 2},
     func: function(){
+      log_reserve.pop();
       player.job = this.id;
       backLv();
 
@@ -888,6 +892,7 @@ const item_data = [
     lvup: {hp_max: 5, mp_max: 0},
     func: function(){
       if(inventory_size-inventory.length >= 3){
+        log_reserve.pop();
         player.job = this.id;
         backLv();
 
@@ -920,6 +925,7 @@ const item_data = [
     lvup: {hp_max: 3, mp_max: 2},
     func: function(){
       if(inventory_size-inventory.length >= 4){
+        log_reserve.pop();
         player.job = this.id;
         backLv();
 
@@ -953,6 +959,7 @@ const item_data = [
     lvup: {hp_max: 1, mp_max: 4},
     func: function(){
       if(inventory_size-inventory.length >= 3){
+        log_reserve.pop();
         player.job = this.id;
         backLv();
 
@@ -1289,13 +1296,13 @@ const shop_data = [
       }
     },
     func_buy: function(){
+      shop_group.splice(shop_group.indexOf(this),1);
+      useItem([inventory.length-1]);
       addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
       shop_using = undefined;
       shop_cursor = -1;
       shop_flag = false;
       setNPC(0x01, this.x, this.y);
-      shop_group.splice(shop_group.indexOf(this),1);
-      useItem([inventory.length-1]);
     },
     func_after: function(){},
   },

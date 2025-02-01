@@ -185,7 +185,7 @@ function drawLog(){
 
 function drawLogPhone(){
   log.innerHTML = "";
-  for(let i=0; i<log_reserve.length && i<log_display_size_phone; i++)
+  for(let i=(log_reserve.length-log_display_size_phone<0)?0:log_reserve.length-log_display_size_phone; i<log_reserve.length; i++)
     log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
   log.insertAdjacentHTML("afterbegin","LOG<br>");
 }

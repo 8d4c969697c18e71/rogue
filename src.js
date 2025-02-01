@@ -69,12 +69,12 @@ function setCanvasSize(){
   // inv
   inv.style.paddingLeft = PADDING+"px"; 
   // log
-  log.style.width = canvas_width*2/3+"px";
+  log.style.width = canvas_width+"px";
   log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";
   log.style.marginTop = MARGIN+"px";
   log.style.marginLeft = MARGIN+"px";
   // shop
-  shop.style.width = canvas_width*2/3+"px";
+  shop.style.width = canvas_width/2+"px";
   shop.style.marginTop = MARGIN+"px";
   shop.style.paddingLeft = PADDING+"px";
   shop.style.marginRight = MARGIN+"px";
