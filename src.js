@@ -107,8 +107,8 @@ function setCanvasSizePhone(){
   shop.style.display = "none";
 
   document.body.style.paddingTop = 0+"px";
-  log_display_num = Math.floor((window.innerHeight-canvas.clientHeight-btn_left.clientHeight*3)/FONT_SIZE-1);
-  inv_display_num = Math.floor((window.innerHeight-216/*FIXME:マジックナンバー*/-btn_left.clientHeight*3)/FONT_SIZE-1);
+  log_display_num = Math.floor((window.innerHeight-canvas.clientHeight-arrow_size*3)/FONT_SIZE-1);
+  inv_display_num = Math.floor((window.innerHeight-216/*FIXME:マジックナンバー*/-arrow_size*3)/FONT_SIZE-1);
 }
 
 // スマホ検出
