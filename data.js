@@ -18,10 +18,13 @@ const btn_upleft = document.getElementById("btn_upleft");
 const btn_downleft = document.getElementById("btn_downleft");
 const btn_upright = document.getElementById("btn_upright");
 const btn_downright = document.getElementById("btn_downright");
+const btn = document.getElementsByClassName("btn");
+const btn_arrow = document.getElementsByClassName("btn_arrow");
 
 
 
 const FONT_SIZE = 16;
+const FONT = "'MS Gothic'";
 // MAP
 const SIZEX = 64;
 const SIZEY = 64;
@@ -38,20 +41,25 @@ const INFO_WIDTH = 175;
 
 // スマホ用
 button.style.visibility = "hidden";//"visible";
-const log_display_size_phone = 5;
-const inv_display_size_phone = 15;
+let zxc_size = 0;
+let arrow_size = 0;
+let log_display_num = 5;
+let inv_display_num = 15;
 let inv_start_offset = 0;
 let shop_start_offset = 0;
 
 
 
 const audio_apply = new Audio("sound/apply.wav");
-const audio_stair = new Audio("sound/stair.wav");
-const audio_portal = new Audio("sound/portal.wav");
-const audio_hit = new Audio("sound/hit.wav");
-const audio_shot = new Audio("sound/shot.wav");
 const audio_fire = new Audio("sound/fire.wav");
+const audio_heal = new Audio("sound/heal.wav");
+const audio_hit = new Audio("sound/hit.wav");
+const audio_jump = new Audio("sound/jump.wav");
+const audio_poison = new Audio("sound/poison.wav");
+const audio_portal = new Audio("sound/portal.wav");
 const audio_ray = new Audio("sound/ray.wav");
+const audio_shot = new Audio("sound/shot.wav");
+const audio_stair = new Audio("sound/stair.wav");
 
 //====================================================================================================
 
@@ -143,19 +151,17 @@ const id_map = {
   none: 0,
   room: 1,
   path: 2,
-  stair: 3,
-  portal: 4,
 };
 let map_draw = [];  // 描画用
 //const char_map = {
 //  0: " ",
 //  1: ".",
 //  2: "#",
-//  3: "%",
-//  4: "<",
 //  player: "@",
 //  wall_v: "|",
 //  wall_h: "—",
+//  stair: "%",
+//  portal: "<",
 //  door: "+",
 //  trap: "^",
 //  // item
@@ -174,11 +180,11 @@ const char_map = {
   0: " ",
   1: "．",
   2: "＃",
-  3: "％",
-  4: "＜",
   player: "＠",
   wall_v: "｜",
   wall_h: "―",
+  stair: "％",
+  portal: "＜",
   door: "＋",
   trap: "＾",
   // item
@@ -194,6 +200,8 @@ const char_map = {
   unique: "＆",
 };
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
+let stair_pos = {x:undefined, y:undefined};
+let portal_pos = {x:undefined, y:undefined};
 let unique_map = [  // 固有マップ
   {
     id: "test",
@@ -231,10 +239,10 @@ let unique_map = [  // 固有マップ
     safe_flag: true,
     map: [
     "000000000",
-    "001131100",
+    "001111100",
     "001111100",
     "011111110",
-    "014111110",
+    "011111110",
     "011111110",
     "001111100",
     "001111100",
@@ -242,6 +250,8 @@ let unique_map = [  // 固有マップ
     ],
     func: function(x_offset){
       setShop(0x05, 6+x_offset, 4);
+      setStair(4+x_offset, 1);
+      setPortal(2+x_offset, 4);
     }
   },
   {
@@ -251,7 +261,7 @@ let unique_map = [  // 固有マップ
     map: [
     "00000000000",
     "00001110000",
-    "00001310000",
+    "00001110000",
     "00001110000",
     "00000200000",
     "01101110110",
@@ -266,6 +276,7 @@ let unique_map = [  // 固有マップ
     "00000000000",
     ],
     func: function(x_offset){
+      setStair(5+x_offset, 2);
       setNPC(0x00, 7+x_offset, 9);
       setNPC(0x02, 9+x_offset, 9);
       setNPC(0x03, 4+x_offset, 5);
@@ -298,8 +309,8 @@ let clairvoyance_flag = false;  // 透視
 let bow_flag = false;
 
 const multiple_slot = ["ring"];
-const throwing_range = 5;
-const magic_range = 10;
+const THROWING_RANGE = 5;
+const MAGIC_RANGE = 10;
 
 // プレイヤー
 let player = {
@@ -441,51 +452,71 @@ const condition_data = [
 //==================================================TRAP==================================================
 const trap_data = [
   {
-    id:0x00,
+    id: 0x00,
     name: "毒床",
     func: function(who){
       setCondition(who, 0x00);
       addLog(who.name+" は毒の床を踏んだ");
+      audio_poison.play();
     },
   },
   {
-    id:0x01,
+    id: 0x01,
     name: "睡眠ガス",
     func: function(who){
       setCondition(who, 0x01);
       addLog(who.name+" は睡眠ガスに包まれた");
+      audio_poison.play();
     },
   },
   {
-    id:0x02,
+    id: 0x02,
     name: "黒い霧",
     func: function(who){
       setCondition(who, 0x02);
       addLog(who.name+" の周囲が黒い霧に包まれた");
+      audio_poison.play();
     },
   },
   {
-    id:0x03,
+    id: 0x03,
     name: "トラばさみ",
     func: function(who){
-      setCondition(who, 0x03)
+      setCondition(who, 0x03);
       addLog(who.name+" はトラばさみにかかった");
+      audio_hit.play();
+    },
+  },
+  {
+    id: 0x04,
+    name: "転送罠",
+    func: function(who){
+      let [x,y] = [];
+      while(1){
+        [x,y] = setRandomXY();
+        if(!isSameRoom(who.x, who.y, x, y))
+          break;
+      }
+      who.x = x;
+      who.y = y;
+      addLog(who.name+" は転送罠にかかった");
+      audio_portal.play();
     },
   },
 ];
-const trap_table = [
+const trap_table = [//TODO
   [],
   [
     0x00,
   ],
   [
-    0x00, 0x01,
+    0x00, 0x01, 0x04,
   ],
   [
-    0x00, 0x02,
+    0x00, 0x02, 0x04,
   ],
   [
-    0x01, 0x02, 0x03,
+    0x01, 0x02, 0x03, 0x04,
   ],
 ];
 let trap_group = [];
@@ -504,10 +535,6 @@ const item_data = [
     name: "三日月草",
     type: "consume",
     func: function(){
-      if(player.hp >= player.hp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = 10;
       addHP(player, value);
       addHung(5);
@@ -521,10 +548,6 @@ const item_data = [
     name: "半月草",
     type: "consume",
     func: function(){
-      if(player.hp >= player.hp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = 20;
       addHP(player, value);
       addHung(5);
@@ -538,10 +561,6 @@ const item_data = [
     name: "後月草",
     type: "consume",
     func: function(){
-      if(player.hp >= player.hp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = 30;
       addHP(player, value);
       addHung(5);
@@ -555,10 +574,6 @@ const item_data = [
     name: "満月草",
     type: "consume",
     func: function(){
-      if(player.hp >= player.hp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = 50;
       addHP(player, value);
       addHung(5);
@@ -572,10 +587,6 @@ const item_data = [
     name: "新月草",
     type: "consume",
     func: function(){
-      if(player.hp >= player.hp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = player.hp_max;
       addHP(player, value);
       addHung(5);
@@ -589,10 +600,6 @@ const item_data = [
     name: "香料",
     type: "consume",
     func: function(){
-      if(player.mp >= player.mp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = 15;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -605,10 +612,6 @@ const item_data = [
     name: "芳しい香料",
     type: "consume",
     func: function(){
-      if(player.mp >= player.mp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = 30;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -621,10 +624,6 @@ const item_data = [
     name: "祝福された香料",
     type: "consume",
     func: function(){
-      if(player.mp >= player.mp_max){
-        addLog("使う必要はない");
-        return false;
-      }
       let value = player.mp_max;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -637,10 +636,6 @@ const item_data = [
     name: "糧食",
     type: "food",
     func: function(){
-      if(player.hung >= player.hung_max){
-        addLog("満腹だ");
-        return false;
-      }
       let value = 30;
       addHung(value);
       addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
@@ -760,7 +755,7 @@ const item_data = [
   },
   {
     id: 0x401,
-    name: "竜印の指輪",
+    name: "蛇印の指輪",
     type: "ring",
     func_equip: function(){
       player.mp_max_offset += 20;
@@ -798,7 +793,7 @@ const item_data = [
     name: "ソウルの杖",
     type: "staff",
     func: function(){
-      if(player.mp < 5){
+      if(player.mp < 4){
         addLog("MP が足りない");
         return false;
       }
@@ -808,10 +803,53 @@ const item_data = [
       return false;
     },
     func_cast: function(dir){
-      player.mp -= 4;
+      addMP(player, -4);
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
       return magic(player, player.mp_max/3, dir);
+    }
+  },
+  {
+    id: 0x601,
+    name: "回復の聖鈴",
+    type: "staff",
+    func: function(){
+      if(player.mp < 8){
+        addLog("MP が足りない");
+        return false;
+      }
+      addMP(player, -8);
+      let value = 15;
+      addHP(player, value);
+      addLog("淡い光が "+player.name+" を包む　HPが "+value+" 回復した");
+      audio_heal.play();
+      return undefined;
+    },
+    func_cast: function(dir){}
+  },
+  {
+    id: 0x602,
+    name: "跳躍の杖",
+    type: "staff",
+    func: function(){
+      if(player.mp < 14){
+        addLog("MP が足りない");
+        return false;
+      }
+      addLog(this.name+" を構えた");
+      magic_flag = true;
+      player.magic_using = this;
+      return false;
+    },
+    func_cast: function(dir){
+      addMP(player, -14);
+      if(jump(player, dir, 3)){
+        addLog(player.name+" は跳んだ");
+        audio_jump.play();
+      }
+      else
+        addLog("跳躍に失敗した");
+      return undefined;
     }
   },
   // 弾薬 0x7XX
@@ -850,6 +888,13 @@ const item_data = [
     item_id: 0x700,
     num: 8,
   },
+  {
+    id: 0x801,
+    name: "鉄の矢の束",
+    type: "stack",
+    item_id: 0x701,
+    num: 8,
+  },
   // ユニーク 0xfXX
   {
     id: 0xf00,
@@ -864,7 +909,7 @@ const item_data = [
     hung_rate: 30,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
-    sight_range: 1,
+    sight_range: 3,
     lvup: {hp_max: 2, mp_max: 2},
     func: function(){
       log_reserve.pop();
@@ -888,10 +933,10 @@ const item_data = [
     hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
-    sight_range: 1,
+    sight_range: 3,
     lvup: {hp_max: 5, mp_max: 0},
     func: function(){
-      if(inventory_size-inventory.length >= 3){
+      if(INVENTORY_SIZE-inventory.length >= 3){
         log_reserve.pop();
         player.job = this.id;
         backLv();
@@ -921,10 +966,10 @@ const item_data = [
     hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
-    sight_range: 5,
+    sight_range: 9,
     lvup: {hp_max: 3, mp_max: 2},
     func: function(){
-      if(inventory_size-inventory.length >= 4){
+      if(INVENTORY_SIZE-inventory.length >= 5){
         log_reserve.pop();
         player.job = this.id;
         backLv();
@@ -933,6 +978,7 @@ const item_data = [
         for(let i=0; i<8; i++)
           addItem(0x800);
         addItem(0x010);
+        addItem(0x602);
         inventory.splice(inventory.indexOf(this), 1);
         return true;
       }
@@ -955,10 +1001,10 @@ const item_data = [
     hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 7,
-    sight_range: 3,
+    sight_range: 6,
     lvup: {hp_max: 1, mp_max: 4},
     func: function(){
-      if(inventory_size-inventory.length >= 3){
+      if(INVENTORY_SIZE-inventory.length >= 3){
         log_reserve.pop();
         player.job = this.id;
         backLv();
@@ -978,13 +1024,23 @@ const item_data = [
 ];
 const equip_type = ["weapon", "armor", "ring", "ammo"];
 const stack_type = ["ammo"];
-const stack_max = 32;
+const STACK_MAX = 32;
 let inventory = [];
-const inventory_size = 20;
+const INVENTORY_SIZE = 20;
 let inv_cursor = 0;
 
 // 落ちてるアイテム
-const item_table = [
+const item_table = [//TODO
+  [
+    0x000, 0x000, 0x000,
+    0x010, 0x020, 0x030,
+    0x800,
+  ],
+  [
+    0x000, 0x000, 0x000,
+    0x010, 0x020, 0x030,
+    0x500, 0x800,
+  ],
   [
     0x000, 0x000, 0x000,
     0x010, 0x020, 0x030,
@@ -1067,7 +1123,7 @@ const enemy_data = [
     mp:15, mp_max:15,
     atk:4, def:2,
     speed:1,
-    sight_range:5,
+    sight_range:6,
     escape_flag: false,
     distance:3,
     group_spawn_flag: false,
@@ -1090,7 +1146,7 @@ const enemy_data = [
     mp:5, mp_max:5,
     atk:8, def:3,
     speed:1,
-    sight_range:3,
+    sight_range:5,
     escape_flag: false,
     distance: 0,
     group_spawn_flag: false,
@@ -1128,12 +1184,12 @@ const other_enemy_info = {
   chase_flag: false, chase_count: 5,
   hp_max_offset: 0, mp_max_offset: 0, atk_offset: 0, def_offset: 0, sight_range_offset: 0,
 };
-const enemy_table = [
+const enemy_table = [//TODO
   [
     0x000, 0x000, 0x001,
   ],
   [
-    0x001, 0x001, 0x002, 0x002, 0x003,
+    0x000, 0x000, 0x002, 0x003,
   ],
   [
     0x002, 0x002, 0x002, 0x003, 0x004,
@@ -1178,6 +1234,15 @@ const skill_data = [
       if(Math.floor(Math.random()+0.5)) return false;
       setCondition(from, 0x80);
       return true;
+    }
+  },
+  {
+    id: 0x002,
+    name: "クイックステップ",
+    direction: undefined,
+    distance: undefined,
+    func: function(from, to){
+      return jump(from, this.direction, this.distance);
     }
   },
 ];
@@ -1288,7 +1353,7 @@ const shop_data = [
       {id: 0xf03, price: 0,},
     ],
     func_before: function(){
-      if(inventory_size-inventory.length < 4){
+      if(INVENTORY_SIZE-inventory.length < 4){
         addLog(shop_using.name+"「...持ちきれないぞ」");
         shop_using = undefined;
         shop_cursor = -1;
@@ -1342,8 +1407,10 @@ const shop_data = [
       {id: 0x800, price: 15,},
       {id: 0x500, price: 50,},
       {id: 0x101, price: 150,},
+      {id: 0x301, price: 250,},
       {id: 0x400, price: 300,},
       {id: 0x401, price: 400,},
+      {id: 0x601, price: 500,},
     ],
     func_before: function(){},
     func_buy: function(){},

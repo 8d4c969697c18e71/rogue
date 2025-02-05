@@ -2,7 +2,6 @@ window.onload = function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
   
   if(!isPhone()){
-    button.style.display = "none"
     setCanvasSize();
     inputName();
   }
@@ -19,8 +18,8 @@ window.addEventListener("resize", () =>{
   if(!isPhone())
     setCanvasSize();
   else{
-    setCanvasSizePhone();
     setButton();
+    setCanvasSizePhone();
   }
   if(input_name_flag) {
     inputName();
@@ -39,10 +38,11 @@ window.addEventListener("resize", () =>{
 
 // ウィンドウサイズ
 function setCanvasSize(){
-  let canvas_width = 512;
-  let canvas_height = 512;
+  let canvas_width = window.innerHeight/2;
+  let canvas_height = canvas_width;
   const body_width = document.body.clientWidth;
 
+  button.style.display = "none";
   note.style.display = "block";
   note_hidden_flag = false;
   if((canvas_width+NOTE_WIDTH+INFO_WIDTH) > body_width){
@@ -74,15 +74,18 @@ function setCanvasSize(){
   log.style.marginTop = MARGIN+"px";
   log.style.marginLeft = MARGIN+"px";
   // shop
-  shop.style.width = canvas_width/2+"px";
+  shop.style.width = canvas_width+"px";
   shop.style.marginTop = MARGIN+"px";
   shop.style.paddingLeft = PADDING+"px";
   shop.style.marginRight = MARGIN+"px";
+
+  const body_padding = document.body.clientHeight-parseInt(window.getComputedStyle(document.body).height)
+  log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*3)/(FONT_SIZE+5)-1);
+  inv_display_num = Math.floor((window.innerHeight-body_padding-288/*FIXME:マジックナンバー*/-arrow_size*3)/(FONT_SIZE+5)-1);
 }
 
 // ウィンドウサイズ（スマホ）
 function setCanvasSizePhone(){
-  document.body.style.paddingTop = 0+"px";
   canvas_width = screen.width - INFO_WIDTH*12/16;
   canvas_height = canvas_width*1.5;
 
@@ -92,7 +95,7 @@ function setCanvasSizePhone(){
   canvas.width = Math.floor(canvas_width*canvas_scale);
   canvas.height = Math.floor(canvas_height*canvas_scale);
   ctx.scale(canvas_scale, canvas_scale);
-  ctx.font = FONT_SIZE+"px 'MS Gothic'";
+  ctx.font = FONT_SIZE+"px "+FONT;
   ctx.fillStyle = "white";
   ctx.textBaseline = "top";
   
@@ -102,6 +105,10 @@ function setCanvasSizePhone(){
   inv.style.fontSize = 12+"px";
   inv.style.width = screen.width-log.clientWidth-5+"px";
   shop.style.display = "none";
+
+  document.body.style.paddingTop = 0+"px";
+  log_display_num = Math.floor((window.innerHeight-canvas.clientHeight-btn_left.clientHeight*3)/FONT_SIZE-1);
+  inv_display_num = Math.floor((window.innerHeight-216/*FIXME:マジックナンバー*/-btn_left.clientHeight*3)/FONT_SIZE-1);
 }
 
 // スマホ検出
@@ -114,43 +121,34 @@ function isPhone(){
 
 // ボタン表示
 function setButton(){
-  button.style.visibility = "visible";
-
-  // ボタンサイズ
-  const ZXC_SIZE = screen.width/6;
-  const ARROW_SIZE = ZXC_SIZE;
-  // zxc
-  btn_z.style.width = ZXC_SIZE+"px"; btn_z.style.height = ZXC_SIZE+"px";
-  btn_x.style.width = ZXC_SIZE+"px"; btn_x.style.height = ZXC_SIZE+"px";
-  btn_c.style.width = ZXC_SIZE+"px"; btn_c.style.height = ZXC_SIZE+"px";
-  btn_z.style.minWidth = ZXC_SIZE+"px"; btn_z.style.minHeight = ZXC_SIZE+"px";
-  btn_x.style.minWidth = ZXC_SIZE+"px"; btn_x.style.minHeight = ZXC_SIZE+"px";
-  btn_c.style.minWidth = ZXC_SIZE+"px"; btn_c.style.minHeight = ZXC_SIZE+"px";
-  // 十字
-  btn_left.style.width = ARROW_SIZE+"px"; btn_left.style.height = ARROW_SIZE+"px";
-  btn_up.style.width = ARROW_SIZE+"px"; btn_up.style.height = ARROW_SIZE+"px";
-  btn_down.style.width = ARROW_SIZE+"px"; btn_down.style.height = ARROW_SIZE+"px";
-  btn_right.style.width = ARROW_SIZE+"px"; btn_right.style.height = ARROW_SIZE+"px";
-  btn_left.style.minWidth = ARROW_SIZE+"px"; btn_left.style.minHeight = ARROW_SIZE+"px";
-  btn_up.style.minWidth = ARROW_SIZE+"px"; btn_up.style.minHeight = ARROW_SIZE+"px";
-  btn_down.style.minWidth = ARROW_SIZE+"px"; btn_down.style.minHeight = ARROW_SIZE+"px";
-  btn_right.style.minWidth = ARROW_SIZE+"px"; btn_right.style.minHeight = ARROW_SIZE+"px";
-  // 斜め
-  btn_upleft.style.width = ARROW_SIZE+"px"; btn_upleft.style.height = ARROW_SIZE+"px";
-  btn_downleft.style.width = ARROW_SIZE+"px"; btn_downleft.style.height = ARROW_SIZE+"px";
-  btn_upright.style.width = ARROW_SIZE+"px"; btn_upright.style.height = ARROW_SIZE+"px";
-  btn_downright.style.width = ARROW_SIZE+"px"; btn_downright.style.height = ARROW_SIZE+"px";
-  btn_upleft.style.minWidth = ARROW_SIZE+"px"; btn_upleft.style.minHeight = ARROW_SIZE+"px";
-  btn_downleft.style.minWidth = ARROW_SIZE+"px"; btn_downleft.style.minHeight = ARROW_SIZE+"px";
-  btn_upright.style.minWidth = ARROW_SIZE+"px"; btn_upright.style.minHeight = ARROW_SIZE+"px";
-  btn_downright.style.minWidth = ARROW_SIZE+"px"; btn_downright.style.minHeight = ARROW_SIZE+"px";
+  zxc_size = screen.width/6;
+  arrow_size = zxc_size;
   
-  // ボタン全般
+  // 全体
+  button.style.visibility = "visible";
   button.style.position = "fixed";
-  button.style.top = window.innerHeight-ARROW_SIZE*2+"px";
+  button.style.top = window.innerHeight-arrow_size*2+"px";
 
-  // 矢印位置
-  arrow.style.width = ARROW_SIZE*3+"px";
+  // デザイン
+  const font_color = "white";
+  const back_color = "black";
+  const line_color = "white";
+  for(let b of btn){
+    b.style.backgroundColor = back_color;
+    b.style.border = "solid 1px "+line_color;
+    bf.style.color = font_color;
+    b.style.width = zxc_size+"px";
+    b.style.height = zxc_size+"px";
+  }
+  for(let ab of btn_arrow){
+    ab.style.width = arrow_size+"px";
+    ab.style.height = arrow_size+"px";
+    ab.style.minWidth = arrow_size+"px";
+    ab.style.minHeight = arrow_size+"px";
+  }
+  
+  // 方向位置
+  arrow.style.width = arrow_size*3+"px";
   btn_left.style.position = "relative";
   btn_up.style.position = "relative";
   btn_down.style.position = "relative";
@@ -160,19 +158,19 @@ function setButton(){
   btn_upright.style.position = "relative";
   btn_downright.style.position = "relative";
 
-  btn_up.style.bottom = ARROW_SIZE+"px";
-  btn_down.style.top = ARROW_SIZE+"px";
-  btn_down.style.right = ARROW_SIZE+"px";
-  btn_right.style.right = ARROW_SIZE+"px";
+  btn_up.style.bottom = arrow_size+"px";
+  btn_down.style.top = arrow_size+"px";
+  btn_down.style.right = arrow_size+"px";
+  btn_right.style.right = arrow_size+"px";
 
-  btn_upleft.style.bottom = ARROW_SIZE+"px";
-  btn_upleft.style.right = ARROW_SIZE*4+"px";
-  btn_downleft.style.top = ARROW_SIZE+"px";
-  btn_downleft.style.right = ARROW_SIZE*5+"px";
-  btn_upright.style.bottom = ARROW_SIZE+"px";
-  btn_upright.style.right = ARROW_SIZE*4+"px";
-  btn_downright.style.top = ARROW_SIZE+"px";
-  btn_downright.style.right = ARROW_SIZE*5+"px";
+  btn_upleft.style.bottom = arrow_size+"px";
+  btn_upleft.style.right = arrow_size*4+"px";
+  btn_downleft.style.top = arrow_size+"px";
+  btn_downleft.style.right = arrow_size*5+"px";
+  btn_upright.style.bottom = arrow_size+"px";
+  btn_upright.style.right = arrow_size*4+"px";
+  btn_downright.style.top = arrow_size+"px";
+  btn_downright.style.right = arrow_size*5+"px";
 }
 
 // 初期化
@@ -416,11 +414,11 @@ function eventPlayer(){
   
   // apply
   if(key_input.apply){
-    if(map[player.y][player.x] == id_map.stair){
+    if(isStair(player.x, player.y)){
       audio_stair.play();
       nextFloor();
     }
-    else if(map[player.y][player.x] == id_map.portal){
+    else if(isPortal(player.x, player.y)){
       audio_portal.play();
       floor_cnt = -1;
       backLv();
@@ -511,7 +509,7 @@ function dealDmg(from, to, dmg){
   }
 
   // fromへの処理
-  if(from == undefined) return;
+  if(from === undefined) return;
 
 }
 
@@ -596,6 +594,15 @@ function isCrossing(x, y){
   return false;
 }
 
+//ジャンプ
+function jump(who, direction, distance){
+  if(!canMove(who.x+direction.x*distance, who.y+direction.y*distance))
+    return false;
+  who.x = who.x+direction.x*distance;
+  who.y = who.y+direction.y*distance;
+  return true;
+}
+
 // UIイベント
 function eventUI(){
   // 上下
@@ -603,11 +610,11 @@ function eventUI(){
     if(inv_cursor > 0)
       inv_cursor--;
     else
-      inv_cursor = inventory_size - 1;
+      inv_cursor = INVENTORY_SIZE - 1;
     return false;
   }
   if(key_input.down){
-    if(inv_cursor < inventory_size - 1)
+    if(inv_cursor < INVENTORY_SIZE - 1)
       inv_cursor++;
     else
       inv_cursor = 0;
@@ -712,57 +719,6 @@ function eventShop(){
   }
 }
 
-// ショップ配置
-function setShop(id, x, y){
-  let shop = shop_data.find(v=>v.id==id);
-  let items = [];
-
-  if(shop.random_flag){
-    if(shop.item_num > shop.item_table.length)
-      shop.item_num = shop.item_table.length;
-
-    for(let n=0; n<shop.item_num; n++){
-      let i = shop.item_table[Math.floor(Math.random()*shop.item_table.length)];
-      if(items.find(v=>v.id==i.id)){
-        n--;
-        continue;
-      }
-      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
-      items.push(item);
-    }
-  }
-  else
-    for(let i of shop.item_table){
-      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
-      items.push(item);
-    }
-
-  let s = Object.assign({}, shop, {x: x, y: y, item: items});
-  shop_group.push(s);
-}
-
-function isShop(x, y){
-  for(let s in shop_group)
-    if(shop_group[s].x == x && shop_group[s].y == y)
-      return true;
-
-  return false;
-}
-
-// NPC配置
-function setNPC(id, x, y){
-  let npc = Object.assign({}, npc_data.find(v=>v.id==id), {x: x, y: y});
-  npc_group.push(npc);
-}
-
-function isNPC(x, y){
-  for(let n in npc_group)
-    if(npc_group[n].x == x && npc_group[n].y == y)
-      return true;
-
-  return false;
-}
-
 // 射撃イベント
 function eventShot(){
   let ammo = player.ammo;
@@ -774,7 +730,7 @@ function eventShot(){
   for(let k in kd)
     if(key_input[k]){
       let enemy = shot(player, ammo, kd[k]);
-      if(enemy!=undefined && isDead(enemy)) addExp(enemy.exp);
+      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
       if(ammo.stack_num > 0) ammo.stack_num--;
       if(ammo.stack_num <= 0){
         equip(inventory.indexOf(ammo));
@@ -804,7 +760,7 @@ function shot(who, ammo, direction){
     shotDmg(who, enemy, ammo);
     if("weapon" in who && who.weapon) who.weapon.func_attack(enemy);
     if("armor" in enemy && enemy.armor) enemy.armor.func_attacked(who);
-    if(who == player) enemy.chase_flag = true;
+    if(who == player) findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
@@ -866,7 +822,7 @@ function eventThrowing(){
     if(key_input[k]){
       let item = inventory[inv_cursor]
       let enemy = throwing(player, item, kd[k]);
-      if(enemy!=undefined && isDead(enemy)) addExp(enemy.exp);
+      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
       // インベントリから削除
       if(stack_type.includes(item.type)){
         if(item.stack_num > 0) item.stack_num--;
@@ -898,11 +854,11 @@ function throwing(who, item, direction){
   addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
 
-  let dst = straightRecursive(who.x, who.y, direction, throwing_range);
+  let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     throwDmg(who, enemy, item);
-    if(who == player) enemy.chase_flag = true;
+    if(who == player) findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
@@ -954,7 +910,7 @@ function eventMagic(){
   for(let k in kd)
     if(key_input[k]){
       let enemy = player.magic_using.func_cast(kd[k]);
-      if(enemy!=undefined && isDead(enemy)) addExp(enemy.exp);
+      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
       
       magic_flag = false;
       player.magic_using = undefined;
@@ -976,11 +932,11 @@ function eventMagic(){
 
 // 魔法
 function magic(who, value, direction){
-  let dst = straightRecursive(who.x, who.y, direction, magic_range);
+  let dst = straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     magicDmg(who, enemy, value);
-    if(who == player) enemy.chase_flag = true;
+    if(who == player) findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
@@ -1012,6 +968,7 @@ function gameoverEvent(){
 }
 
 function gameover(){
+  log_reserve = [];
   addLog("ゲームオーバー");
   drawGameover();
   drawInfo();
@@ -1301,7 +1258,7 @@ function addItem(id){
   let item = item_data.find(v=>v.id==id);
   // スタックアイテム
   if(item.type=="stack"){
-    if(inventory.length < inventory_size){
+    if(inventory.length < INVENTORY_SIZE){
       for(let i=0; i<item.num; i++){
         addItem(item.item_id);
         log_reserve.pop();
@@ -1310,8 +1267,8 @@ function addItem(id){
       return true;
     }
     for(let i of inventory){
-      if(i.id == item.item_id && i.stack_num < stack_max){
-        if(i.stack_num + item.num <= stack_max){
+      if(i.id == item.item_id && i.stack_num < STACK_MAX){
+        if(i.stack_num + item.num <= STACK_MAX){
           for(let i=0; i<item.num; i++){
             addItem(item.item_id);
             log_reserve.pop();
@@ -1341,7 +1298,7 @@ function addItem(id){
   }
 
   // 所持数オーバー
-  if(inventory.length >= inventory_size){
+  if(inventory.length >= INVENTORY_SIZE){
     addLog("持ちきれない");
     return false;
   }
@@ -1358,7 +1315,7 @@ function addItem(id){
 // スタックアイテム加算
 function getStackIndex(item){
   for(let i of inventory)
-    if(i.id==item.id && i.stack_num < stack_max){
+    if(i.id==item.id && i.stack_num < STACK_MAX){
       return inventory.indexOf(i);  // スタックできるアイテムがある
     }
   return undefined;
@@ -1383,21 +1340,22 @@ function setItemGroup(){
 
   for(let i=0; i<num; i++){
     const item_id = Math.floor(Math.random() * table.length);
-    const [x, y] = setItemXY();
+    const [x, y] = setRandomXY();
     
     setItem(table[item_id], x, y);
   }
 }
 
-function setItemXY(){
+function setRandomXY(){
   const x = Math.floor(Math.random() * (SIZEX-1 - 1) + 1);
   const y = Math.floor(Math.random() * (SIZEY-1 - 1) + 1);
 
   if(!canMove(x, y)
-    || map[y][x] == id_map.path
+    || map[y][x] != id_map.room
     || isItem(x, y)
-    || isTrap(x, y))
-    return setItemXY();
+    || isTrap(x, y)
+    || isEnemy(x, y))
+    return setRandomXY();
   return [x, y];
 }
 
@@ -1446,7 +1404,7 @@ function eventEnv(){
   checkCondition(player);
 
   // 死亡判定
-  isDead(player);
+  isDead(player)
 
   // エネミー
   for(let enemy of enemy_group){
@@ -1457,14 +1415,14 @@ function eventEnv(){
     isDead(enemy)
   }
 
-  isDead(player);
+  isDead(player)
 
   // 階段に乗ってる
-  if(map[player.y][player.x] == id_map.stair){
+  if(isStair(player.x, player.y)){
     addLog("階段 (降りる:z)");
   }
   // ポータルに乗ってる
-  if(map[player.y][player.x] == id_map.portal){
+  if(isPortal(player.x, player.y)){
     addLog("帰還ポータル (入る:z)");
   }
   
@@ -1491,6 +1449,11 @@ function nextFloor(){
   initMaps();
   initGroups();
 
+  stair_pos.x = undefined;
+  stair_pos.y = undefined;
+  portal_pos.x = undefined;
+  portal_pos.y = undefined;
+
   turn_cnt = 1;
   floor_cnt++;
   clairvoyance_flag = false;
@@ -1511,7 +1474,8 @@ function nextFloor(){
   else{
     generateMap();
 
-    setStair();
+    let [x,y] = setRandomXY();
+    setStair(x, y);
     setTrapGroup();
     setItemGroup();
 
@@ -1522,17 +1486,85 @@ function nextFloor(){
   }
 }
 
+// 階段
+function setStair(x, y){
+  stair_pos.x = x;
+  stair_pos.y = y;
+}
+
+function isStair(x, y){
+  if(stair_pos.x==x && stair_pos.y==y)
+    return true;
+  return false;
+}
+
+// ポータル
+function setPortal(x, y){
+  portal_pos.x = x;
+  portal_pos.y = y;
+}
+
+function isPortal(x, y){
+  if(portal_pos.x==x && portal_pos.y==y)
+    return true;
+  return false;
+}
+
+// ショップ配置
+function setShop(id, x, y){
+  let shop = shop_data.find(v=>v.id==id);
+  let items = [];
+
+  if(shop.random_flag){
+    if(shop.item_num > shop.item_table.length)
+      shop.item_num = shop.item_table.length;
+
+    for(let n=0; n<shop.item_num; n++){
+      let i = shop.item_table[Math.floor(Math.random()*shop.item_table.length)];
+      if(items.find(v=>v.id==i.id)){
+        n--;
+        continue;
+      }
+      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
+      items.push(item);
+    }
+  }
+  else
+    for(let i of shop.item_table){
+      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
+      items.push(item);
+    }
+
+  let s = Object.assign({}, shop, {x: x, y: y, item: items});
+  shop_group.push(s);
+}
+
+function isShop(x, y){
+  for(let s in shop_group)
+    if(shop_group[s].x == x && shop_group[s].y == y)
+      return true;
+
+  return false;
+}
+
+// NPC配置
+function setNPC(id, x, y){
+  let npc = Object.assign({}, npc_data.find(v=>v.id==id), {x: x, y: y});
+  npc_group.push(npc);
+}
+
+function isNPC(x, y){
+  for(let n in npc_group)
+    if(npc_group[n].x == x && npc_group[n].y == y)
+      return true;
+
+  return false;
+}
+
 // 罠
 function setTrap(id, x, y){
-  if(!canMove(x, y)
-    || map[y][x] == id_map.path
-    || trap_group.find(v=>(v.x==x && v.y==y)))
-    return false;
-
   let trap = Object.assign({}, trap_data.find(v=>v.id==id), {x: x, y: y, visible: false});
-  
   trap_group.push(trap);
-  return true;
 }
 
 // マップ内罠
@@ -1547,12 +1579,10 @@ function setTrapGroup(){
   if(table.length==0) return;
 
   for(let i=0; i<num; i++){
-    const x = Math.floor(Math.random() * (SIZEX-1 - 1) + 1);
-    const y = Math.floor(Math.random() * (SIZEY-1 - 1) + 1);
     const item = Math.floor(Math.random() * table.length);
+    const [x,y] = setRandomXY();
     
-    if(!setTrap(table[item], x, y))
-      i--;
+    setTrap(table[item], x, y)
   }
 }
 
@@ -1589,18 +1619,16 @@ function eventEnemies(){
     
     // speed回行動
     for(let cnt=0; cnt<enemy.speed; cnt++)
-      eventEnemy(enemy);
+      eventEnemy(enemy)
   }
 }
 
 function eventEnemy(enemy){
   // 発見
-  enemy.map_sight = initMap(enemy.map_sight, false);
+  initMap(enemy.map_sight, false);
   getSight(enemy);
-  if(isInSight(enemy, player.x, player.y)){
-    enemy.chase_flag = true;
-    enemy.chase_count = chase_count_init;
-  }
+  if(enemy.map_sight[player.y][player.x])
+    findPl(enemy);
   else
     enemy.chase_count--;
   if(enemy.chase_count < 0)
@@ -1679,14 +1707,9 @@ function getSightPath(x, y, sight_range, map_sight){
   }
 }
 
-// 視界内のtarget有無
-function isInSight(who, target_x, target_y){
-  for(let i=0; i<SIZEY; i++)
-    for(let j=0; j<SIZEX; j++){
-      if(who.map_sight[i][j] && j==target_x && i==target_y)
-        return true;
-    }
-  return false;
+function findPl(who){
+  who.chase_flag = true;
+  who.chase_count = chase_count_init;
 }
 
 // エネミー移動（追跡）
@@ -1775,8 +1798,9 @@ function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag){
     }
   }
     
-  if(next_node.x == undefined || next_node.y == undefined){
-    console.log("aster: cannot reach");
+  if(next_node.x === undefined || next_node.y === undefined){
+    // debug
+    //console.log("aster: cannot reach");
     return;
   }
   
@@ -1785,7 +1809,7 @@ function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag){
 }
 
 function getRoute(route, node, n){
-  if(n.parent == undefined)
+  if(n.parent === undefined)
     return route;
   route.push(n);
   route = getRoute(route, node, node.find(v=>(v.x==n.parent.x && v.y==n.parent.y)));
@@ -1802,7 +1826,7 @@ function moveEnemyTravel(enemy){
       }
 
   let route;
-  route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, false);
+  route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
   let dir = {
     x: route[route.length-1].x - enemy.x,
     y: route[route.length-1].y - enemy.y
@@ -1825,7 +1849,8 @@ function setNextTravelRoom(enemy){
     next_room_y = Math.floor(Math.random()*SIZEY);
     let break_flag = true;
     for(let xy of room_xy)
-      if(next_room_x==xy.x && next_room_y==xy.y){
+      if(next_room_x==xy.x && next_room_y==xy.y
+        || !canMove(next_room_x, next_room_y) || map[next_room_y][next_room_x]!=id_map.room){
         break_flag = false;
         break;
       }
@@ -1835,6 +1860,7 @@ function setNextTravelRoom(enemy){
   enemy.travel_y = next_room_y;
 
   // debug
+  //console.log("setNextTravelRoom: "+enemy.name+" set next travel point.");
   //map_draw[enemy.travel_y][enemy.travel_x] = "㊦";
 }
 
@@ -1871,7 +1897,7 @@ function setEnemy(id, x, y){
 
     // プロパティチェック
     for(let key in s)
-      if(s[key] == undefined){
+      if(s[key] === undefined){
         console.warn("setEnemy: undefined property.");
         e.skill.splice(e.skill.indexOf(s), 1);
         break;
@@ -1912,19 +1938,11 @@ function setEnemyGroup(){
 
 // priority: ifで比較する値が高いほどそのifは優先される
 function setSpawnXY(priority, group_spawn_flag, id){
-  const x = Math.floor(Math.random() * (SIZEX-1 - 1) + 1);
-  const y = Math.floor(Math.random() * (SIZEY-1 - 1) + 1);
-  
-  // 位置被り
-  if(isEnemy(x,y))
-    return setSpawnXY(priority, group_spawn_flag, id);
-  // 部屋の中
-  if(map[y][x] != id_map.room)
-    return setSpawnXY(priority, group_spawn_flag, id);
+  const [x,y] = setRandomXY();
 
   // 配置制限
   // PLの視界外
-  if(isInSight(player, x, y) && priority < 300)
+  if(player.map_sight[y][x] && priority < 300)
     return setSpawnXY(++priority, group_spawn_flag, id);
   // 壁が隣
   let next_wall_flag = false;
@@ -1984,8 +2002,8 @@ function drawMap(){
           || map_draw[player.y+i][player.x+j]==char_map.wall_h
           || map_draw[player.y+i][player.x+j]==char_map.wall_v)
           ctx.fillStyle = "white";
-        else if(map_draw[player.y+i][player.x+j]==char_map[id_map.stair]
-          || map_draw[player.y+i][player.x+j]==char_map[id_map.portal]
+        else if(map_draw[player.y+i][player.x+j]==char_map.stair
+          || map_draw[player.y+i][player.x+j]==char_map.portal
           || map_draw[player.y+i][player.x+j]==char_map.trap)
           ctx.fillStyle = "blue";
         else if(map_draw[player.y+i][player.x+j]==char_map.player
@@ -2033,8 +2051,8 @@ function drawMapAll(){
           || map_draw[i][j]==char_map.wall_h
           || map_draw[i][j]==char_map.wall_v)
           ctx.fillStyle = "white";
-        else if(map_draw[i][j]==char_map[id_map.stair]
-          || map_draw[i][j]==char_map[id_map.portal]
+        else if(map_draw[i][j]==char_map.stair
+          || map_draw[i][j]==char_map.portal
           || map_draw[i][j]==char_map.trap)
           ctx.fillStyle = "blue";
         else if(map_draw[i][j]==char_map.player
@@ -2073,13 +2091,15 @@ function updateMap(){
   updateMapDraw();
   // 壁追加
   updateMDWall();
+  // 階段・ポータル
+  updateMDStairPortal();
   // 罠
   updateMDTrap();
   // 射撃・投擲・魔法
   if(shot_flag || throwing_flag|| magic_flag)
     updateShotRange();
   else
-    map_shotrange = initMap(map_shotrange, false);
+    initMap(map_shotrange, false);
 
   // アイテム
   updateMDItem();
@@ -2096,7 +2116,7 @@ function updateMap(){
 // 視界更新
 function updateSight(){
   if(!clairvoyance_flag){
-    player.map_sight = initMap(player.map_sight, false);
+    initMap(player.map_sight, false);
     getSight(player);
   }
 }
@@ -2113,29 +2133,32 @@ function updateMapDraw(){
         map_draw[i][j] = char_map[map[i][j]];
 }
 
+// 階段・ポータル更新
+function updateMDStairPortal(){
+  if(!(stair_pos.x === undefined) && !(stair_pos.y === undefined) && player.map_sight[stair_pos.y][stair_pos.x])
+    map_draw[stair_pos.y][stair_pos.x] = char_map.stair;
+  if(!(portal_pos.x === undefined) && !(portal_pos.y === undefined) && player.map_sight[portal_pos.y][portal_pos.x])
+    map_draw[portal_pos.y][portal_pos.x] = char_map.portal;
+}
+
 // 壁更新
 function updateMDWall(){
   for(let i=0; i<SIZEY; i++)
     for(let j=0; j<SIZEX; j++){
-      if(player.map_sight[i][j] && map[i][j] == id_map.none){
-        // 横線
-        if((isInMap(j, i-1) && ![id_map.none, id_map.path].includes(map[i-1][j]))
-          || (isInMap(j, i+1) && ![id_map.none, id_map.path].includes(map[i+1][j]))){
-          map_draw[i][j] = char_map.wall_h;
-          continue;
-        }
-        // 縦線
-        if((isInMap(j-1, i) && ![id_map.none, id_map.path].includes(map[i][j-1]))
-          || (isInMap(j+1, i) && ![id_map.none, id_map.path].includes(map[i][j+1]))){
-          map_draw[i][j] = char_map.wall_v;
-          continue;
-        }
+      // 壁
+      if(player.map_sight[i][j] && (map[i][j] == id_map.room || isStair(j, i) || isPortal(j, i))){
+        // 縦
+        for(let k=-1; k<=1; k++)
+          if(map[i][j+k] == id_map.none)
+            map_draw[i][j+k] = char_map.wall_v;
+        // 横
+        for(let k=-1; k<=1; k++)
+          if(map[i+k][j] == id_map.none)
+            map_draw[i+k][j] = char_map.wall_h;
         // 角
-        if(map_draw[i][j] != char_map.wall_v && map_draw[i][j] != char_map.wall_h)
-          for(let n of [-1, 1])
-            for(let m of [-1, 1])
-              if(isInMap(j+m, i+n) && ![id_map.none, id_map.path].includes(map[i+n][j+m]))
-                map_draw[i][j] = char_map.wall_h;
+        for(let [k, l] of [[1,1],[1,-1],[-1,1],[-1,-1]])
+          if(map_draw[i+k][j+l] == char_map[id_map.none])
+            map_draw[i+k][j+l] = char_map.wall_h;
       }
       // 扉
       else if(map_draw[i][j] == char_map[id_map.path]){
@@ -2188,7 +2211,7 @@ function updateMDItem(){
 
 // 射撃・投擲・魔法の射程
 function updateShotRange(){
-  map_shotrange = initMap(map_shotrange, false);
+  initMap(map_shotrange, false);
 
   // 左上
   for(let cnt = 1; cnt<=10; cnt++){
@@ -2262,28 +2285,28 @@ function isSameRoom(a_x, a_y, b_x, b_y){
   return false;
 }
 
-// [x,y]に位置する部屋のroomマスと1マス周りのnone,pathマスの座標取得
+// [x,y]に位置する部屋の座標取得
 // checked_map: {x, y}
-function getRoomXY(x, y, checked_map){
-  checked_map.push({x:x, y:y});
+function getRoomXY(x, y, map){
   if(!isRoom(x, y)) return;
   for(let i=-1; i<=1; i++)
-    for(let j=-1; j<=1; j++){
-      if(!(checked_map.find(v=>v.x==x+j && v.y==y+i)))
-        getRoomXY(x+j, y+i, checked_map);
-    }
+    for(let j=-1; j<=1; j++)
+      if(!(map.find(v=>v.x==x+j && v.y==y+i))){
+        map.push({x:x+j, y:y+i});
+        getRoomXY(x+j, y+i, map);
+      }
 }
 
 function canMove(x, y){
-  if(isInMap(x,y) 
-    && !(map[y][x] == id_map.none)
-    && !isEnemy(x,y)
-    && !isShop(x,y)
-    && !isNPC(x,y)
-    && !(x==player.x && y==player.y)
+  if(!isInMap(x,y) 
+    || map[y][x] == id_map.none
+    || isEnemy(x,y)
+    || isShop(x,y)
+    || isNPC(x,y)
+    || (x==player.x && y==player.y)
   )
-    return true;
-  return false;
+    return false;
+  return true;
 }
 
 // 斜め移動の判定
@@ -2309,38 +2332,17 @@ function clairvoyance(){
 
 // プレイヤー位置
 function setPlayerPos(){
-  let x = Math.floor( Math.random() * (SIZEX - 1) + 1);
-  let y = Math.floor( Math.random() * (SIZEY - 1) + 1);
+  let [x,y] = setRandomXY();
 
-  if(canMove(x, y)
-    && map[y][x]==id_map.room
-    && map[y][x]!=id_map.stair
-    && !isItem(x, y)
-    && !isTrap(x, y)){
-    player.x = x;
-    player.y = y;
-    updateSight();
-    return;
-  }
-  setPlayerPos();
+  player.x = x;
+  player.y = y;
+  updateSight();
 }
 
 function setPlayerPosManual(x, y){
   player.x = x;
   player.y = y;
   updateSight();
-}
-
-// 階段
-function setStair(){
-  let x = Math.floor( Math.random() * (SIZEX-1 - 1) + 1);
-  let y = Math.floor( Math.random() * (SIZEY-1 - 1) + 1);
-  
-  if(map[y][x] == id_map.room){
-    map[y][x] = id_map.stair;
-    return;
-  }
-  setStair();
 }
 
 // マップ自動生成
@@ -2460,20 +2462,19 @@ function generateUniqueMap(um){
 
 function initMaps(){
   // 地形マップ
-  map = initMap(map, id_map.none);
+  initMap(map, id_map.none);
   // 描画マップ
-  map_draw = initMap(map_draw, char_map[0]);
+  initMap(map_draw, char_map[0]);
 }
 
 function initMap(m, v){
-  m = [];
+  m.splice(0);
   for(let i=0; i<SIZEY; i++){
-    m[i] = [];
+    m.push([]);
     for(let j=0; j<SIZEX; j++){
-      m[i][j] = v;
+      m[i].push(v);
     }
   }
-  return m;
 }
 
 //==================================================NAME==================================================
@@ -2564,7 +2565,7 @@ function inputName(){
   let space = "";
   for(let i=0; i<name_max_length-name_length; i++)
     space += "_";
-  ctx.fillText(player.name+space, canvas.width/2, FONT_SIZE*3/2+y_offset);
+  ctx.fillText(player.name+space, canvas.clientWidth/2-name_max_length/2, FONT_SIZE*3/2+y_offset);
   
   // 操作説明
   ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.clientWidth/2, FONT_SIZE*2*(syllabary.length+2)+y_offset);
@@ -2572,11 +2573,12 @@ function inputName(){
 
 // 五十音表示
 function displaySyllabary(y_offset){
+  let x_offset = canvas.clientWidth/2-(syllabary[0].length*2-1)*FONT_SIZE/2;
   for(let i=0; i<syllabary.length; i++)
     for(let j=0; j<syllabary[i].length; j++){
       if(input_name_pos.x == j && input_name_pos.y == i)
-        ctx.fillText(">"+syllabary[i][j], canvas.clientWidth/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
+        ctx.fillText(">"+syllabary[i][j], x_offset+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
       else
-      ctx.fillText(" "+syllabary[i][j], canvas.clientWidth/2-FONT_SIZE*9+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
+      ctx.fillText(" "+syllabary[i][j], x_offset+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
     }
 }

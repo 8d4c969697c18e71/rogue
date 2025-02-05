@@ -45,47 +45,15 @@ function drawInfo(){
 //=========================INVENTORY=========================
 
 function drawInv(){
-  if(isPhone()){
-    drawInvPhone();
-    return;
-  }
-
-  inv.innerHTML = "";
-  if(ui_flag) inv.style.border = "solid 1px white";
-  else inv.style.border = "solid 1px black";
-
-  inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
-  for(let i=0; i<inventory_size; i++){
-    if(i == inv_cursor)
-      inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
-    else if(i<9)
-      inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
-    else
-      inv.insertAdjacentHTML("beforeend", (i+1)+": ");
-    if(i < inventory.length){
-      if(inventory[i].equip_flag)
-        inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
-      else
-        inv.insertAdjacentHTML("beforeend", inventory[i].name);
-      if(inventory[i].stack_num)
-        inv.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
-    }
-    else
-      inv.insertAdjacentHTML("beforeend", "------");
-    inv.insertAdjacentHTML("beforeend", "<br>");
-  }
-}
-
-function drawInvPhone(){
   inv.innerHTML = "";
   if(ui_flag) inv.style.border = "solid 1px white";
   else inv.style.border = "solid 1px black";
 
   if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
-  if(inv_cursor >= inv_display_size_phone + inv_start_offset) inv_start_offset = inv_cursor - inv_display_size_phone + 1;
+  if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
 
   inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
-  for(let i=inv_start_offset; i<inv_display_size_phone+inv_start_offset; i++){
+  for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++){
     if(i == inv_cursor)
       inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
     else if(i<9)
@@ -144,12 +112,12 @@ function drawShopPhone(){
   inv.style.border = "solid 1px black";
 
   if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
-  if(shop_cursor >= inv_display_size_phone + shop_start_offset) shop_start_offset = shop_cursor - inv_display_size_phone + 1;
+  if(shop_cursor >= inv_display_num + shop_start_offset) shop_start_offset = shop_cursor - inv_display_num + 1;
 
   if(shop_flag){
     inv.style.border = "solid 1px white";
     inv.insertAdjacentHTML("beforeend", "SHOP<br>");
-    for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_size_phone+shop_start_offset; i++){
+    for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_num+shop_start_offset; i++){
       if(i == shop_cursor)
         inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
       else if(i<9)
@@ -185,7 +153,7 @@ function drawLog(){
 
 function drawLogPhone(){
   log.innerHTML = "";
-  for(let i=(log_reserve.length-log_display_size_phone<0)?0:log_reserve.length-log_display_size_phone; i<log_reserve.length; i++)
+  for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
     log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
   log.insertAdjacentHTML("afterbegin","LOG<br>");
 }
@@ -242,9 +210,9 @@ function drawNote(){
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map[id_map.stair]+"&nbsp;", "blue")+": 階段<br>");;
+    colorUI("&nbsp;"+char_map.stair+"&nbsp;", "blue")+": 階段<br>");;
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map[id_map.portal]+"&nbsp;", "blue")+": 帰還ゲート<br>");
+    colorUI("&nbsp;"+char_map.portal+"&nbsp;", "blue")+": 帰還ゲート<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;"+char_map.trap+"&nbsp;", "blue")+": 罠<br>");
   note.insertAdjacentHTML("beforeend", 
