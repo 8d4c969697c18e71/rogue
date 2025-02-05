@@ -136,7 +136,7 @@ function setButton(){
   for(let b of btn){
     b.style.backgroundColor = back_color;
     b.style.border = "solid 1px "+line_color;
-    bf.style.color = font_color;
+    b.style.color = font_color;
     b.style.width = zxc_size+"px";
     b.style.height = zxc_size+"px";
   }
