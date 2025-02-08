@@ -351,7 +351,7 @@ let player = {
 };
 
 // 状態異常
-const condition_data = [
+const condition_data = [//TODO
   // デバフ 0x00~
   {
     id: 0x00,
@@ -410,6 +410,7 @@ const condition_data = [
       who.cannot_move_flag = true;
     },
     func_during: function(who){
+      who.cannot_move_flag = true;
     },
     func_recovery: function(who){
       addLog(who.name+" は動けるようになった");
@@ -434,23 +435,11 @@ const condition_data = [
       who.cannot_action_flag = false;
     },
   },
-  {
-    id: 0xff,
-    name: "テンプレート",
-    turn: 0,
-    func_be: function(who){
-      addLog(who.name+" ");
-    },
-    func_during: function(who){
-    },
-    func_recovery: function(who){
-      addLog(who.name+" ");
-    },
-  },
 ];
 
 //==================================================TRAP==================================================
-const trap_data = [
+
+const trap_data = [//TODO
   {
     id: 0x00,
     name: "毒床",
@@ -504,7 +493,7 @@ const trap_data = [
     },
   },
 ];
-const trap_table = [//TODO
+const trap_table = [
   [],
   [
     0x00,
@@ -523,7 +512,7 @@ let trap_group = [];
 
 //==================================================ITEM==================================================
 
-const item_data = [
+const item_data = [//TODO
   // 消費アイテム
   {
     id: 0x000,
@@ -1030,7 +1019,7 @@ const INVENTORY_SIZE = 20;
 let inv_cursor = 0;
 
 // 落ちてるアイテム
-const item_table = [//TODO
+const item_table = [
   [
     0x000, 0x000, 0x000,
     0x010, 0x020, 0x030,
@@ -1046,12 +1035,40 @@ const item_table = [//TODO
     0x010, 0x020, 0x030,
     0x500, 0x800,
   ],
+  [
+    0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
+    0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
+    0x011, 0x011,
+    0x100, 0x300, 0x400, 
+    0x500, 0x800, 0x800,
+  ],
+  [
+    0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
+    0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
+    0x011, 0x011,
+    0x100, 0x300, 0x400, 
+    0x500, 0x800, 0x800,
+  ],
+  [
+    0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
+    0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
+    0x011, 0x011,
+    0x100, 0x300, 0x400, 
+    0x500, 0x800, 0x800,
+  ],
+  [
+    0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
+    0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
+    0x011, 0x011,
+    0x100, 0x101, 0x300, 0x301, 0x400, 
+    0x500, 0x800, 0x800,
+  ],
 ];
 let item_group = [];
 
 //==================================================ENEMY==================================================
 
-const enemy_data = [
+const enemy_data = [//TODO
   {
     id: 0x000,
     name: "亡者",
@@ -1073,7 +1090,7 @@ const enemy_data = [
   {
     id: 0x001,
     name: "ミランダフラワー",
-    char: "ミ",
+    char: "花",
     lv:1,
     hp:1, hp_max:1, 
     mp:0, mp_max:0, 
@@ -1092,6 +1109,7 @@ const enemy_data = [
     skill: [
       {
         id: 0x000,
+        chance: 1,
         ammo: 0x7f0,
       },
     ],
@@ -1128,11 +1146,19 @@ const enemy_data = [
     distance:3,
     group_spawn_flag: false,
     exp:4,
-    func_spawn: function(me){},
+    func_spawn: function(me){
+      this.lv = Math.floor(floor_cnt/2);
+      this.hp_max = Math.floor(10*floor_cnt/3);
+      this.hp = this.hp_max;
+      this.mp_max = Math.floor(15*floor_cnt/3);
+      this.mp = this.mp_max;
+      this.atk = 2+Math.floor(2+2*turn_cnt/3);
+    },
     func_died: function(){},
     skill: [
       {
         id: 0x000,
+        chance: 0.75,
         ammo: 0x700,
       },
     ],
@@ -1140,9 +1166,9 @@ const enemy_data = [
   {
     id: 0x004,
     name: "スケルトン",
-    char: "ス",
+    char: "骨",
     lv:3,
-    hp:9, hp_max:9,
+    hp:15, hp_max:15,
     mp:5, mp_max:5,
     atk:8, def:3,
     speed:1,
@@ -1156,26 +1182,55 @@ const enemy_data = [
     skill: [
       {
         id:0x001,
+        chance: 0.33,
       },
     ],
   },
   {
-    id: 0xfff,
-    name: "テンプレート",
-    char: "",
-    lv:0,
-    hp:0, hp_max:0,
-    mp:0, mp_max:0,
-    atk:8, def:0,
-    speed:0,
-    sight_range:0,
+    id: 0x005,
+    name: "ネズミ",
+    char: "鼠",
+    lv:3,
+    hp:15, hp_max:15,
+    mp:3, mp_max:3,
+    atk:4, def:4,
+    speed:2,
+    sight_range:8,
+    escape_flag: false,
+    distance: 0,
+    group_spawn_flag: true,
+    exp:5,
+    func_spawn: function(me){},
+    func_died: function(){},
+    skill: [
+      {
+        id: 0x003,
+        chance: 0.5,
+      }
+    ],
+  },
+  {
+    id: 0x006,
+    name: "車輪骸骨",
+    char: "車",
+    lv:4,
+    hp:20, hp_max:20,
+    mp:5, mp_max:5,
+    atk:4, def:2,
+    speed:1,
+    sight_range:5,
     escape_flag: false,
     distance: 0,
     group_spawn_flag: false,
-    exp:0,
+    exp:8,
     func_spawn: function(me){},
     func_died: function(){},
-    skill: [],
+    skill: [
+      {
+        id: 0x004,
+        chance: 1,
+      }
+    ],
   },
 ];
 const other_enemy_info = {
@@ -1184,7 +1239,7 @@ const other_enemy_info = {
   chase_flag: false, chase_count: 5,
   hp_max_offset: 0, mp_max_offset: 0, atk_offset: 0, def_offset: 0, sight_range_offset: 0,
 };
-const enemy_table = [//TODO
+const enemy_table = [
   [
     0x000, 0x000, 0x001,
   ],
@@ -1194,16 +1249,26 @@ const enemy_table = [//TODO
   [
     0x002, 0x002, 0x002, 0x003, 0x004,
   ],
+  [
+    0x002, 0x004, 0x005,
+  ],
+  [
+    0x002, 0x004, 0x005,
+  ],
+  [
+    0x002, 0x003, 0x004, 0x005,
+  ],
 ];
 let enemy_group = [];
 const chase_count_init = 10;
 
 //==================================================SKILL==================================================
 
-const skill_data = [
+const skill_data = [//TODO
   {
     id: 0x000,
     name: "射撃",
+    chance: 0,
     ammo: undefined,
     func: function(from, to){
       for(let d in key_direction){
@@ -1230,8 +1295,8 @@ const skill_data = [
   {
     id: 0x001,
     name: "受け流し",
+    chance: 0,
     func: function(from, to){
-      if(Math.floor(Math.random()+0.5)) return false;
       setCondition(from, 0x80);
       return true;
     }
@@ -1239,10 +1304,48 @@ const skill_data = [
   {
     id: 0x002,
     name: "クイックステップ",
+    chance: 0,
     direction: undefined,
     distance: undefined,
     func: function(from, to){
       return jump(from, this.direction, this.distance);
+    }
+  },
+  {
+    id: 0x003,
+    name: "毒攻撃",
+    chance: 0,
+    func: function(from, to){
+      for(let d in key_direction){
+        let x = from.x + key_direction[d].x;
+        let y = from.y + key_direction[d].y;
+        if(x == to.x && y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y)){
+          attack(from, to);
+          if(Math.floor(Math.random()+0.33))
+            setCondition(to, 0x00);
+          return true;
+        }
+      }
+      for(let d in key_direction_diagonal){
+        let x = from.x + key_direction_diagonal[d].x;
+        let y = from.y + key_direction_diagonal[d].y;
+        if(x == to.x && y == to.y && canDiagonal(from.x, from.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
+          attack(from, to);
+          if(Math.floor(Math.random()+0.33))
+            setCondition(to, 0x00);
+          return true;
+        }
+      }
+      return false;
+    }
+  },
+  {
+    id: 0x004,
+    name: "突撃",
+    chance: 0,
+    func: function(from, to){
+      //TODO
+      return true;
     }
   },
 ];
@@ -1322,7 +1425,7 @@ const npc_data = [
 let npc_group = [];
 
 // ショップ
-const shop_data = [
+const shop_data = [//TODO
   {
     id: 0x00,
     name: "薬屋",

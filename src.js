@@ -1638,6 +1638,7 @@ function eventEnemy(enemy){
   if(enemy.chase_flag){
     // スキル
     for(let skill of enemy.skill){
+      if(Math.floor(Math.random()+skill.chance)) continue;
       if(skill.func(enemy, player)) return;
     }
 
