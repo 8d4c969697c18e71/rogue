@@ -222,15 +222,16 @@ let unique_map = [  // 固有マップ
     "011111020111110",//A
     "011111222111110",//B
     "011111000111110",//C
-    "044444000111110",//D
+    "011111000111110",//D
     "000000000000000",//E
     ],
     func: function(x_offset){
       setItem(0x800,1+x_offset, 1);
-      setItem(0xf00,2+x_offset, 1);
+      setItem(0xf01,2+x_offset, 1);
       setShop(0x05, 9+x_offset, 1);
       setTrap(0x00, 1+x_offset, 5);
       setTrap(0x02, 2+x_offset, 5);
+      //setEnemy(0x006, 11+x_offset, 3);
     }
   },
   {
@@ -503,6 +504,9 @@ const trap_table = [
   ],
   [
     0x00, 0x02, 0x04,
+  ],
+  [
+    0x01, 0x02, 0x03, 0x04,
   ],
   [
     0x01, 0x02, 0x03, 0x04,
@@ -1253,10 +1257,10 @@ const enemy_table = [
     0x002, 0x004, 0x005,
   ],
   [
-    0x002, 0x004, 0x005,
+    0x002, 0x004, 0x005, 0x006,
   ],
   [
-    0x002, 0x003, 0x004, 0x005,
+    0x002, 0x003, 0x004, 0x005, 0x006,
   ],
 ];
 let enemy_group = [];
@@ -1268,14 +1272,12 @@ const skill_data = [//TODO
   {
     id: 0x000,
     name: "射撃",
-    chance: 0,
     ammo: undefined,
     func: function(from, to){
       for(let d in key_direction){
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
         let xy = straightRecursive(from.x, from.y, key_direction[d], ammo.range-1);
-        if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y
-          && isInSight(from, to.x, to.y)){
+        if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && from.map_sight[to.y][to.x]){
           shot(from, ammo, key_direction[d]);
           return true;
         }
@@ -1283,8 +1285,7 @@ const skill_data = [//TODO
       for(let d in key_direction_diagonal){
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
         let xy = straightRecursive(from.x, from.y, key_direction_diagonal[d], ammo.range-1);
-        if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y
-          && isInSight(from, to.x, to.y)){
+        if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y && from.map_sight[to.y][to.x]){
           shot(from, ammo, key_direction_diagonal[d]);
           return true;
         }
@@ -1295,7 +1296,6 @@ const skill_data = [//TODO
   {
     id: 0x001,
     name: "受け流し",
-    chance: 0,
     func: function(from, to){
       setCondition(from, 0x80);
       return true;
@@ -1304,7 +1304,6 @@ const skill_data = [//TODO
   {
     id: 0x002,
     name: "クイックステップ",
-    chance: 0,
     direction: undefined,
     distance: undefined,
     func: function(from, to){
@@ -1314,7 +1313,6 @@ const skill_data = [//TODO
   {
     id: 0x003,
     name: "毒攻撃",
-    chance: 0,
     func: function(from, to){
       for(let d in key_direction){
         let x = from.x + key_direction[d].x;
@@ -1342,10 +1340,26 @@ const skill_data = [//TODO
   {
     id: 0x004,
     name: "突撃",
-    chance: 0,
     func: function(from, to){
-      //TODO
-      return true;
+      for(let d in key_direction){
+        let xy = straightRecursiveDiagonal(from.x, from.y, key_direction[d], SIZEX+SIZEY);
+        if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y) && from.map_sight[to.y][to.x]){
+          addLog(from.name+" は "+to.name+" に突撃した");
+          attack(from, to);
+          while(move(from, key_direction[d]));
+          return true;
+        }
+      }
+      for(let d in key_direction_diagonal){
+        let xy = straightRecursiveDiagonal(from.x, from.y, key_direction_diagonal[d], SIZEX+SIZEY);
+        if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y && canDiagonal(from.x, from.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y) && from.map_sight[to.y][to.x]){
+          addLog(from.name+" は "+to.name+" に突撃した");
+          attack(from, to);
+          while(move(from, key_direction_diagonal[d]));
+          return true;
+        }
+      }
+      return false;
     }
   },
 ];

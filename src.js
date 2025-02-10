@@ -622,7 +622,7 @@ function eventUI(){
   }
   // apply
   if(key_input.apply)
-    if(useItem(inv_cursor)){
+    if(inv_cursor<inventory.length && useItem(inv_cursor)){
       audio_apply.play();
       //inv_cursor = -1;
       ui_flag = false;
@@ -636,7 +636,7 @@ function eventUI(){
   }
   // sub
   if(key_input.sub){
-    if(checkThrowing(inv_cursor)){
+    if(inv_cursor<inventory.length && checkThrowing(inv_cursor)){
       addLog(inventory[inv_cursor].name+" を振り被った")
       audio_apply.play();
       throwing_flag = true;
@@ -800,6 +800,15 @@ function shotDmg(from, to, ammo){
 
 function straightRecursive(x, y, direction, range){
   if(!canMove(x+direction.x, y+direction.y)
+    || range <= 0
+    || map_draw[y+direction.y][x+direction.x] == char_map.door)
+    return {x:x, y:y};
+  return straightRecursive(x+direction.x, y+direction.y, direction, --range);
+}
+
+function straightRecursiveDiagonal(x, y, direction, range){
+  if(!canMove(x+direction.x, y+direction.y)
+    || !canDiagonal(x, y, direction.x, direction.y)
     || range <= 0
     || map_draw[y+direction.y][x+direction.x] == char_map.door)
     return {x:x, y:y};
@@ -1458,7 +1467,7 @@ function nextFloor(){
   floor_cnt++;
   clairvoyance_flag = false;
 
-  // テスト用
+  // テスト用//FIXME
   //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
   if(um = unique_map.find(v=>v.id==floor_cnt)){ // 固有マップ
@@ -1638,7 +1647,7 @@ function eventEnemy(enemy){
   if(enemy.chase_flag){
     // スキル
     for(let skill of enemy.skill){
-      if(Math.floor(Math.random()+skill.chance)) continue;
+      if(!(Math.floor(Math.random()+skill.chance))) continue;
       if(skill.func(enemy, player)) return;
     }
 
@@ -1893,13 +1902,13 @@ function setEnemy(id, x, y){
 
   // スキル
   for(let s of e.skill){
-    let skill = Object.assign({}, skill_data.find(v=>v.id==s.id), s);
+    let skill = Object.assign({}, skill_data.find(v=>v.id==s.id), {chance: 0}, s);
     Object.assign(s, skill);
 
     // プロパティチェック
     for(let key in s)
       if(s[key] === undefined){
-        console.warn("setEnemy: undefined property.");
+        console.warn("setEnemy: undefined property. ("+s.name+")");
         e.skill.splice(e.skill.indexOf(s), 1);
         break;
       }
