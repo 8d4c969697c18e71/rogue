@@ -292,12 +292,12 @@ let unique_map = [  // 固有マップ
 
 //==================================================INFO==================================================
 
-let exeEventsFlg = false;
 let room_num;
 let turn_cnt = 1;
 let floor_cnt = -1;
 
 // 遷移フラグ
+let exeEventsFlg = false;
 let gameover_flag = false;
 let ui_flag = false;
 let shop_flag = false;
@@ -446,7 +446,7 @@ const trap_data = [//TODO
     id: 0x00,
     name: "毒床",
     func: async function(who){
-      setCondition(who, 0x00);
+      await setCondition(who, 0x00);
       addLog(who.name+" は毒の床を踏んだ");
       audio_poison.play();
     },
@@ -455,7 +455,7 @@ const trap_data = [//TODO
     id: 0x01,
     name: "睡眠ガス",
     func: async function(who){
-      setCondition(who, 0x01);
+      await setCondition(who, 0x01);
       addLog(who.name+" は睡眠ガスに包まれた");
       audio_poison.play();
     },
@@ -464,7 +464,7 @@ const trap_data = [//TODO
     id: 0x02,
     name: "黒い霧",
     func: async function(who){
-      setCondition(who, 0x02);
+      await setCondition(who, 0x02);
       addLog(who.name+" の周囲が黒い霧に包まれた");
       audio_poison.play();
     },
@@ -473,7 +473,7 @@ const trap_data = [//TODO
     id: 0x03,
     name: "トラばさみ",
     func: async function(who){
-      setCondition(who, 0x03);
+      await setCondition(who, 0x03);
       addLog(who.name+" はトラばさみにかかった");
       audio_hit.play();
     },
@@ -674,7 +674,7 @@ const item_data = [//TODO
       if(!player.ammo)
         for(let i of inventory){
           if(i.type=="ammo"){
-            equip(inventory.indexOf(i));
+            await equip(inventory.indexOf(i));
             break;
           }
         }
@@ -1107,7 +1107,7 @@ const enemy_data = [//TODO
     group_spawn_flag: true,
     exp:1,
     func_spawn: async function(me){
-      setConditionTurn(me, 0x03, 1000);
+      await setConditionTurn(me, 0x03, 1000);
       log_reserve.splice(log_reserve.length-1, 1);
     },
     func_died: async function(){},
@@ -1279,7 +1279,7 @@ const skill_data = [//TODO
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
         let xy = straightRecursive(from.x, from.y, key_direction[d], ammo.range-1);
         if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && from.map_sight[to.y][to.x]){
-          shot(from, ammo, key_direction[d]);
+          await shot(from, ammo, key_direction[d]);
           return true;
         }
       }
@@ -1287,7 +1287,7 @@ const skill_data = [//TODO
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
         let xy = straightRecursive(from.x, from.y, key_direction_diagonal[d], ammo.range-1);
         if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y && from.map_sight[to.y][to.x]){
-          shot(from, ammo, key_direction_diagonal[d]);
+          await shot(from, ammo, key_direction_diagonal[d]);
           return true;
         }
       }
@@ -1298,7 +1298,7 @@ const skill_data = [//TODO
     id: 0x001,
     name: "受け流し",
     func: async function(from, to){
-      setCondition(from, 0x80);
+      await setCondition(from, 0x80);
       return true;
     }
   },
@@ -1319,9 +1319,9 @@ const skill_data = [//TODO
         let x = from.x + key_direction[d].x;
         let y = from.y + key_direction[d].y;
         if(x == to.x && y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y)){
-          attack(from, to);
+          await attack(from, to);
           if(Math.floor(Math.random()+0.33))
-            setCondition(to, 0x00);
+            await setCondition(to, 0x00);
           return true;
         }
       }
@@ -1329,9 +1329,9 @@ const skill_data = [//TODO
         let x = from.x + key_direction_diagonal[d].x;
         let y = from.y + key_direction_diagonal[d].y;
         if(x == to.x && y == to.y && canDiagonal(from.x, from.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
-          attack(from, to);
+          await attack(from, to);
           if(Math.floor(Math.random()+0.33))
-            setCondition(to, 0x00);
+            await setCondition(to, 0x00);
           return true;
         }
       }
@@ -1480,7 +1480,7 @@ const shop_data = [//TODO
     },
     func_buy: async function(){
       shop_group.splice(shop_group.indexOf(this),1);
-      useItem([inventory.length-1]);
+      await useItem([inventory.length-1]);
       addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
       shop_using = undefined;
       shop_cursor = -1;

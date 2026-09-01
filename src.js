@@ -1,22 +1,22 @@
 //==================================================INIT==================================================
 
-window.onload = function(){
+window.onload = async function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
   
   if(!isPhone()){
     setCanvasSize();
-    inputName();
+    await inputName();
   }
   else{
     setButton();
     setCanvasSizePhone();
     player.name = "あなた";
     input_name_flag = false;
-    init();
+    await init();
   }
 }
 
-window.addEventListener("resize", () =>{
+window.addEventListener("resize", async () =>{
   if(!isPhone())
     setCanvasSize();
   else{
@@ -24,7 +24,7 @@ window.addEventListener("resize", () =>{
     setCanvasSizePhone();
   }
   if(input_name_flag) {
-    inputName();
+    await inputName();
     return;
   }
   if(!gameover_flag){
@@ -176,9 +176,9 @@ function setButton(){
 }
 
 // 初期化
-function init(){
+async function init(){
   initStatus();
-  nextFloor();
+  await nextFloor();
   
   updateMap();
   drawMap();
@@ -317,13 +317,13 @@ async function events(){
   exeEventsFlg = true;
   // 名前入力
   if(input_name_flag) {
-    inputName();
+    await inputName();
     exeEventsFlg = false;
     return;
   }
   // ゲームオーバー
   else if(gameover_flag){
-    turn_flag = gameoverEvent();
+    turn_flag = await gameoverEvent();
     drawGameover();
   }
   // 行動不能
@@ -332,19 +332,19 @@ async function events(){
   }
   // 射撃
   else if(shot_flag){
-    turn_flag = eventShot();
+    turn_flag = await eventShot();
   }
   // 投擲
   else if(throwing_flag){
-    turn_flag = eventThrowing();
+    turn_flag = await eventThrowing();
   }
   // 魔法
   else if(magic_flag){
-    turn_flag = eventMagic();
+    turn_flag = await eventMagic();
   }
   // UI
   else if(ui_flag){
-    turn_flag = eventUI();
+    turn_flag = await eventUI();
   }
   // ショップ
   else if(shop_flag){
@@ -368,7 +368,7 @@ async function events(){
   // ターン経過
   if(turn_flag){
     await eventEnemies();
-    eventEnv()
+    await eventEnv()
     turn_cnt++;
   }
 
@@ -398,7 +398,7 @@ async function eventPlayer(){
       if(isEnemy(x, y) && canDiagonal(player.x, player.y, kd[k].x, kd[k].y)){
         let enemy = enemy_group.find(v=>(v.x==x && v.y==y));
         await attack(player, enemy);
-        if(isDead(enemy)) addExp(enemy.exp);
+        if(await isDead(enemy)) addExp(enemy.exp);
         return true;
       }
       else if(isShop(x, y)){
@@ -435,13 +435,13 @@ async function eventPlayer(){
   if(key_input.apply){
     if(isStair(player.x, player.y)){
       audio_stair.play();
-      nextFloor();
+      await nextFloor();
     }
     else if(isPortal(player.x, player.y)){
       audio_portal.play();
       floor_cnt = -1;
       backLv();
-      nextFloor();
+      await nextFloor();
     }
     else{
       if(checkTrap(player.x, player.y))
@@ -481,6 +481,7 @@ async function eventPlayer(){
 async function attack(from, to){
   addLog(from.name+" の攻撃");
   audio_hit.play();
+  await wait(300);
 
   let dmg;
   dmg = (3*from.lv)*(from.atk+from.atk_offset+8)/16*(15/16)**(to.def+to.def_offset);
@@ -495,20 +496,21 @@ async function attack(from, to){
       to.condition.splice(to.condition.indexOf(cond), 1);
       to.cannot_action_flag = false;
       addLog(to.name+" は攻撃を受け流し 反撃した");
-      dealDmg(to, from, dmg);
+      audio_hit.play();
+      await wait(300);
+      await dealDmg(to, from, dmg);
       return;
     }
 
-  dealDmg(from, to, dmg);
-  if("weapon" in from && from.weapon) from.weapon.func_attack(to);
-  if("armor" in to && to.armor) to.armor.func_attacked(from);
+  await dealDmg(from, to, dmg);
+  if("weapon" in from && from.weapon) await from.weapon.func_attack(to);
+  if("armor" in to && to.armor) await to.armor.func_attacked(from);
 
-  await wait(300);
   return;
 }
 
 // ダメージ
-function dealDmg(from, to, dmg){
+async function dealDmg(from, to, dmg){
   addHP(to, -dmg);
   addLogSameLine(to.name+" に "+dmg+" のダメージ");
 
@@ -517,17 +519,19 @@ function dealDmg(from, to, dmg){
     // 睡眠
     if(cond.id == 0x01 && dmg > 0){
       to.condition.splice(to.condition.indexOf(cond), 1);
-      cond.func_recovery(to);
+      await cond.func_recovery(to);
     }
     // 受け流し失敗
     if(cond.id == 0x80){
       to.condition.splice(to.condition.indexOf(cond), 1);
       to.cannot_action_flag = false;
       addLog(to.name+" は受け流しに失敗した");
-      dealDmg(from, to, Math.round(dmg*1.5));
+      await dealDmg(from, to, Math.round(dmg*1.5));
       return;
     }
   }
+
+  drawInfo();
 
   // fromへの処理
   if(from === undefined) return;
@@ -553,7 +557,7 @@ async function sprint(direction){
   // 移動
   move(player, direction);
   await eventEnemies();
-  eventEnv();
+  await eventEnv();
   turn_cnt++;
 
   // 視界更新
@@ -625,7 +629,7 @@ function jump(who, direction, distance){
 }
 
 // UIイベント
-function eventUI(){
+async function eventUI(){
   // 上下
   if(key_input.up){
     if(inv_cursor > 0)
@@ -643,7 +647,7 @@ function eventUI(){
   }
   // apply
   if(key_input.apply)
-    if(inv_cursor<inventory.length && useItem(inv_cursor)){
+    if(inv_cursor<inventory.length && await useItem(inv_cursor)){
       audio_apply.play();
       //inv_cursor = -1;
       ui_flag = false;
@@ -741,7 +745,7 @@ function eventShop(){
 }
 
 // 射撃イベント
-function eventShot(){
+async function eventShot(){
   let ammo = player.ammo;
 
   // 十字キー
@@ -750,11 +754,11 @@ function eventShot(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
-      let enemy = shot(player, ammo, kd[k]);
-      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
+      let enemy = await shot(player, ammo, kd[k]);
+      if(!(enemy===undefined) && await isDead(enemy)) addExp(enemy.exp);
       if(ammo.stack_num > 0) ammo.stack_num--;
       if(ammo.stack_num <= 0){
-        equip(inventory.indexOf(ammo));
+        await equip(inventory.indexOf(ammo));
         log_reserve.pop();
         inventory.splice(inventory.indexOf(ammo), 1);
       }
@@ -771,23 +775,24 @@ function eventShot(){
 }
 
 // 射撃
-function shot(who, ammo, direction){
+async function shot(who, ammo, direction){
   addLog(who.name+" は "+ammo.name+" を放った");
   audio_shot.play();
+  await wait(300);
 
   let dst = straightRecursive(who.x, who.y, direction, ammo.range);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
-    shotDmg(who, enemy, ammo);
-    if("weapon" in who && who.weapon) who.weapon.func_attack(enemy);
-    if("armor" in enemy && enemy.armor) enemy.armor.func_attacked(who);
+    await shotDmg(who, enemy, ammo);
+    if("weapon" in who && who.weapon) await who.weapon.func_attack(enemy);
+    if("armor" in enemy && enemy.armor) await enemy.armor.func_attacked(who);
     if(who == player) findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
-    shotDmg(who, player, ammo);
-    if("weapon" in who && who.weapon) who.weapon.func_attack(player);
-    if("armor" in player && player.armor) player.armor.func_attacked(who);
+    await shotDmg(who, player, ammo);
+    if("weapon" in who && who.weapon) await who.weapon.func_attack(player);
+    if("armor" in player && player.armor) await player.armor.func_attacked(who);
     return player;
   }
   else{// 外した
@@ -808,7 +813,7 @@ function shot(who, ammo, direction){
   }
 }
 
-function shotDmg(from, to, ammo){
+async function shotDmg(from, to, ammo){
   let dmg;
   dmg = (3*from.lv)*(ammo.dmg+8)/16*(15/16)**(to.def+to.def_offset);
   let rand = Math.random() * dmg/4 - dmg/8;
@@ -816,7 +821,7 @@ function shotDmg(from, to, ammo){
   dmg = Math.round(dmg);
   if(dmg < 0) dmg = 0;
 
-  dealDmg(from, to, dmg);
+  await dealDmg(from, to, dmg);
 }
 
 function straightRecursive(x, y, direction, range){
@@ -843,7 +848,7 @@ function straightRecursiveAllMap(x, y, direction){
 }
 
 // 投擲イベント
-function eventThrowing(){
+async function eventThrowing(){
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -851,8 +856,8 @@ function eventThrowing(){
   for(let k in kd)
     if(key_input[k]){
       let item = inventory[inv_cursor]
-      let enemy = throwing(player, item, kd[k]);
-      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
+      let enemy = await throwing(player, item, kd[k]);
+      if(!(enemy===undefined) && await isDead(enemy)) addExp(enemy.exp);
       // インベントリから削除
       if(stack_type.includes(item.type)){
         if(item.stack_num > 0) item.stack_num--;
@@ -880,19 +885,19 @@ function eventThrowing(){
 }
 
 // 投擲
-function throwing(who, item, direction){
+async function throwing(who, item, direction){
   addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
 
   let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
-    throwDmg(who, enemy, item);
+    await throwDmg(who, enemy, item);
     if(who == player) findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
-    throwDmg(who, player, item);
+    await throwDmg(who, player, item);
     return player;
   }
   else{  // アイテム化
@@ -911,7 +916,7 @@ function throwing(who, item, direction){
   }
 }
 
-function throwDmg(from, to, item){
+async function throwDmg(from, to, item){
   let dmg;
   if(item.type=="ammo" || item.type=="weapon")
     dmg = Math.round(Math.random()+1)
@@ -919,7 +924,7 @@ function throwDmg(from, to, item){
     dmg = Math.round(Math.random())
   if(dmg < 0) dmg = 0;
 
-  dealDmg(from, to, dmg);
+  await dealDmg(from, to, dmg);
 }
 
 // 投擲物選択
@@ -932,15 +937,15 @@ function checkThrowing(index){
 }
 
 // 魔法イベント
-function eventMagic(){
+async function eventMagic(){
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
-      let enemy = player.magic_using.func_cast(kd[k]);
-      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
+      let enemy = await player.magic_using.func_cast(kd[k]);
+      if(!(enemy===undefined) && await isDead(enemy)) addExp(enemy.exp);
       
       magic_flag = false;
       player.magic_using = undefined;
@@ -975,7 +980,7 @@ function magic(who, value, direction){
   }
 }
 
-function magicDmg(from, to, value){
+async function magicDmg(from, to, value){
   let dmg;
   dmg = (3*from.lv)*(value+8)/16*(15/16)**((to.mp_max+to.mp_max_offset)/2);
   let rand = Math.random() * dmg/4 - dmg/8;
@@ -983,16 +988,16 @@ function magicDmg(from, to, value){
   dmg = Math.round(dmg);
   if(dmg < 0) dmg = 0;
   
-  dealDmg(from, to, dmg);
+  await dealDmg(from, to, dmg);
 }
 
 // ゲームオーバー
-function gameoverEvent(){
+async function gameoverEvent(){
   if(key_input.apply || key_input.cancel || key_input.sub){
     turn_cnt = 1;
     floor_cnt = -1;
     gameover_flag = false;
-    init();
+    await init();
   }
   return false;
 }
@@ -1160,7 +1165,7 @@ function initStatus(){
 }
 
 // 状態異常
-function setCondition(who, id){
+async function setCondition(who, id){
   let cond = condition_data.find(v=>v.id==id);
   
   if(!cond || !("condition" in who)){
@@ -1175,39 +1180,39 @@ function setCondition(who, id){
 
   let c = Object.assign({}, cond);
   who.condition.push(c);
-  who.condition[who.condition.length-1].func_be(who);
+  await who.condition[who.condition.length-1].func_be(who);
   return true;
 }
 
 // ターン数指定
-function setConditionTurn(who, id, turn){
-  if(!setCondition(who, id)) return false;
+async function setConditionTurn(who, id, turn){
+  if(!await setCondition(who, id)) return false;
   who.condition[who.condition.length-1].turn = turn;
   return true;
 }
 
 // 状態異常判定
-function checkCondition(who){
+async function checkCondition(who){
   for(let cond of who.condition){
     if(cond.turn<=0){
       who.condition.splice(who.condition.indexOf(cond), 1);
-      cond.func_recovery(who);
+      await cond.func_recovery(who);
     }
     else{
-      cond.func_during(who);
+      await cond.func_during(who);
       cond.turn--;
     }
   }
 }
 
 // 死亡判定
-function isDead(who){
+async function isDead(who){
   if(who.hp <= 0){
     if(who == player)
       gameover();
     else{
-      who.func_died();
-      removeEnemy(who);
+      await who.func_died();
+      await removeEnemy(who);
     }
     return true;
   }
@@ -1217,17 +1222,17 @@ function isDead(who){
 //==================================================ITEM==================================================
 
 // アイテム使用
-function useItem(index){
+async function useItem(index){
   if(equip_type.includes(inventory[index].type)){
-    return equip(index);
+    return await equip(index);
   }
   else{
-    return inventory[index].func();
+    return await inventory[index].func();
   }
 }
 
 // プレイヤー装備切り替え
-function equip(index){
+async function equip(index){
   let equip_item = inventory[index];
   // 装備する
   if(!(equip_item.equip_flag)){
@@ -1258,9 +1263,10 @@ function equip(index){
     else
       player[equip_item.type] = equip_item;
     
-    equip_item.func_equip(player);
+    await equip_item.func_equip(player);
 
     addLog(equip_item.name+" を装備した");
+
     return true;
   }
   // 外す
@@ -1276,7 +1282,7 @@ function equip(index){
     else
       player[equip_item.type] = undefined;
     
-    equip_item.func_unequip(player);
+    await equip_item.func_unequip(player);
 
     addLog(equip_item.name+" を外した");
     return true;
@@ -1400,7 +1406,7 @@ function isItem(x, y){
 //==================================================ENVIRONMENT==================================================
 
 // 環境イベント
-function eventEnv(){
+async function eventEnv(){
   // 自然回復
   if(turn_cnt % (player.hp_regen_rate + player.hp_regen_rate_offset) == 0)
     addHP(player, 1);
@@ -1410,7 +1416,7 @@ function eventEnv(){
   // 空腹度
   if(player.hung <= 0){
     addLog("飢えが "+player.name+" を蝕む");
-    dealDmg(undefined, player, -1);
+    await dealDmg(undefined, player, -1);
     audio_hit.play();
   }
   if(!safe_flag && turn_cnt % player.hung_rate == 0){
@@ -1426,26 +1432,26 @@ function eventEnv(){
   // 罠
   for(let t of trap_group)
     if(t.x == player.x && t.y == player.y){
-        t.func(player);
+        await t.func(player);
         trap_group.splice(trap_group.indexOf(t), 1);
       }
 
   // 状態異常
-  checkCondition(player);
+  await checkCondition(player);
 
   // 死亡判定
-  isDead(player)
+  await isDead(player)
 
   // エネミー
   for(let enemy of enemy_group){
     // 状態異常
-    checkCondition(enemy);
+    await checkCondition(enemy);
 
     // 死亡判定
-    isDead(enemy)
+    await isDead(enemy)
   }
 
-  isDead(player)
+  await isDead(player)
 
   // 階段に乗ってる
   if(isStair(player.x, player.y)){
@@ -1473,7 +1479,7 @@ function eventEnv(){
 }
 
 // 階層移動
-function nextFloor(){
+async function nextFloor(){
   addLog("次の階層へ移動した");
 
   initMaps();
@@ -1510,7 +1516,7 @@ function nextFloor(){
     setItemGroup();
 
     setPlayerPos();
-    setEnemyGroup();
+    await setEnemyGroup();
 
     safe_flag = false;
   }
@@ -1642,7 +1648,7 @@ function checkTrap(x, y){
 async function eventEnemies(){
   for(let enemy of enemy_group){
     // 死亡判定
-    if(isDead(enemy)) continue;
+    if(await isDead(enemy)) continue;
 
     // 行動不能
     if(enemy.cannot_action_flag) continue;
@@ -1669,7 +1675,7 @@ async function eventEnemy(enemy){
     // スキル
     for(let skill of enemy.skill){
       if(!(Math.floor(Math.random()+skill.chance))) continue;
-      if(skill.func(enemy, player)) return;
+      if(await skill.func(enemy, player)) return;
     }
 
     // 攻撃
@@ -1704,7 +1710,7 @@ async function eventEnemy(enemy){
       moveEnemyTravel(enemy);
     }
   }
-  isDead(player);
+  await isDead(player);
 }
 
 // 視界取得
@@ -1939,7 +1945,7 @@ function setEnemy(id, x, y){
 
 // エネミーグループ
 // 5階層毎にテーブル変更
-function setEnemyGroup(){
+async function setEnemyGroup(){
   let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
   let table = [];
 
@@ -1962,7 +1968,7 @@ function setEnemyGroup(){
       // 設置
       setEnemy(enemy_id, x, y);
       let e = enemy_group[enemy_group.length-1];
-      e.func_spawn(e);
+      await e.func_spawn(e);
     }
   }
 }
@@ -2006,8 +2012,9 @@ function isEnemy(x, y){
 }
 
 // エネミーの死亡判定
-function removeEnemy(enemy){
+async function removeEnemy(enemy){
   addLog(enemy.name+" は倒れた");
   enemy_group.splice(enemy_group.indexOf(enemy), 1);
+  await wait(300);
   return true;
 }

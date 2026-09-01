@@ -1,5 +1,5 @@
 // 名前入力
-function inputName(){
+async function inputName(){
   ctx.textAlign = "center";
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   let y_offset = FONT_SIZE*2;
@@ -59,7 +59,7 @@ function inputName(){
     else if(syllabary[input_name_pos.y][input_name_pos.x]=="終"){
       ctx.textAlign = "start";
       input_name_flag = false;
-      init();
+      await init();
       return;
     }
     else
