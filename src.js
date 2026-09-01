@@ -888,6 +888,7 @@ async function eventThrowing(){
 async function throwing(who, item, direction){
   addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
+  await wait(300);
 
   let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
@@ -1418,6 +1419,7 @@ async function eventEnv(){
     addLog("飢えが "+player.name+" を蝕む");
     await dealDmg(undefined, player, -1);
     audio_hit.play();
+    await wait(300);
   }
   if(!safe_flag && turn_cnt % player.hung_rate == 0){
     if(player.hung > 0){
