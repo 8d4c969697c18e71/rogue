@@ -209,6 +209,40 @@ document.addEventListener("keydown", async (e) =>{
   }
 });
 
+function toggleKeyInput(e){
+  if(e.key==key_code.left) key_input.left = true;
+  if(e.key==key_code.right) key_input.right = true;
+  if(e.key==key_code.up) key_input.up = true;
+  if(e.key==key_code.down) key_input.down = true;
+  if(key_input.left && key_input.up) key_input.up_left = true;
+  if(key_input.right && key_input.up) key_input.up_right = true;
+  if(key_input.left && key_input.down) key_input.down_left = true;
+  if(key_input.right && key_input.down) key_input.down_right = true;
+  if(e.key==key_code.shift) key_input.shift = true;
+  if(e.key==key_code.ctrl) key_input.ctrl = true;
+  if(e.key==key_code.apply) key_input.apply = true;
+  if(e.key==key_code.cancel) key_input.cancel = true;
+  if(e.key==key_code.sub) key_input.sub = true;
+  if(e.key==key_code.esc) key_input.esc = true;
+}
+
+document.addEventListener("keyup", e=>{
+  if(e.key==key_code.left) key_input.left = false;
+  if(e.key==key_code.right) key_input.right = false;
+  if(e.key==key_code.up) key_input.up = false;
+  if(e.key==key_code.down) key_input.down = false;
+  if(!key_input.left || !key_input.up) key_input.up_left = false;
+  if(!key_input.right || !key_input.up) key_input.up_right = false;
+  if(!key_input.left || !key_input.down) key_input.down_left = false;
+  if(!key_input.right || !key_input.down) key_input.down_right = false;
+  if(e.key==key_code.shift) key_input.shift = false;
+  if(e.key==key_code.ctrl) key_input.ctrl = false;
+  if(e.key==key_code.apply) key_input.apply = false;
+  if(e.key==key_code.cancel) key_input.cancel = false;
+  if(e.key==key_code.sub) key_input.sub = false;
+  if(e.key==key_code.esc) key_input.esc = false;
+});
+
 // ボタン
 btn_z.addEventListener("click", () =>{
   key_input.apply = true;
@@ -272,40 +306,6 @@ btn_downright.addEventListener("click", () =>{
   events();
   key_input.ctrl = false;
   key_input.down_right = false;
-});
-
-function toggleKeyInput(e){
-  if(e.key==key_code.left) key_input.left = true;
-  if(e.key==key_code.right) key_input.right = true;
-  if(e.key==key_code.up) key_input.up = true;
-  if(e.key==key_code.down) key_input.down = true;
-  if(key_input.left && key_input.up) key_input.up_left = true;
-  if(key_input.right && key_input.up) key_input.up_right = true;
-  if(key_input.left && key_input.down) key_input.down_left = true;
-  if(key_input.right && key_input.down) key_input.down_right = true;
-  if(e.key==key_code.shift) key_input.shift = true;
-  if(e.key==key_code.ctrl) key_input.ctrl = true;
-  if(e.key==key_code.apply) key_input.apply = true;
-  if(e.key==key_code.cancel) key_input.cancel = true;
-  if(e.key==key_code.sub) key_input.sub = true;
-  if(e.key==key_code.esc) key_input.esc = true;
-}
-
-document.addEventListener("keyup", e=>{
-  if(e.key==key_code.left) key_input.left = false;
-  if(e.key==key_code.right) key_input.right = false;
-  if(e.key==key_code.up) key_input.up = false;
-  if(e.key==key_code.down) key_input.down = false;
-  if(!key_input.left || !key_input.up) key_input.up_left = false;
-  if(!key_input.right || !key_input.up) key_input.up_right = false;
-  if(!key_input.left || !key_input.down) key_input.down_left = false;
-  if(!key_input.right || !key_input.down) key_input.down_right = false;
-  if(e.key==key_code.shift) key_input.shift = false;
-  if(e.key==key_code.ctrl) key_input.ctrl = false;
-  if(e.key==key_code.apply) key_input.apply = false;
-  if(e.key==key_code.cancel) key_input.cancel = false;
-  if(e.key==key_code.sub) key_input.sub = false;
-  if(e.key==key_code.esc) key_input.esc = false;
 });
 
 const wait = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
