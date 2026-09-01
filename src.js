@@ -1,43 +1,43 @@
-window.onload = function(){
+window.onload = async function(){
   document.body.addEventListener("keydown", e=>{e.preventDefault()});
   
-  if(!isPhone()){
-    setCanvasSize();
-    inputName();
+  if(!await isPhone()){
+    await setCanvasSize();
+    await inputName();
   }
   else{
-    setButton();
-    setCanvasSizePhone();
+    await setButton();
+    await setCanvasSizePhone();
     player.name = "あなた";
     input_name_flag = false;
-    init();
+    await init();
   }
 }
 
-window.addEventListener("resize", () =>{
-  if(!isPhone())
-    setCanvasSize();
+window.addEventListener("resize", async () =>{
+  if(!await isPhone())
+    await setCanvasSize();
   else{
-    setButton();
-    setCanvasSizePhone();
+    await setButton();
+    await setCanvasSizePhone();
   }
   if(input_name_flag) {
-    inputName();
+    await inputName();
     return;
   }
   if(!gameover_flag){
-    updateMap();
-    drawMap();
-    drawInfo();
-    drawInv();
-    drawLog();
-    drawShop();
-    drawNote();
+    await updateMap();
+    await drawMap();
+    await drawInfo();
+    await drawInv();
+    await drawLog();
+    await drawShop();
+    await drawNote();
   }
 });
 
 // ウィンドウサイズ
-function setCanvasSize(){
+async function setCanvasSize(){
   let canvas_width = window.innerHeight/2;
   let canvas_height = canvas_width;
   const body_width = document.body.clientWidth;
@@ -85,7 +85,7 @@ function setCanvasSize(){
 }
 
 // ウィンドウサイズ（スマホ）
-function setCanvasSizePhone(){
+async function setCanvasSizePhone(){
   canvas_width = screen.width - INFO_WIDTH*12/16;
   canvas_height = canvas_width*1.5;
 
@@ -112,7 +112,7 @@ function setCanvasSizePhone(){
 }
 
 // スマホ検出
-function isPhone(){
+async function isPhone(){
   if(navigator.userAgent.match(/iPhone|Android.+Mobile/))
     return true;
 
@@ -120,7 +120,7 @@ function isPhone(){
 }
 
 // ボタン表示
-function setButton(){
+async function setButton(){
   zxc_size = screen.width/6;
   arrow_size = zxc_size;
   
@@ -174,22 +174,22 @@ function setButton(){
 }
 
 // 初期化
-function init(){
-  initStatus();
-  nextFloor();
+async function init(){
+  await initStatus();
+  await nextFloor();
   
-  updateMap();
-  drawMap();
+  await updateMap();
+  await drawMap();
 
-  drawInfo();
-  drawInv();
+  await drawInfo();
+  await drawInv();
   log_reserve = [];
-  drawLog();
+  await drawLog();
 
-  drawNote();
+  await drawNote();
 }
 
-function initGroups(){
+async function initGroups(){
   item_group = [];
   enemy_group = [];
   trap_group = [];
@@ -200,77 +200,77 @@ function initGroups(){
 //==================================================KEY==================================================
 
 // 操作、各イベント
-document.addEventListener("keydown", e =>{
-  toggleKeyInput(e);
-  events();
+document.addEventListener("keydown", async (e) =>{
+  await toggleKeyInput(e);
+  await events();
 });
 
 // ボタン
-btn_z.addEventListener("click", () =>{
+btn_z.addEventListener("click", async () =>{
   key_input.apply = true;
-  events();
+  await events();
   key_input.apply = false;
 });
-btn_x.addEventListener("click", () =>{
+btn_x.addEventListener("click", async () =>{
   key_input.cancel = true;
-  events();
+  await events();
   key_input.cancel = false;
 });
-btn_c.addEventListener("click", () =>{
+btn_c.addEventListener("click", async () =>{
   key_input.sub = true;
-  events();
+  await events();
   key_input.sub = false;
 });
-btn_left.addEventListener("click", () =>{
+btn_left.addEventListener("click", async () =>{
   key_input.left = true;
-  events();
+  await events();
   key_input.left = false;
 });
-btn_up.addEventListener("click", () =>{
+btn_up.addEventListener("click", async () =>{
   key_input.up = true;
-  events();
+  await events();
   key_input.up = false;
 });
-btn_down.addEventListener("click", () =>{
+btn_down.addEventListener("click", async () =>{
   key_input.down = true;
-  events();
+  await events();
   key_input.down = false;
 });
-btn_right.addEventListener("click", () =>{
+btn_right.addEventListener("click", async () =>{
   key_input.right = true;
-  events();
+  await events();
   key_input.right = false;
 });
-btn_upleft.addEventListener("click", () =>{
+btn_upleft.addEventListener("click", async () =>{
   key_input.ctrl = true;
   key_input.up_left = true;
-  events();
+  await events();
   key_input.ctrl = false;
   key_input.up_left = false;
 });
-btn_downleft.addEventListener("click", () =>{
+btn_downleft.addEventListener("click", async () =>{
   key_input.ctrl = true;
   key_input.down_left = true;
-  events();
+  await events();
   key_input.ctrl = false;
   key_input.down_left = false;
 });
-btn_upright.addEventListener("click", () =>{
+btn_upright.addEventListener("click", async () =>{
   key_input.ctrl = true;
   key_input.up_right = true;
-  events();
+  await events();
   key_input.ctrl = false;
   key_input.up_right = false;
 });
-btn_downright.addEventListener("click", () =>{
+btn_downright.addEventListener("click", async () =>{
   key_input.ctrl = true;
   key_input.down_right = true;
-  events();
+  await events();
   key_input.ctrl = false;
   key_input.down_right = false;
 });
 
-function toggleKeyInput(e){
+async function toggleKeyInput(e){
   if(e.key==key_code.left) key_input.left = true;
   if(e.key==key_code.right) key_input.right = true;
   if(e.key==key_code.up) key_input.up = true;
@@ -307,16 +307,16 @@ document.addEventListener("keyup", e=>{
 //==================================================EVENT==================================================
 
 // イベント
-function events(){
+async function events(){
   // 名前入力
   if(input_name_flag) {
-    inputName();
+    await inputName();
     return;
   }
   // ゲームオーバー
   else if(gameover_flag){
-    turn_flag = gameoverEvent();
-    drawGameover();
+    turn_flag = await gameoverEvent();
+    await drawGameover();
   }
   // 行動不能
   else if(player.cannot_action_flag){
@@ -324,50 +324,50 @@ function events(){
   }
   // 射撃
   else if(shot_flag){
-    turn_flag = eventShot();
+    turn_flag = await eventShot();
   }
   // 投擲
   else if(throwing_flag){
-    turn_flag = eventThrowing();
+    turn_flag = await eventThrowing();
   }
   // 魔法
   else if(magic_flag){
-    turn_flag = eventMagic();
+    turn_flag = await eventMagic();
   }
   // UI
   else if(ui_flag){
-    turn_flag = eventUI();
+    turn_flag = await eventUI();
   }
   // ショップ
   else if(shop_flag){
-    turn_flag = eventShop();
+    turn_flag = await eventShop();
   }
   // マップ
   else{
-    turn_flag = eventPlayer();
+    turn_flag = await eventPlayer();
   }
 
   // ターン経過
   if(turn_flag){
-    eventEnemies();
-    eventEnv()
+    await eventEnemies();
+    await eventEnv()
     turn_cnt++;
   }
 
   // 描画
   if(!gameover_flag){
-    updateMap();
-    drawMap();
-    drawInfo();
-    drawInv();
-    drawLog();
-    drawShop();
+    await updateMap();
+    await drawMap();
+    await drawInfo();
+    await drawInv();
+    await drawLog();
+    await drawShop();
   }
 }
 
 // プレイヤーイベント
 // @return: true: ターン経過
-function eventPlayer(){
+async function eventPlayer(){
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -376,24 +376,24 @@ function eventPlayer(){
     if(key_input[k]){
       let x = player.x + kd[k].x;
       let y = player.y + kd[k].y;
-      if(isEnemy(x, y) && canDiagonal(player.x, player.y, kd[k].x, kd[k].y)){
+      if(await isEnemy(x, y) && await canDiagonal(player.x, player.y, kd[k].x, kd[k].y)){
         let enemy = enemy_group.find(v=>(v.x==x && v.y==y));
-        attack(player, enemy);
-        if(isDead(enemy)) addExp(enemy.exp);
+        await attack(player, enemy);
+        if(await isDead(enemy)) await addExp(enemy.exp);
         return true;
       }
-      else if(isShop(x, y)){
+      else if(await isShop(x, y)){
         shop_using = shop_group.find(v=>v.x==x && v.y==y);
-        addLog(shop_using.name+"「"+shop_using.dialogue_intro+"」");
+        await addLog(shop_using.name+"「"+shop_using.dialogue_intro+"」");
         audio_apply.play();
         shop_cursor = 0;
         shop_flag = true;
         shop_using.func_before();
         return false;
       }
-      else if(isNPC(x, y)){
+      else if(await isNPC(x, y)){
         let npc = npc_group.find(v=>v.x==x && v.y==y);
-        addLog(npc.name+"「"+npc.dialogue[npc.dialogue_cnt]+"」");
+        await addLog(npc.name+"「"+npc.dialogue[npc.dialogue_cnt]+"」");
         audio_apply.play();
         if(npc.dialogue_cnt<npc.dialogue.length-1)
           npc.dialogue_cnt++;
@@ -404,9 +404,9 @@ function eventPlayer(){
       }
       else if(!player.cannot_move_flag){
         if(!key_input.shift)
-          return move(player, kd[k]);
+          return await move(player, kd[k]);
         else{
-          sprint(kd[k])
+          await sprint(kd[k])
           return false;
         }
       }
@@ -414,21 +414,21 @@ function eventPlayer(){
   
   // apply
   if(key_input.apply){
-    if(isStair(player.x, player.y)){
+    if(await isStair(player.x, player.y)){
       audio_stair.play();
-      nextFloor();
+      await nextFloor();
     }
-    else if(isPortal(player.x, player.y)){
+    else if(await isPortal(player.x, player.y)){
       audio_portal.play();
       floor_cnt = -1;
-      backLv();
-      nextFloor();
+      await backLv();
+      await nextFloor();
     }
     else{
-      if(checkTrap(player.x, player.y))
-        addLog("罠を発見した");
+      if(await checkTrap(player.x, player.y))
+        await addLog("罠を発見した");
       else
-        addLog("待機した");
+        await addLog("待機した");
       audio_apply.play();
       return true;
     }
@@ -443,14 +443,14 @@ function eventPlayer(){
   // sub
   if(key_input.sub){
     if(!bow_flag){
-      addLog("射撃武器を装備していない");
+      await addLog("射撃武器を装備していない");
       return false;
     }
     else if(!player.ammo){
-      addLog("弾薬を装備していない");
+      await addLog("弾薬を装備していない");
       return false;
     }
-    addLog(player.weapon.name+" を構えた");
+    await addLog(player.weapon.name+" を構えた");
     audio_apply.play();
     shot_flag = true;
     return false;
@@ -459,8 +459,8 @@ function eventPlayer(){
 
 // 攻撃
 // http://000.la.coocan.jp/torneco/damage.html
-function attack(from, to){
-  addLog(from.name+" の攻撃");
+async function attack(from, to){
+  await addLog(from.name+" の攻撃");
   audio_hit.play();
 
   let dmg;
@@ -475,21 +475,21 @@ function attack(from, to){
     if(cond.id == 0x80){
       to.condition.splice(to.condition.indexOf(cond), 1);
       to.cannot_action_flag = false;
-      addLog(to.name+" は攻撃を受け流し 反撃した");
-      dealDmg(to, from, dmg);
+      await addLog(to.name+" は攻撃を受け流し 反撃した");
+      await dealDmg(to, from, dmg);
       return;
     }
 
-  dealDmg(from, to, dmg);
-  if("weapon" in from && from.weapon) from.weapon.func_attack(to);
+  await dealDmg(from, to, dmg);
+  if("weapon" in from && from.weapon) await from.weapon.func_attack(to);
   if("armor" in to && to.armor) to.armor.func_attacked(from);
   return;
 }
 
 // ダメージ
-function dealDmg(from, to, dmg){
-  addHP(to, -dmg);
-  addLogSameLine(to.name+" に "+dmg+" のダメージ");
+async function dealDmg(from, to, dmg){
+  await addHP(to, -dmg);
+  await addLogSameLine(to.name+" に "+dmg+" のダメージ");
 
   // 状態異常
   for(let cond of to.condition){
@@ -502,8 +502,8 @@ function dealDmg(from, to, dmg){
     if(cond.id == 0x80){
       to.condition.splice(to.condition.indexOf(cond), 1);
       to.cannot_action_flag = false;
-      addLog(to.name+" は受け流しに失敗した");
-      dealDmg(from, to, Math.round(dmg*1.5));
+      await addLog(to.name+" は受け流しに失敗した");
+      await dealDmg(from, to, Math.round(dmg*1.5));
       return;
     }
   }
@@ -514,10 +514,10 @@ function dealDmg(from, to, dmg){
 }
 
 // 移動
-function move(who, direction){
+async function move(who, direction){
   let new_x = who.x + direction.x;
   let new_y = who.y + direction.y;
-  if(canMove(new_x,new_y) && canDiagonal(who.x, who.y, direction.x, direction.y)){
+  if(await canMove(new_x,new_y) && await canDiagonal(who.x, who.y, direction.x, direction.y)){
     who.x = new_x;
     who.y = new_y;
     return true;
@@ -526,66 +526,66 @@ function move(who, direction){
 }
 
 // 高速移動
-function sprint(direction){
+async function sprint(direction){
   let log_before = log_reserve[log_reserve.length-1];
 
   // 移動
-  move(player, direction);
-  eventEnemies();
-  eventEnv();
+  await move(player, direction);
+  await eventEnemies();
+  await eventEnv();
   turn_cnt++;
 
   // 視界更新
-  updateMap();
+  await updateMap();
 
   // 停止
   if(log_reserve[log_reserve.length-1] != log_before)
     return;
-  if(!canMove(player.x+direction.x, player.y+direction.y) && canDiagonal(player.x, player.y, direction.x, direction.y))
+  if(!await canMove(player.x+direction.x, player.y+direction.y) && await canDiagonal(player.x, player.y, direction.x, direction.y))
     return;
   if(map_draw[player.y+direction.y][player.x+direction.x] == char_map.door)
     return;
-  if(isFrontObj(player, direction))
+  if(await isFrontObj(player, direction))
     return;
-  if(isCrossing(player.x, player.y))
+  if(await isCrossing(player.x, player.y))
     return;
 
-  sprint(direction);
+  await sprint(direction);
 }
 
 // 進行方向調査
 // 前方（斜め含む3マス）に何かあったらtrue
-function isFrontObj(who, direction){
+async function isFrontObj(who, direction){
   // 上下
   if(direction.x == 0){
     for(let i=-1; i<=1; i++)
-      if(isAnyObj(who.x+i, who.y+direction.y))
+      if(await isAnyObj(who.x+i, who.y+direction.y))
         return true;
   }
   // 左右
   else if(direction.y == 0){
     for(let i=-1; i<=1; i++)
-      if(isAnyObj(who.x+direction.x, who.y+i))
+      if(await isAnyObj(who.x+direction.x, who.y+i))
         return true;
   }
   // 斜め
   else{
-    if(isAnyObj(who.x, who.y+direction.y))
+    if(await isAnyObj(who.x, who.y+direction.y))
       return true;
-    if(isAnyObj(who.x+direction.x, who.y))
+    if(await isAnyObj(who.x+direction.x, who.y))
       return true;
   }
   return false;
 }
 
-function isAnyObj(x, y){
-  if(isItem(x, y) || isEnemy(x, y) || isNPC(x, y) || isShop(x, y))
+async function isAnyObj(x, y){
+  if(await isItem(x, y) || await isEnemy(x, y) || await isNPC(x, y) || await isShop(x, y))
     return true;
   return false;
 }
 
 // 交差点
-function isCrossing(x, y){
+async function isCrossing(x, y){
   if(map[y][x] != id_map.path) return false;
   let path_cnt = 0;
   for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]])
@@ -595,8 +595,8 @@ function isCrossing(x, y){
 }
 
 //ジャンプ
-function jump(who, direction, distance){
-  if(!canMove(who.x+direction.x*distance, who.y+direction.y*distance))
+async function jump(who, direction, distance){
+  if(!await canMove(who.x+direction.x*distance, who.y+direction.y*distance))
     return false;
   who.x = who.x+direction.x*distance;
   who.y = who.y+direction.y*distance;
@@ -604,7 +604,7 @@ function jump(who, direction, distance){
 }
 
 // UIイベント
-function eventUI(){
+async function eventUI(){
   // 上下
   if(key_input.up){
     if(inv_cursor > 0)
@@ -622,7 +622,7 @@ function eventUI(){
   }
   // apply
   if(key_input.apply)
-    if(inv_cursor<inventory.length && useItem(inv_cursor)){
+    if(inv_cursor<inventory.length && await useItem(inv_cursor)){
       audio_apply.play();
       //inv_cursor = -1;
       ui_flag = false;
@@ -636,8 +636,8 @@ function eventUI(){
   }
   // sub
   if(key_input.sub){
-    if(inv_cursor<inventory.length && checkThrowing(inv_cursor)){
-      addLog(inventory[inv_cursor].name+" を振り被った")
+    if(inv_cursor<inventory.length && await checkThrowing(inv_cursor)){
+      await addLog(inventory[inv_cursor].name+" を振り被った")
       audio_apply.play();
       throwing_flag = true;
       return false;
@@ -646,7 +646,7 @@ function eventUI(){
 }
 
 // ショップイベント
-function eventShop(){
+async function eventShop(){
   // 上下
   if(key_input.up ){
     if(shop_cursor > 0)
@@ -667,7 +667,7 @@ function eventShop(){
     // buy
     if(shop_using.item[shop_cursor].price >= 0){
       if(player.gold >= shop_using.item[shop_cursor].price){
-        if(addItem(shop_using.item[shop_cursor].id)){
+        if(await addItem(shop_using.item[shop_cursor].id)){
           player.gold -= shop_using.item[shop_cursor].price;
           //shop_using.item.splice(shop_cursor, 1);
           shop_using.func_buy();
@@ -676,7 +676,7 @@ function eventShop(){
         return true;
       }
       else
-        addLog("金貨が足りない");
+        await addLog("金貨が足りない");
       return false;
     }
     // sell
@@ -684,7 +684,7 @@ function eventShop(){
       if(inventory.find(v=>v.id==shop_using.item[shop_cursor].id)){
         let item_sell = inventory[inventory.indexOf(inventory.find(v=>v.id==shop_using.item[shop_cursor].id))]
         if(item_sell.equip_flag){
-          addLog("装備中だ");
+          await addLog("装備中だ");
           return false;
         }
           
@@ -700,17 +700,17 @@ function eventShop(){
           player.gold += -shop_using.item[shop_cursor].price;
         }
         audio_apply.play();
-        addLog(item_sell.name+" を売った");
+        await addLog(item_sell.name+" を売った");
         return true;
       }
       else
-        addLog("持っていない");
+        await addLog("持っていない");
       return false;
     }
   }
   // cancel
   if(key_input.cancel){
-    addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
+    await addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
     shop_using.func_after();
     shop_using = undefined;
     shop_cursor = -1;
@@ -720,7 +720,7 @@ function eventShop(){
 }
 
 // 射撃イベント
-function eventShot(){
+async function eventShot(){
   let ammo = player.ammo;
 
   // 十字キー
@@ -729,11 +729,11 @@ function eventShot(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
-      let enemy = shot(player, ammo, kd[k]);
-      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
+      let enemy = await shot(player, ammo, kd[k]);
+      if(!(enemy===undefined) && await isDead(enemy)) await addExp(enemy.exp);
       if(ammo.stack_num > 0) ammo.stack_num--;
       if(ammo.stack_num <= 0){
-        equip(inventory.indexOf(ammo));
+        await equip(inventory.indexOf(ammo));
         log_reserve.pop();
         inventory.splice(inventory.indexOf(ammo), 1);
       }
@@ -743,43 +743,43 @@ function eventShot(){
   
   // cancel
   if(key_input.cancel){
-    addLog("構えを解いた");
+    await addLog("構えを解いた");
     shot_flag = false;
     return false;
   }
 }
 
 // 射撃
-function shot(who, ammo, direction){
-  addLog(who.name+" は "+ammo.name+" を放った");
+async function shot(who, ammo, direction){
+  await addLog(who.name+" は "+ammo.name+" を放った");
   audio_shot.play();
 
-  let dst = straightRecursive(who.x, who.y, direction, ammo.range);
-  if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
+  let dst = await straightRecursive(who.x, who.y, direction, ammo.range);
+  if(await isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
-    shotDmg(who, enemy, ammo);
-    if("weapon" in who && who.weapon) who.weapon.func_attack(enemy);
+    await shotDmg(who, enemy, ammo);
+    if("weapon" in who && who.weapon) await who.weapon.func_attack(enemy);
     if("armor" in enemy && enemy.armor) enemy.armor.func_attacked(who);
-    if(who == player) findPl(enemy);
+    if(who == player) await findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
-    shotDmg(who, player, ammo);
-    if("weapon" in who && who.weapon) who.weapon.func_attack(player);
+    await shotDmg(who, player, ammo);
+    if("weapon" in who && who.weapon) await who.weapon.func_attack(player);
     if("armor" in player && player.armor) player.armor.func_attacked(who);
     return player;
   }
   else{// 外した
     if(who == player){
-      if(!isItem(dst.x, dst.y))
-        setItem(ammo.id, dst.x, dst.y);
+      if(!await isItem(dst.x, dst.y))
+        await setItem(ammo.id, dst.x, dst.y);
       else{
         for(let s=1; s<SIZEX; s++)
           for(let i=-s; i<=s; i++)
             for(let j=-s; j<=s; j++)
-              if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)){
-                setItem(ammo.id, dst.x+j, dst.y+i);
-                addLog(ammo.name+" は床に落ちた");
+              if(await canMove(dst.x+j, dst.y+i) && !await isItem(dst.x+j, dst.y+i)){
+                await setItem(ammo.id, dst.x+j, dst.y+i);
+                await addLog(ammo.name+" は床に落ちた");
                 return undefined;
               }
       }
@@ -787,7 +787,7 @@ function shot(who, ammo, direction){
   }
 }
 
-function shotDmg(from, to, ammo){
+async function shotDmg(from, to, ammo){
   let dmg;
   dmg = (3*from.lv)*(ammo.dmg+8)/16*(15/16)**(to.def+to.def_offset);
   let rand = Math.random() * dmg/4 - dmg/8;
@@ -795,34 +795,34 @@ function shotDmg(from, to, ammo){
   dmg = Math.round(dmg);
   if(dmg < 0) dmg = 0;
 
-  dealDmg(from, to, dmg);
+  await dealDmg(from, to, dmg);
 }
 
-function straightRecursive(x, y, direction, range){
-  if(!canMove(x+direction.x, y+direction.y)
+async function straightRecursive(x, y, direction, range){
+  if(!await canMove(x+direction.x, y+direction.y)
     || range <= 0
     || map_draw[y+direction.y][x+direction.x] == char_map.door)
     return {x:x, y:y};
-  return straightRecursive(x+direction.x, y+direction.y, direction, --range);
+  return await straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
 
-function straightRecursiveDiagonal(x, y, direction, range){
-  if(!canMove(x+direction.x, y+direction.y)
-    || !canDiagonal(x, y, direction.x, direction.y)
+async function straightRecursiveDiagonal(x, y, direction, range){
+  if(!await canMove(x+direction.x, y+direction.y)
+    || !await canDiagonal(x, y, direction.x, direction.y)
     || range <= 0
     || map_draw[y+direction.y][x+direction.x] == char_map.door)
     return {x:x, y:y};
-  return straightRecursive(x+direction.x, y+direction.y, direction, --range);
+  return await straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
 
-function straightRecursiveAllMap(x, y, direction){
-  if(!canMove(x+direction.x, y+direction.y))
+async function straightRecursiveAllMap(x, y, direction){
+  if(!await canMove(x+direction.x, y+direction.y))
     return {x:x, y:y};
-  return straightRecursiveAllMap(x+direction.x, y+direction.y, direction);
+  return await straightRecursiveAllMap(x+direction.x, y+direction.y, direction);
 }
 
 // 投擲イベント
-function eventThrowing(){
+async function eventThrowing(){
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -830,8 +830,8 @@ function eventThrowing(){
   for(let k in kd)
     if(key_input[k]){
       let item = inventory[inv_cursor]
-      let enemy = throwing(player, item, kd[k]);
-      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
+      let enemy = await throwing(player, item, kd[k]);
+      if(!(enemy===undefined) && await isDead(enemy)) await addExp(enemy.exp);
       // インベントリから削除
       if(stack_type.includes(item.type)){
         if(item.stack_num > 0) item.stack_num--;
@@ -850,7 +850,7 @@ function eventThrowing(){
   
   // cancel
   if(key_input.cancel){
-    addLog("投擲をやめた");
+    await addLog("投擲をやめた");
     //inv_cursor = -1;
     throwing_flag = false;
     ui_flag = false;
@@ -859,38 +859,38 @@ function eventThrowing(){
 }
 
 // 投擲
-function throwing(who, item, direction){
-  addLog(who.name+" は "+item.name+" を投擲した");
+async function throwing(who, item, direction){
+  await addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
 
-  let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
-  if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
+  let dst = await straightRecursive(who.x, who.y, direction, THROWING_RANGE);
+  if(await isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
-    throwDmg(who, enemy, item);
-    if(who == player) findPl(enemy);
+    await throwDmg(who, enemy, item);
+    if(who == player) await findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
-    throwDmg(who, player, item);
+    await throwDmg(who, player, item);
     return player;
   }
   else{  // アイテム化
-    if(!isItem(dst.x, dst.y))
-      setItem(item.id, dst.x, dst.y);
+    if(!await isItem(dst.x, dst.y))
+      await setItem(item.id, dst.x, dst.y);
     else{
       for(let s=1; s<SIZEX; s++)
         for(let i=-s; i<=s; i++)
           for(let j=-s; j<=s; j++)
-            if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)){
-              setItem(item.id, dst.x+j, dst.y+i);
-              addLog(item.name+" は床に落ちた");
+            if(await canMove(dst.x+j, dst.y+i) && !await isItem(dst.x+j, dst.y+i)){
+              await setItem(item.id, dst.x+j, dst.y+i);
+              await addLog(item.name+" は床に落ちた");
               return undefined;
             }
     }
   }
 }
 
-function throwDmg(from, to, item){
+async function throwDmg(from, to, item){
   let dmg;
   if(item.type=="ammo" || item.type=="weapon")
     dmg = Math.round(Math.random()+1)
@@ -898,20 +898,20 @@ function throwDmg(from, to, item){
     dmg = Math.round(Math.random())
   if(dmg < 0) dmg = 0;
 
-  dealDmg(from, to, dmg);
+  await dealDmg(from, to, dmg);
 }
 
 // 投擲物選択
-function checkThrowing(index){
+async function checkThrowing(index){
   if(inventory[index].equip_flag){
-    addLog(inventory[index].name+" は投擲できない");
+    await addLog(inventory[index].name+" は投擲できない");
     return false;
   }
   return true;
 }
 
 // 魔法イベント
-function eventMagic(){
+async function eventMagic(){
   // 十字キー
   let kd;
   if(!key_input.ctrl) kd = key_direction;
@@ -919,7 +919,7 @@ function eventMagic(){
   for(let k in kd)
     if(key_input[k]){
       let enemy = player.magic_using.func_cast(kd[k]);
-      if(!(enemy===undefined) && isDead(enemy)) addExp(enemy.exp);
+      if(!(enemy===undefined) && await isDead(enemy)) await addExp(enemy.exp);
       
       magic_flag = false;
       player.magic_using = undefined;
@@ -930,7 +930,7 @@ function eventMagic(){
   
   // cancel
   if(key_input.cancel){
-    addLog("構えを解いた");
+    await addLog("構えを解いた");
     magic_flag = false;
     player.magic_using = undefined;
     //inv_cursor = -1;
@@ -940,21 +940,21 @@ function eventMagic(){
 }
 
 // 魔法
-function magic(who, value, direction){
-  let dst = straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
-  if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
+async function magic(who, value, direction){
+  let dst = await straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
+  if(await isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
-    magicDmg(who, enemy, value);
-    if(who == player) findPl(enemy);
+    await magicDmg(who, enemy, value);
+    if(who == player) await findPl(enemy);
     return enemy;
   }
   else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y){
-    magicDmg(who, player, value);
+    await magicDmg(who, player, value);
     return player;
   }
 }
 
-function magicDmg(from, to, value){
+async function magicDmg(from, to, value){
   let dmg;
   dmg = (3*from.lv)*(value+8)/16*(15/16)**((to.mp_max+to.mp_max_offset)/2);
   let rand = Math.random() * dmg/4 - dmg/8;
@@ -962,31 +962,31 @@ function magicDmg(from, to, value){
   dmg = Math.round(dmg);
   if(dmg < 0) dmg = 0;
   
-  dealDmg(from, to, dmg);
+  await dealDmg(from, to, dmg);
 }
 
 // ゲームオーバー
-function gameoverEvent(){
+async function gameoverEvent(){
   if(key_input.apply || key_input.cancel || key_input.sub){
     turn_cnt = 1;
     floor_cnt = -1;
     gameover_flag = false;
-    init();
+    await init();
   }
   return false;
 }
 
-function gameover(){
+async function gameover(){
   log_reserve = [];
-  addLog("ゲームオーバー");
-  drawGameover();
-  drawInfo();
-  drawInv();
-  drawLog();
+  await addLog("ゲームオーバー");
+  await drawGameover();
+  await drawInfo();
+  await drawInv();
+  await drawLog();
   gameover_flag = true;
 }
 
-function drawGameover(){
+async function drawGameover(){
   let gameover_fig = [
     "       ______       ",
     "     ／      ＼     ",
@@ -1027,7 +1027,7 @@ function drawGameover(){
 //==================================================STATUS==================================================
 
 // HP
-function addHP(who, value){
+async function addHP(who, value){
   who.hp += value;
   if(who.hp > (who.hp_max + who.hp_max_offset))
     who.hp = who.hp_max + who.hp_max_offset;
@@ -1036,7 +1036,7 @@ function addHP(who, value){
 }
 
 // MP
-function addMP(who, value){
+async function addMP(who, value){
   who.mp += value;
   if(who.mp > (who.mp_max + who.mp_max_offset))
     who.mp = who.mp_max + who.mp_max_offset;
@@ -1046,7 +1046,7 @@ function addMP(who, value){
 
 // 空腹度
 // PL専用
-function addHung(value){
+async function addHung(value){
   player.hung += value;
   if(player.hung > (player.hung_max + player.hung_max_offset))
     player.hung = player.hung_max + player.hung_max_offset;
@@ -1056,15 +1056,15 @@ function addHung(value){
 
 // 経験値
 // PL専用
-function addExp(value){
+async function addExp(value){
   player.exp += value;
-  addLogSameLine(value+" の経験値を得た");
-  lvUp();
+  await addLogSameLine(value+" の経験値を得た");
+  await lvUp();
 }
 
 // 全回復
-function fullRecovery(who){
-  addLog(who.name+" は全快した");
+async function fullRecovery(who){
+  await addLog(who.name+" は全快した");
   who.hp = who.hp_max + who.hp_max_offset;
   who.mp = who.mp_max + who.mp_max_offset;
   if(who == player) player.hung = player.hung_max + player.hung_max_offset;
@@ -1072,25 +1072,25 @@ function fullRecovery(who){
 }
 
 // レベルアップ
-function lvUp(){
+async function lvUp(){
   if(player.exp >= player.next_exp){
     player.lv++;
     player.next_exp = player.next_exp + player.lv * 15;
 
     player.hp_max += player.lvup.hp_max;
     player.mp_max += player.lvup.mp_max;
-    addHP(player, player.lvup.hp_max);
-    addMP(player, player.lvup.mp_max)
+    await addHP(player, player.lvup.hp_max);
+    await addMP(player, player.lvup.mp_max)
 
-    addLog(player.name+" はレベルが上がった");
-    lvUp();
+    await addLog(player.name+" はレベルが上がった");
+    await lvUp();
     return true;
   }
   return false;
 }
 
 // lv1に戻す
-function backLv(){
+async function backLv(){
   let job = item_data.find(v=>v.id==player.job);
 
   player.hp = job.hp;
@@ -1114,9 +1114,9 @@ function backLv(){
 }
 
 // ステ初期化
-function initStatus(){
+async function initStatus(){
   player.job = 0xf00;
-  backLv();
+  await backLv();
 
   player.hp_max_offset = 0;
   player.mp_max_offset = 0;
@@ -1139,7 +1139,7 @@ function initStatus(){
 }
 
 // 状態異常
-function setCondition(who, id){
+async function setCondition(who, id){
   let cond = condition_data.find(v=>v.id==id);
   
   if(!cond || !("condition" in who)){
@@ -1159,14 +1159,14 @@ function setCondition(who, id){
 }
 
 // ターン数指定
-function setConditionTurn(who, id, turn){
-  if(!setCondition(who, id)) return false;
+async function setConditionTurn(who, id, turn){
+  if(!await setCondition(who, id)) return false;
   who.condition[who.condition.length-1].turn = turn;
   return true;
 }
 
 // 状態異常判定
-function checkCondition(who){
+async function checkCondition(who){
   for(let cond of who.condition){
     if(cond.turn<=0){
       who.condition.splice(who.condition.indexOf(cond), 1);
@@ -1180,13 +1180,13 @@ function checkCondition(who){
 }
 
 // 死亡判定
-function isDead(who){
+async function isDead(who){
   if(who.hp <= 0){
     if(who == player)
-      gameover();
+      await gameover();
     else{
       who.func_died();
-      removeEnemy(who);
+      await removeEnemy(who);
     }
     return true;
   }
@@ -1196,9 +1196,9 @@ function isDead(who){
 //==================================================ITEM==================================================
 
 // アイテム使用
-function useItem(index){
+async function useItem(index){
   if(equip_type.includes(inventory[index].type)){
-    return equip(index);
+    return await equip(index);
   }
   else{
     return inventory[index].func();
@@ -1206,19 +1206,19 @@ function useItem(index){
 }
 
 // プレイヤー装備切り替え
-function equip(index){
+async function equip(index){
   let equip_item = inventory[index];
   // 装備する
   if(!(equip_item.equip_flag)){
     // 装備欄チェック
     if(player[equip_item.type]){
-      addLog("装備スロットが埋まっている");
+      await addLog("装備スロットが埋まっている");
       return false;
     }
     // 指輪
     else if(player[equip_item.type+"1"]
       && player[equip_item.type+"2"]){
-      addLog("装備スロットが埋まっている");
+      await addLog("装備スロットが埋まっている");
       return false;
     }
 
@@ -1237,9 +1237,9 @@ function equip(index){
     else
       player[equip_item.type] = equip_item;
     
-    equip_item.func_equip(player);
+    await equip_item.func_equip(player);
 
-    addLog(equip_item.name+" を装備した");
+    await addLog(equip_item.name+" を装備した");
     return true;
   }
   // 外す
@@ -1255,38 +1255,38 @@ function equip(index){
     else
       player[equip_item.type] = undefined;
     
-    equip_item.func_unequip(player);
+    await equip_item.func_unequip(player);
 
-    addLog(equip_item.name+" を外した");
+    await addLog(equip_item.name+" を外した");
     return true;
   }
 }
 
 // アイテム取得
-function addItem(id){
+async function addItem(id){
   let item = item_data.find(v=>v.id==id);
   // スタックアイテム
   if(item.type=="stack"){
     if(inventory.length < INVENTORY_SIZE){
       for(let i=0; i<item.num; i++){
-        addItem(item.item_id);
+        await addItem(item.item_id);
         log_reserve.pop();
       }
-      addLog(item.name+" を入手");
+      await addLog(item.name+" を入手");
       return true;
     }
     for(let i of inventory){
       if(i.id == item.item_id && i.stack_num < STACK_MAX){
         if(i.stack_num + item.num <= STACK_MAX){
           for(let i=0; i<item.num; i++){
-            addItem(item.item_id);
+            await addItem(item.item_id);
             log_reserve.pop();
           }
-          addLog(item.name+" を入手");
+          await addLog(item.name+" を入手");
           return true;
         }
         else{
-          addLog("持ちきれない");
+          await addLog("持ちきれない");
           return false;
         }
       }
@@ -1297,10 +1297,10 @@ function addItem(id){
 
   // スタック可能アイテム
   if(stack_type.includes(item.type)){
-    let index = getStackIndex(item);
+    let index = await getStackIndex(item);
     if(!(index===undefined)){
       inventory[index].stack_num++;
-      addLog(item.name+" を入手");
+      await addLog(item.name+" を入手");
       return true;
     }
     Object.assign(it, {stack_num: 1});
@@ -1308,7 +1308,7 @@ function addItem(id){
 
   // 所持数オーバー
   if(inventory.length >= INVENTORY_SIZE){
-    addLog("持ちきれない");
+    await addLog("持ちきれない");
     return false;
   }
 
@@ -1317,12 +1317,12 @@ function addItem(id){
     Object.assign(it, {equip_flag: false});
   
   inventory.push(it);
-  addLog(item.name+" を入手");
+  await addLog(item.name+" を入手");
   return true;
 }
 
 // スタックアイテム加算
-function getStackIndex(item){
+async function getStackIndex(item){
   for(let i of inventory)
     if(i.id==item.id && i.stack_num < STACK_MAX){
       return inventory.indexOf(i);  // スタックできるアイテムがある
@@ -1331,13 +1331,13 @@ function getStackIndex(item){
 }
 
 // アイテム設置
-function setItem(id, x, y){
+async function setItem(id, x, y){
   let item = Object.assign({}, item_data.find(v=>v.id==id), {x: x, y: y});
   item_group.push(item);
 }
 
 // マップ内アイテム
-function setItemGroup(){
+async function setItemGroup(){
   let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
   let table = [];
   
@@ -1349,27 +1349,27 @@ function setItemGroup(){
 
   for(let i=0; i<num; i++){
     const item_id = Math.floor(Math.random() * table.length);
-    const [x, y] = setRandomXY();
+    const [x, y] = await setRandomXY();
     
-    setItem(table[item_id], x, y);
+    await setItem(table[item_id], x, y);
   }
 }
 
-function setRandomXY(){
+async function setRandomXY(){
   const x = Math.floor(Math.random() * (SIZEX-1 - 1) + 1);
   const y = Math.floor(Math.random() * (SIZEY-1 - 1) + 1);
 
-  if(!canMove(x, y)
+  if(!await canMove(x, y)
     || map[y][x] != id_map.room
-    || isItem(x, y)
-    || isTrap(x, y)
-    || isEnemy(x, y))
-    return setRandomXY();
+    || await isItem(x, y)
+    || await isTrap(x, y)
+    || await isEnemy(x, y))
+    return await setRandomXY();
   return [x, y];
 }
 
 // アイテムの有無
-function isItem(x, y){
+async function isItem(x, y){
   for(let i in item_group)
     if(x==item_group[i].x && y==item_group[i].y)
       return true;
@@ -1379,26 +1379,26 @@ function isItem(x, y){
 //==================================================ENVIRONMENT==================================================
 
 // 環境イベント
-function eventEnv(){
+async function eventEnv(){
   // 自然回復
   if(turn_cnt % (player.hp_regen_rate + player.hp_regen_rate_offset) == 0)
-    addHP(player, 1);
+    await addHP(player, 1);
   if(turn_cnt % (player.mp_regen_rate + player.mp_regen_rate_offset) == 0)
-    addMP(player, 1);
+    await addMP(player, 1);
 
   // 空腹度
   if(player.hung <= 0){
-    addLog("飢えが "+player.name+" を蝕む");
-    dealDmg(undefined, player, -1);
+    await addLog("飢えが "+player.name+" を蝕む");
+    await dealDmg(undefined, player, -1);
     audio_hit.play();
   }
   if(!safe_flag && turn_cnt % player.hung_rate == 0){
     if(player.hung > 0){
-      addHung(-1);
+      await addHung(-1);
       if(player.hung == 25)
-        addLog("空腹を感じる");
+        await addLog("空腹を感じる");
       if(player.hung == 10)
-        addLog("耐え難い空腹");
+        await addLog("耐え難い空腹");
     }
   }
 
@@ -1410,29 +1410,29 @@ function eventEnv(){
       }
 
   // 状態異常
-  checkCondition(player);
+  await checkCondition(player);
 
   // 死亡判定
-  isDead(player)
+  await isDead(player)
 
   // エネミー
   for(let enemy of enemy_group){
     // 状態異常
-    checkCondition(enemy);
+    await checkCondition(enemy);
 
     // 死亡判定
-    isDead(enemy)
+    await isDead(enemy)
   }
 
-  isDead(player)
+  await isDead(player)
 
   // 階段に乗ってる
-  if(isStair(player.x, player.y)){
-    addLog("階段 (降りる:z)");
+  if(await isStair(player.x, player.y)){
+    await addLog("階段 (降りる:z)");
   }
   // ポータルに乗ってる
-  if(isPortal(player.x, player.y)){
-    addLog("帰還ポータル (入る:z)");
+  if(await isPortal(player.x, player.y)){
+    await addLog("帰還ポータル (入る:z)");
   }
   
   // アイテム取得
@@ -1441,10 +1441,10 @@ function eventEnv(){
       if(i.id==0x000){
         player.gold += 5;
         audio_apply.play();
-        addLog("金貨5枚 を入手")
+        await addLog("金貨5枚 を入手")
         item_group.splice(item_group.indexOf(i), 1);
       }
-      else if(addItem(i.id)){
+      else if(await addItem(i.id)){
         audio_apply.play();
         item_group.splice(item_group.indexOf(i), 1);
       }
@@ -1452,11 +1452,11 @@ function eventEnv(){
 }
 
 // 階層移動
-function nextFloor(){
-  addLog("次の階層へ移動した");
+async function nextFloor(){
+  await addLog("次の階層へ移動した");
 
-  initMaps();
-  initGroups();
+  await initMaps();
+  await initGroups();
 
   stair_pos.x = undefined;
   stair_pos.y = undefined;
@@ -1468,59 +1468,59 @@ function nextFloor(){
   clairvoyance_flag = false;
 
   // テスト用//FIXME
-  //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+  //await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
   if(um = unique_map.find(v=>v.id==floor_cnt)){ // 固有マップ
-    generateUniqueMap(um);
+    await generateUniqueMap(um);
     
     if(um.safe_flag) safe_flag = true;
     else safe_flag = false;
   }
   else if(floor_cnt%10 == 0){  // 帰還ポータル階
-    generateUniqueMap(unique_map.find(v=>v.id=="return"));
+    await generateUniqueMap(unique_map.find(v=>v.id=="return"));
     safe_flag = true;
   }
   else{
-    generateMap();
+    await generateMap();
 
-    let [x,y] = setRandomXY();
-    setStair(x, y);
-    setTrapGroup();
-    setItemGroup();
+    let [x,y] = await setRandomXY();
+    await setStair(x, y);
+    await setTrapGroup();
+    await setItemGroup();
 
-    setPlayerPos();
-    setEnemyGroup();
+    await setPlayerPos();
+    await setEnemyGroup();
 
     safe_flag = false;
   }
 }
 
 // 階段
-function setStair(x, y){
+async function setStair(x, y){
   stair_pos.x = x;
   stair_pos.y = y;
 }
 
-function isStair(x, y){
+async function isStair(x, y){
   if(stair_pos.x==x && stair_pos.y==y)
     return true;
   return false;
 }
 
 // ポータル
-function setPortal(x, y){
+async function setPortal(x, y){
   portal_pos.x = x;
   portal_pos.y = y;
 }
 
-function isPortal(x, y){
+async function isPortal(x, y){
   if(portal_pos.x==x && portal_pos.y==y)
     return true;
   return false;
 }
 
 // ショップ配置
-function setShop(id, x, y){
+async function setShop(id, x, y){
   let shop = shop_data.find(v=>v.id==id);
   let items = [];
 
@@ -1548,7 +1548,7 @@ function setShop(id, x, y){
   shop_group.push(s);
 }
 
-function isShop(x, y){
+async function isShop(x, y){
   for(let s in shop_group)
     if(shop_group[s].x == x && shop_group[s].y == y)
       return true;
@@ -1557,12 +1557,12 @@ function isShop(x, y){
 }
 
 // NPC配置
-function setNPC(id, x, y){
+async function setNPC(id, x, y){
   let npc = Object.assign({}, npc_data.find(v=>v.id==id), {x: x, y: y});
   npc_group.push(npc);
 }
 
-function isNPC(x, y){
+async function isNPC(x, y){
   for(let n in npc_group)
     if(npc_group[n].x == x && npc_group[n].y == y)
       return true;
@@ -1571,13 +1571,13 @@ function isNPC(x, y){
 }
 
 // 罠
-function setTrap(id, x, y){
+async function setTrap(id, x, y){
   let trap = Object.assign({}, trap_data.find(v=>v.id==id), {x: x, y: y, visible: false});
   trap_group.push(trap);
 }
 
 // マップ内罠
-function setTrapGroup(){
+async function setTrapGroup(){
   let num = Math.floor(Math.random() * (room_num*1 - 1) + 1);
   let table = [];
   
@@ -1589,14 +1589,14 @@ function setTrapGroup(){
 
   for(let i=0; i<num; i++){
     const item = Math.floor(Math.random() * table.length);
-    const [x,y] = setRandomXY();
+    const [x,y] = await setRandomXY();
     
-    setTrap(table[item], x, y)
+    await setTrap(table[item], x, y)
   }
 }
 
 // 罠の有無
-function isTrap(x, y){
+async function isTrap(x, y){
   for(let t of trap_group)
     if(x==t.x && y==t.y)
       return t;
@@ -1604,11 +1604,11 @@ function isTrap(x, y){
 }
 
 // 罠の看破
-function checkTrap(x, y){
+async function checkTrap(x, y){
   let ret = false;
   for(let i=-1; i<=1; i++)
     for(let j=-1; j<=1; j++)
-      if(t = isTrap(x+j, y+i)){
+      if(t = await isTrap(x+j, y+i)){
         t.visible = true;
         ret = true;
       }
@@ -1618,26 +1618,26 @@ function checkTrap(x, y){
 //==================================================ENEMY==================================================
 
 // エネミーイベント
-function eventEnemies(){
+async function eventEnemies(){
   for(let enemy of enemy_group){
     // 死亡判定
-    if(isDead(enemy)) continue;
+    if(await isDead(enemy)) continue;
 
     // 行動不能
     if(enemy.cannot_action_flag) continue;
     
     // speed回行動
     for(let cnt=0; cnt<enemy.speed; cnt++)
-      eventEnemy(enemy)
+      await eventEnemy(enemy)
   }
 }
 
-function eventEnemy(enemy){
+async function eventEnemy(enemy){
   // 発見
-  initMap(enemy.map_sight, false);
-  getSight(enemy);
+  await initMap(enemy.map_sight, false);
+  await getSight(enemy);
   if(enemy.map_sight[player.y][player.x])
-    findPl(enemy);
+    await findPl(enemy);
   else
     enemy.chase_count--;
   if(enemy.chase_count < 0)
@@ -1655,16 +1655,16 @@ function eventEnemy(enemy){
     for(let d in key_direction){
       let x = enemy.x + key_direction[d].x;
       let y = enemy.y + key_direction[d].y;
-      if(x == player.x && y == player.y && canDiagonal(enemy.x, enemy.y, key_direction[d].x, key_direction[d].y)){
-        attack(enemy, player);
+      if(x == player.x && y == player.y && await canDiagonal(enemy.x, enemy.y, key_direction[d].x, key_direction[d].y)){
+        await attack(enemy, player);
         return;
       }
     }
     for(let d in key_direction_diagonal){
       let x = enemy.x + key_direction_diagonal[d].x;
       let y = enemy.y + key_direction_diagonal[d].y;
-      if(x == player.x && y == player.y && canDiagonal(enemy.x, enemy.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
-        attack(enemy, player);
+      if(x == player.x && y == player.y && await canDiagonal(enemy.x, enemy.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
+        await attack(enemy, player);
         return;
       }
     }
@@ -1672,7 +1672,7 @@ function eventEnemy(enemy){
     // 移動
     if(!enemy.cannot_move_flag){
       // 追跡
-      moveEnemyChase(enemy);
+      await moveEnemyChase(enemy);
     }
   }
   // 未発見
@@ -1680,52 +1680,52 @@ function eventEnemy(enemy){
     // 移動
     if(!enemy.cannot_move_flag){
       // 巡回
-      moveEnemyTravel(enemy);
+      await moveEnemyTravel(enemy);
     }
   }
-  isDead(player);
+  await isDead(player);
 }
 
 // 視界取得
-function getSight(who){
+async function getSight(who){
   for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]){
     // 部屋
-    if(isRoom(who.x+j, who.y+i)){
+    if(await isRoom(who.x+j, who.y+i)){
       let room_xy = [];
-      getRoomXY(who.x+j, who.y+i, room_xy);
+      await getRoomXY(who.x+j, who.y+i, room_xy);
       for(let xy of room_xy)
         who.map_sight[xy.y][xy.x] = true;
     }
     // 通路
-    getSightPath(who.x, who.y, (who.sight_range+who.sight_range_offset), who.map_sight);
+    await getSightPath(who.x, who.y, (who.sight_range+who.sight_range_offset), who.map_sight);
   }
 }
 
 // 通路の視界
-function getSightPath(x, y, sight_range, map_sight){
+async function getSightPath(x, y, sight_range, map_sight){
   map_sight[y][x] = true;
   for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]){
-    if(isInMap(x+j,y+i) 
+    if(await isInMap(x+j,y+i) 
       && map[y+i][x+j] != id_map.none 
       && !map_sight[y+i][x+j] 
       && sight_range > 0
-      && !isRoom(x, y)
-      && !isRoom(x+j, y+i)){
+      && !await isRoom(x, y)
+      && !await isRoom(x+j, y+i)){
       map_sight[y+i][x+j] = true;
-      getSightPath(x+j, y+i, sight_range-1, map_sight);
+      await getSightPath(x+j, y+i, sight_range-1, map_sight);
     }
   }
 }
 
-function findPl(who){
+async function findPl(who){
   who.chase_flag = true;
   who.chase_count = chase_count_init;
 }
 
 // エネミー移動（追跡）
-function moveEnemyChase(enemy){
+async function moveEnemyChase(enemy){
   let route
-  route = astar(enemy.x, enemy.y, player.x, player.y, enemy.distance, enemy.escape_flag);  
+  route = await astar(enemy.x, enemy.y, player.x, player.y, enemy.distance, enemy.escape_flag);  
   let dir = {
     x: route[route.length-1].x - enemy.x,
     y: route[route.length-1].y - enemy.y
@@ -1734,11 +1734,11 @@ function moveEnemyChase(enemy){
   //for(let r of route)
   //  map_draw[r.y][r.x] = "√";
 
-  return move(enemy, dir);
+  return await move(enemy, dir);
 }
 
 // A-star
-function astar(start_x, start_y, dst_x, dst_y, distance, escape_flag){
+async function astar(start_x, start_y, dst_x, dst_y, distance, escape_flag){
   let node = [];
 
   // 初期コスト計算
@@ -1746,15 +1746,15 @@ function astar(start_x, start_y, dst_x, dst_y, distance, escape_flag){
   let heuristic_cost = Math.max(Math.abs(dst_x-start_x), Math.abs(dst_y-start_y));
   node.push({x:start_x, y:start_y, status:"open", a_cost:actual_cost, h_cost:heuristic_cost, parent:undefined});
   
-  asterRecursive(node, start_x, start_y, dst_x, dst_y, distance, escape_flag);
+  await asterRecursive(node, start_x, start_y, dst_x, dst_y, distance, escape_flag);
 
   let dst_node = node[node.length-1];
   let route = [];
-  getRoute(route, node, dst_node);
+  await getRoute(route, node, dst_node);
   return route;
 }
 
-function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag){
+async function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag){
   // close
   node.find(v=>(v.x==x && v.y==y)).status = "closed";
 
@@ -1762,19 +1762,19 @@ function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag){
   let movement_cost;
   for(let [i, j] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,-1],[-1,1]]){
     // 目的地到達判定
-    if(x+j == dst_x && y+i == dst_y && canDiagonal(x, y, j, i)){
+    if(x+j == dst_x && y+i == dst_y && await canDiagonal(x, y, j, i)){
       node.push({x:x+j, y:y+i, status:"dst", parent:{x:x, y:y}});
       return;
     }
     // 探索
-    else if(canMove(x+j, y+i) && canDiagonal(x, y, j, i)
+    else if(await canMove(x+j, y+i) && await canDiagonal(x, y, j, i)
       && !(node.find(v=>(v.x==x+j && v.y==y+i)))){
       // 移動コスト
       if(Math.floor(((x+j-dst_x)**2+(y+i-dst_y)**2)/2) < distance)
         movement_cost = 64;
       else if(x+j == dst_x || y+i == dst_y)
         movement_cost = 1;
-      else if({x:dst_x, y:dst_y} == straightRecursiveAllMap(x, y, {x:j, y:i}))
+      else if({x:dst_x, y:dst_y} == await straightRecursiveAllMap(x, y, {x:j, y:i}))
         movement_cost = 1;
       else
         movement_cost = 3;
@@ -1814,29 +1814,29 @@ function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag){
     return;
   }
   
-  asterRecursive(node, next_node.x, next_node.y, dst_x, dst_y, escape_flag);
+  await asterRecursive(node, next_node.x, next_node.y, dst_x, dst_y, escape_flag);
   return;
 }
 
-function getRoute(route, node, n){
+async function getRoute(route, node, n){
   if(n.parent === undefined)
     return route;
   route.push(n);
-  route = getRoute(route, node, node.find(v=>(v.x==n.parent.x && v.y==n.parent.y)));
+  route = await getRoute(route, node, node.find(v=>(v.x==n.parent.x && v.y==n.parent.y)));
 }
 
 // エネミー移動（巡回）
-function moveEnemyTravel(enemy){
+async function moveEnemyTravel(enemy){
   // 新規目的地
   for(let i=-1; i<=1; i++)
     for(let j=-1; j<=1; j++)
       if(enemy.x+j==enemy.travel_x && enemy.y+i==enemy.travel_y){
-        setNextTravelRoom(enemy);
+        await setNextTravelRoom(enemy);
         return;
       }
 
   let route;
-  route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
+  route = await astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
   let dir = {
     x: route[route.length-1].x - enemy.x,
     y: route[route.length-1].y - enemy.y
@@ -1845,12 +1845,12 @@ function moveEnemyTravel(enemy){
   //for(let r of route)
   //  map_draw[r.y][r.x] = "√";
 
-  return move(enemy, dir);
+  return await move(enemy, dir);
 }
 
-function setNextTravelRoom(enemy){
+async function setNextTravelRoom(enemy){
   let room_xy = [];
-  getRoomXY(enemy.x, enemy.y, room_xy);
+  await getRoomXY(enemy.x, enemy.y, room_xy);
 
   let next_room_x;
   let next_room_y;
@@ -1860,7 +1860,7 @@ function setNextTravelRoom(enemy){
     let break_flag = true;
     for(let xy of room_xy)
       if(next_room_x==xy.x && next_room_y==xy.y
-        || !canMove(next_room_x, next_room_y) || map[next_room_y][next_room_x]!=id_map.room){
+        || !await canMove(next_room_x, next_room_y) || map[next_room_y][next_room_x]!=id_map.room){
         break_flag = false;
         break;
       }
@@ -1875,7 +1875,7 @@ function setNextTravelRoom(enemy){
 }
 
 // エネミー移動（ランダム）
-function moveEnemyRand(enemy){
+async function moveEnemyRand(enemy){
   let rand_diagonal = Math.floor( Math.random() * 2);
   let rand_dir = Math.floor( Math.random() * 4);
   let dir_array = ["left", "right", "up", "down"];
@@ -1884,17 +1884,17 @@ function moveEnemyRand(enemy){
   // 垂直水平
   if(map[enemy.y][enemy.x] != id_map.path || rand_diagonal){
     let dir = key_direction[dir_array[rand_dir]];
-    return move(enemy, dir);
+    return await move(enemy, dir);
   }
   // 斜め
   else{
     let dir = key_direction_diagonal[dir_array_diagonal[rand_dir]];
-    return move(enemy, dir);
+    return await move(enemy, dir);
   }
 }
 
 // エネミー追加
-function setEnemy(id, x, y){
+async function setEnemy(id, x, y){
   let enemy = enemy_data.find(v=>v.id==id);
   let e = Object.assign({}, enemy,
     {x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], },
@@ -1918,7 +1918,7 @@ function setEnemy(id, x, y){
 
 // エネミーグループ
 // 5階層毎にテーブル変更
-function setEnemyGroup(){
+async function setEnemyGroup(){
   let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
   let table = [];
 
@@ -1937,9 +1937,9 @@ function setEnemyGroup(){
 
     for(let j=0; j<spawn_cnt; j++){
       // 位置
-      const [x, y] = setSpawnXY(0, enemy.group_spawn_flag, enemy.id);
+      const [x, y] = await setSpawnXY(0, enemy.group_spawn_flag, enemy.id);
       // 設置
-      setEnemy(enemy_id, x, y);
+      await setEnemy(enemy_id, x, y);
       let e = enemy_group[enemy_group.length-1];
       e.func_spawn(e);
     }
@@ -1947,13 +1947,13 @@ function setEnemyGroup(){
 }
 
 // priority: ifで比較する値が高いほどそのifは優先される
-function setSpawnXY(priority, group_spawn_flag, id){
-  const [x,y] = setRandomXY();
+async function setSpawnXY(priority, group_spawn_flag, id){
+  const [x,y] = await setRandomXY();
 
   // 配置制限
   // PLの視界外
   if(player.map_sight[y][x] && priority < 300)
-    return setSpawnXY(++priority, group_spawn_flag, id);
+    return await setSpawnXY(++priority, group_spawn_flag, id);
   // 壁が隣
   let next_wall_flag = false;
   for(let i=-1; i<=1; i++)
@@ -1961,7 +1961,7 @@ function setSpawnXY(priority, group_spawn_flag, id){
       if(map[y+i][x+j] == id_map.none)
         next_wall_flag = true;
   if(!next_wall_flag && priority < 200)
-    return setSpawnXY(++priority, group_spawn_flag, id);
+    return await setSpawnXY(++priority, group_spawn_flag, id);
   // グループ湧き
   if(group_spawn_flag && priority < 100){
     let next_e_flag = false;
@@ -1971,13 +1971,13 @@ function setSpawnXY(priority, group_spawn_flag, id){
           if(x+j == e.x && y+i == e.y && e.id == id)
             next_e_flag = true;
     if(!next_e_flag)
-      return setSpawnXY(++priority, group_spawn_flag, id);
+      return await setSpawnXY(++priority, group_spawn_flag, id);
   }
   return [x, y];
 }
 
 // エネミーがいるか
-function isEnemy(x, y){
+async function isEnemy(x, y){
   for(let e in enemy_group)
     if(enemy_group[e].x == x && enemy_group[e].y == y)
       return true;
@@ -1985,8 +1985,8 @@ function isEnemy(x, y){
 }
 
 // エネミーの死亡判定
-function removeEnemy(enemy){
-  addLog(enemy.name+" は倒れた");
+async function removeEnemy(enemy){
+  await addLog(enemy.name+" は倒れた");
   enemy_group.splice(enemy_group.indexOf(enemy), 1);
   return true;
 }
@@ -1995,7 +1995,7 @@ function removeEnemy(enemy){
 
 // 描画
 // PL中心
-function drawMap(){
+async function drawMap(){
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   for(let i=-player.y; i<SIZEY-player.y; i++)
     for(let j=-player.x; j<SIZEX-player.x; j++){
@@ -2044,7 +2044,7 @@ function drawMap(){
 }
 
 // すべて描画
-function drawMapAll(){
+async function drawMapAll(){
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   for(let i=0; i<SIZEY; i++){
     for(let j=0; j<SIZEX; j++){
@@ -2094,45 +2094,45 @@ function drawMapAll(){
 }
 
 // 描画マップ更新
-function updateMap(){
+async function updateMap(){
   // 視界更新
-  updateSight();
+  await updateSight();
   // 描画マップ更新
-  updateMapDraw();
+  await updateMapDraw();
   // 壁追加
-  updateMDWall();
+  await updateMDWall();
   // 階段・ポータル
-  updateMDStairPortal();
+  await updateMDStairPortal();
   // 罠
-  updateMDTrap();
+  await updateMDTrap();
   // 射撃・投擲・魔法
   if(shot_flag || throwing_flag|| magic_flag)
-    updateShotRange();
+    await updateShotRange();
   else
-    initMap(map_shotrange, false);
+    await initMap(map_shotrange, false);
 
   // アイテム
-  updateMDItem();
+  await updateMDItem();
   // エネミー
-  updateMDEnemyGroup();
+  await updateMDEnemyGroup();
   // ショップ
-  updateMDShopGroup();
+  await updateMDShopGroup();
   // NPC
-  updateMDNPCGroup();
+  await updateMDNPCGroup();
   // プレイヤー
   map_draw[player.y][player.x] = char_map.player;
 }
 
 // 視界更新
-function updateSight(){
+async function updateSight(){
   if(!clairvoyance_flag){
-    initMap(player.map_sight, false);
-    getSight(player);
+    await initMap(player.map_sight, false);
+    await getSight(player);
   }
 }
 
 // 描画マップ更新
-function updateMapDraw(){
+async function updateMapDraw(){
   for(let i=0; i<SIZEY; i++)
     for(let j=0; j<SIZEX; j++)
       if(map_draw[i][j]=="√" || map_draw[i][j]=="㊦") continue;// debug
@@ -2144,7 +2144,7 @@ function updateMapDraw(){
 }
 
 // 階段・ポータル更新
-function updateMDStairPortal(){
+async function updateMDStairPortal(){
   if(!(stair_pos.x === undefined) && !(stair_pos.y === undefined) && player.map_sight[stair_pos.y][stair_pos.x])
     map_draw[stair_pos.y][stair_pos.x] = char_map.stair;
   if(!(portal_pos.x === undefined) && !(portal_pos.y === undefined) && player.map_sight[portal_pos.y][portal_pos.x])
@@ -2152,11 +2152,11 @@ function updateMDStairPortal(){
 }
 
 // 壁更新
-function updateMDWall(){
+async function updateMDWall(){
   for(let i=0; i<SIZEY; i++)
     for(let j=0; j<SIZEX; j++){
       // 壁
-      if(player.map_sight[i][j] && (map[i][j] == id_map.room || isStair(j, i) || isPortal(j, i))){
+      if(player.map_sight[i][j] && (map[i][j] == id_map.room || await isStair(j, i) || await isPortal(j, i))){
         // 縦
         for(let k=-1; k<=1; k++)
           if(map[i][j+k] == id_map.none)
@@ -2174,42 +2174,42 @@ function updateMDWall(){
       else if(map_draw[i][j] == char_map[id_map.path]){
         for(let n of [-1, 1])
           for(let m of [-1, 1])
-            if(isInMap(j+m, i+n) && ![id_map.none, id_map.path].includes(map[i+n][j+m]))
+            if(await isInMap(j+m, i+n) && ![id_map.none, id_map.path].includes(map[i+n][j+m]))
               map_draw[i][j] = char_map.door;
       }
     }
 }
 
 // 罠
-function updateMDTrap(){
+async function updateMDTrap(){
   for(let t of trap_group)
     if(player.map_sight[t.y][t.x] && t.visible)
       map_draw[t.y][t.x] = char_map.trap;
 }
 
 // エネミー描画
-function updateMDEnemyGroup(){
+async function updateMDEnemyGroup(){
   for(let e of enemy_group)
     if(player.map_sight[e.y][e.x])
       map_draw[e.y][e.x] = e.char;
 }
 
 // ショップ描画
-function updateMDShopGroup(){
+async function updateMDShopGroup(){
   for(let s of shop_group)
     if(player.map_sight[s.y][s.x])
       map_draw[s.y][s.x] = s.char;
 }
 
 // NPC描画
-function updateMDNPCGroup(){
+async function updateMDNPCGroup(){
   for(let n of npc_group)
     if(player.map_sight[n.y][n.x])
       map_draw[n.y][n.x] = n.char;
 }
 
 // アイテム描画
-function updateMDItem(){
+async function updateMDItem(){
   for(let i of item_group)
     if(player.map_sight[i.y][i.x]){
       if(i.type=="stack")
@@ -2220,8 +2220,8 @@ function updateMDItem(){
 }
 
 // 射撃・投擲・魔法の射程
-function updateShotRange(){
-  initMap(map_shotrange, false);
+async function updateShotRange(){
+  await initMap(map_shotrange, false);
 
   // 左上
   for(let cnt = 1; cnt<=10; cnt++){
@@ -2273,21 +2273,21 @@ function updateShotRange(){
   }
 }
 
-function isInMap(x, y){
+async function isInMap(x, y){
   if(0 <= x && x < SIZEX && 0 <= y && y < SIZEY)
     return true;
   return false;
 }
 
-function isRoom(x, y){
+async function isRoom(x, y){
   if(![id_map.path, id_map.none].includes(map[y][x]))
     return true;
   return false;
 }
 
-function isSameRoom(a_x, a_y, b_x, b_y){
+async function isSameRoom(a_x, a_y, b_x, b_y){
   let checked_map = [];
-  getRoomXY(a_x, a_y, checked_map);
+  await getRoomXY(a_x, a_y, checked_map);
 
   for(let i of checked_map)
     if(i.x==b_x && i.y==b_y)
@@ -2297,22 +2297,22 @@ function isSameRoom(a_x, a_y, b_x, b_y){
 
 // [x,y]に位置する部屋の座標取得
 // checked_map: {x, y}
-function getRoomXY(x, y, map){
-  if(!isRoom(x, y)) return;
+async function getRoomXY(x, y, map){
+  if(!await isRoom(x, y)) return;
   for(let i=-1; i<=1; i++)
     for(let j=-1; j<=1; j++)
       if(!(map.find(v=>v.x==x+j && v.y==y+i))){
         map.push({x:x+j, y:y+i});
-        getRoomXY(x+j, y+i, map);
+        await getRoomXY(x+j, y+i, map);
       }
 }
 
-function canMove(x, y){
-  if(!isInMap(x,y) 
+async function canMove(x, y){
+  if(!await isInMap(x,y) 
     || map[y][x] == id_map.none
-    || isEnemy(x,y)
-    || isShop(x,y)
-    || isNPC(x,y)
+    || await isEnemy(x,y)
+    || await isShop(x,y)
+    || await isNPC(x,y)
     || (x==player.x && y==player.y)
   )
     return false;
@@ -2320,7 +2320,7 @@ function canMove(x, y){
 }
 
 // 斜め移動の判定
-function canDiagonal(x, y, dir_x, dir_y){
+async function canDiagonal(x, y, dir_x, dir_y){
   if(dir_x==0 || dir_y==0)
     return true;
 
@@ -2331,7 +2331,7 @@ function canDiagonal(x, y, dir_x, dir_y){
 }
 
 // 千里眼
-function clairvoyance(){
+async function clairvoyance(){
   clairvoyance_flag = true;
   for(let i=0; i<SIZEY; i++)
     for(let j=0; j<SIZEX; j++)
@@ -2341,39 +2341,39 @@ function clairvoyance(){
 //==================================================MAP GEN==================================================
 
 // プレイヤー位置
-function setPlayerPos(){
-  let [x,y] = setRandomXY();
+async function setPlayerPos(){
+  let [x,y] = await setRandomXY();
 
   player.x = x;
   player.y = y;
-  updateSight();
+  await updateSight();
 }
 
-function setPlayerPosManual(x, y){
+async function setPlayerPosManual(x, y){
   player.x = x;
   player.y = y;
-  updateSight();
+  await updateSight();
 }
 
 // マップ自動生成
-function generateMap(){
+async function generateMap(){
   let path_anchor = [];
   room_num = 0;
 
   // 部屋生成
   for(let i=0; i<ROOMNUM; i++)
-    if(genRoom(path_anchor))
+    if(await genRoom(path_anchor))
       room_num++;
 
   // 通路生成
-  genPath(path_anchor);
+  await genPath(path_anchor);
 
   // debug
-  //clairvoyance();
+  //await clairvoyance();
 }
 
 // 部屋生成
-function genRoom(path_anchor){
+async function genRoom(path_anchor){
   let room_h = Math.floor(Math.random()*(ROOMSIZEMAX-ROOMSIZEMIN+1)+ROOMSIZEMIN+1);
   let room_w = Math.floor(Math.random()*(ROOMSIZEMAX-ROOMSIZEMIN+1)+ROOMSIZEMIN+1);
   let anchor_y = Math.floor(Math.random()*(SIZEY-room_h-1-2)+2);
@@ -2386,7 +2386,7 @@ function genRoom(path_anchor){
   // 他の部屋の重複判定
   for(let j=-3; j<room_h+3; j++)
     for(let k=-3; k<room_w+3; k++)
-      if(isInMap(anchor_x+k, anchor_y+j)
+      if(await isInMap(anchor_x+k, anchor_y+j)
       && map[anchor_y+j][anchor_x+k] == id_map.room)
         return false;
   
@@ -2409,7 +2409,7 @@ function genRoom(path_anchor){
 }
 
 // 通路生成
-function genPath(path_anchor){
+async function genPath(path_anchor){
   let result_couple = [];
 
   // アンカー間が最短のペア
@@ -2458,7 +2458,7 @@ function genPath(path_anchor){
 }
 
 // 固有マップ生成
-function generateUniqueMap(um){
+async function generateUniqueMap(um){
   let x_offset = Math.floor(SIZEX/2-um.map[0].length/2);
   for(let i=0; i<um.map.length; i++){
     let s = um.map[i].split("");
@@ -2466,18 +2466,18 @@ function generateUniqueMap(um){
       map[i][j] = Number(s[j-x_offset]);
   }
 
-  setPlayerPosManual(um.pl_x+x_offset, um.pl_y);
+  await setPlayerPosManual(um.pl_x+x_offset, um.pl_y);
   um.func(x_offset);
 }
 
-function initMaps(){
+async function initMaps(){
   // 地形マップ
-  initMap(map, id_map.none);
+  await initMap(map, id_map.none);
   // 描画マップ
-  initMap(map_draw, char_map[0]);
+  await initMap(map_draw, char_map[0]);
 }
 
-function initMap(m, v){
+async function initMap(m, v){
   m.splice(0);
   for(let i=0; i<SIZEY; i++){
     m.push([]);
@@ -2490,7 +2490,7 @@ function initMap(m, v){
 //==================================================NAME==================================================
 
 // 名前入力
-function inputName(){
+async function inputName(){
   ctx.textAlign = "center";
   ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
   let y_offset = FONT_SIZE*2;
@@ -2544,13 +2544,13 @@ function inputName(){
       else syllabary = katakana;
 
       // 一覧
-      displaySyllabary(y_offset+FONT_SIZE*4);
+      await displaySyllabary(y_offset+FONT_SIZE*4);
     }
 
     else if(syllabary[input_name_pos.y][input_name_pos.x]=="終"){
       ctx.textAlign = "start";
       input_name_flag = false;
-      init();
+      await init();
       return;
     }
     else
@@ -2561,7 +2561,7 @@ function inputName(){
     player.name = player.name.slice(0, -1);
 
   // 一覧
-  displaySyllabary(y_offset+FONT_SIZE*4);
+  await displaySyllabary(y_offset+FONT_SIZE*4);
 
   // 文字数制限
   let name_length = 0;
@@ -2582,7 +2582,7 @@ function inputName(){
 }
 
 // 五十音表示
-function displaySyllabary(y_offset){
+async function displaySyllabary(y_offset){
   let x_offset = canvas.clientWidth/2-(syllabary[0].length*2-1)*FONT_SIZE/2;
   for(let i=0; i<syllabary.length; i++)
     for(let j=0; j<syllabary[i].length; j++){
