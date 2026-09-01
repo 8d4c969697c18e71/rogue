@@ -191,10 +191,12 @@ function addLog(text){
   log_reserve.push(addSpaceAfterBreak(turn_cnt + ": " + text));
   if(log_reserve.length>LOG_RESERVE_SIZE)
     log_reserve.shift();
+  drawLog();
 }
 
 function addLogSameLine(text){
   log_reserve[log_reserve.length-1] += "　" + text;
+  drawLog();
 }
 
 //=========================NOTE=========================

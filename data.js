@@ -225,7 +225,7 @@ let unique_map = [  // 固有マップ
     "011111000111110",//D
     "000000000000000",//E
     ],
-    func: function(x_offset){
+    func: async function(x_offset){
       setItem(0x800,1+x_offset, 1);
       setItem(0xf01,2+x_offset, 1);
       setShop(0x05, 9+x_offset, 1);
@@ -249,7 +249,7 @@ let unique_map = [  // 固有マップ
     "001111100",
     "000000000",
     ],
-    func: function(x_offset){
+    func: async function(x_offset){
       setShop(0x05, 6+x_offset, 4);
       setStair(4+x_offset, 1);
       setPortal(2+x_offset, 4);
@@ -276,9 +276,9 @@ let unique_map = [  // 固有マップ
     "01111111110",
     "00000000000",
     ],
-    func: function(x_offset){
+    func: async function(x_offset){
       setStair(5+x_offset, 2);
-      setNPC(0x00, 7+x_offset, 9);
+      //setNPC(0x00, 7+x_offset, 9);
       setNPC(0x02, 9+x_offset, 9);
       setNPC(0x03, 4+x_offset, 5);
       setShop(0x00, 1+x_offset, 7);
@@ -292,6 +292,7 @@ let unique_map = [  // 固有マップ
 
 //==================================================INFO==================================================
 
+let exeEventsFlg = false;
 let room_num;
 let turn_cnt = 1;
 let floor_cnt = -1;
@@ -358,15 +359,15 @@ const condition_data = [//TODO
     id: 0x00,
     name: "毒",
     turn: 5,
-    func_be: function(who){
+    func_be: async function(who){
       addLog(who.name+" は毒に侵された");
     },
-    func_during: function(who){
+    func_during: async function(who){
       let dmg = 2;
       addHP(who, -2);
       addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
     },
-    func_recovery: function(who){
+    func_recovery: async function(who){
       addLog(who.name+" の毒は取り除かれた");
     },
   },
@@ -374,15 +375,15 @@ const condition_data = [//TODO
     id: 0x01,
     name: "眠",
     turn: 5,
-    func_be: function(who){
+    func_be: async function(who){
       addLog(who.name+" は眠りに落ちた");
       who.cannot_action_flag = true;
     },
-    func_during: function(who){
+    func_during: async function(who){
       addLog(who.name+" は眠っている");
       who.cannot_action_flag = true;
     },
-    func_recovery: function(who){
+    func_recovery: async function(who){
       addLog(who.name+" は目を覚ました");
       who.cannot_action_flag = false;
     },
@@ -391,13 +392,13 @@ const condition_data = [//TODO
     id: 0x02,
     name: "盲",
     turn: 10,
-    func_be: function(who){
+    func_be: async function(who){
       addLog(who.name+" は前が見えない");
       who.sight_range_offset = -who.sight_range;
     },
-    func_during: function(who){
+    func_during: async function(who){
     },
-    func_recovery: function(who){
+    func_recovery: async function(who){
       addLog(who.name+" の視力は回復した");
       who.sight_range_offset = 0;
     },
@@ -406,14 +407,14 @@ const condition_data = [//TODO
     id: 0x03,
     name: "縛",
     turn: 10,
-    func_be: function(who){
+    func_be: async function(who){
       addLog(who.name+" は身動きがとれない");
       who.cannot_move_flag = true;
     },
-    func_during: function(who){
+    func_during: async function(who){
       who.cannot_move_flag = true;
     },
-    func_recovery: function(who){
+    func_recovery: async function(who){
       addLog(who.name+" は動けるようになった");
       who.cannot_move_flag = false;
     },
@@ -423,15 +424,15 @@ const condition_data = [//TODO
     id: 0x80,
     name: "受",
     turn: 2,
-    func_be: function(who){
+    func_be: async function(who){
       addLog(who.name+" は受け流しの構えをとった");
       who.cannot_action_flag = true;
       if(who == player) turn--;
     },
-    func_during: function(who){
+    func_during: async function(who){
       who.cannot_action_flag = true;
     },
-    func_recovery: function(who){
+    func_recovery: async function(who){
       addLog(who.name+" は受け流しの構えを解いた");
       who.cannot_action_flag = false;
     },
@@ -444,7 +445,7 @@ const trap_data = [//TODO
   {
     id: 0x00,
     name: "毒床",
-    func: function(who){
+    func: async function(who){
       setCondition(who, 0x00);
       addLog(who.name+" は毒の床を踏んだ");
       audio_poison.play();
@@ -453,7 +454,7 @@ const trap_data = [//TODO
   {
     id: 0x01,
     name: "睡眠ガス",
-    func: function(who){
+    func: async function(who){
       setCondition(who, 0x01);
       addLog(who.name+" は睡眠ガスに包まれた");
       audio_poison.play();
@@ -462,7 +463,7 @@ const trap_data = [//TODO
   {
     id: 0x02,
     name: "黒い霧",
-    func: function(who){
+    func: async function(who){
       setCondition(who, 0x02);
       addLog(who.name+" の周囲が黒い霧に包まれた");
       audio_poison.play();
@@ -471,7 +472,7 @@ const trap_data = [//TODO
   {
     id: 0x03,
     name: "トラばさみ",
-    func: function(who){
+    func: async function(who){
       setCondition(who, 0x03);
       addLog(who.name+" はトラばさみにかかった");
       audio_hit.play();
@@ -480,7 +481,7 @@ const trap_data = [//TODO
   {
     id: 0x04,
     name: "転送罠",
-    func: function(who){
+    func: async function(who){
       let [x,y] = [];
       while(1){
         [x,y] = setRandomXY();
@@ -527,7 +528,7 @@ const item_data = [//TODO
     id: 0x010,
     name: "三日月草",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = 10;
       addHP(player, value);
       addHung(5);
@@ -540,7 +541,7 @@ const item_data = [//TODO
     id: 0x011,
     name: "半月草",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = 20;
       addHP(player, value);
       addHung(5);
@@ -553,7 +554,7 @@ const item_data = [//TODO
     id: 0x012,
     name: "後月草",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = 30;
       addHP(player, value);
       addHung(5);
@@ -566,7 +567,7 @@ const item_data = [//TODO
     id: 0x013,
     name: "満月草",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = 50;
       addHP(player, value);
       addHung(5);
@@ -579,7 +580,7 @@ const item_data = [//TODO
     id: 0x014,
     name: "新月草",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = player.hp_max;
       addHP(player, value);
       addHung(5);
@@ -592,7 +593,7 @@ const item_data = [//TODO
     id: 0x020,
     name: "香料",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = 15;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -604,7 +605,7 @@ const item_data = [//TODO
     id: 0x021,
     name: "芳しい香料",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = 30;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -616,7 +617,7 @@ const item_data = [//TODO
     id: 0x022,
     name: "祝福された香料",
     type: "consume",
-    func: function(){
+    func: async function(){
       let value = player.mp_max;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -628,7 +629,7 @@ const item_data = [//TODO
     id: 0x030,
     name: "糧食",
     type: "food",
-    func: function(){
+    func: async function(){
       let value = 30;
       addHung(value);
       addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
@@ -642,32 +643,32 @@ const item_data = [//TODO
     id: 0x100,
     name: "ショートソード",
     type: "weapon",
-    func_equip: function(){
+    func_equip: async function(){
       player.atk_offset += 2;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.atk_offset -= 2;
     },
-    func_attack: function(to){},
+    func_attack: async function(to){},
   },
   {
     id: 0x101,
     name: "ブロードソード",
     type: "weapon",
-    func_equip: function(){
+    func_equip: async function(){
       player.atk_offset += 3;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.atk_offset -= 3;
     },
-    func_attack: function(to){},
+    func_attack: async function(to){},
   },
   // 射撃武器 0x2XX
   {
     id: 0x200,
     name: "狩猟弓",
     type: "weapon",
-    func_equip: function(){
+    func_equip: async function(){
       player.atk_offset -= 2;
       bow_flag = true;
       if(!player.ammo)
@@ -678,70 +679,70 @@ const item_data = [//TODO
           }
         }
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.atk_offset += 2;
       bow_flag = false;
     },
-    func_attack: function(to){},
+    func_attack: async function(to){},
   },
   // 鎧 0x3XX
   {
     id: 0x300,
     name: "レザーアーマー",
     type: "armor",
-    func_equip: function(){
+    func_equip: async function(){
       player.def_offset += 1;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.def_offset -= 1;
     },
-    func_attacked: function(from){},
+    func_attacked: async function(from){},
   },
   {
     id: 0x301,
     name: "チェインメイル",
     type: "armor",
-    func_equip: function(){
+    func_equip: async function(){
       player.def_offset += 2;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.def_offset -= 2;
     },
-    func_attacked: function(from){},
+    func_attacked: async function(from){},
   },
   {
     id: 0x302,
     name: "無名騎士の鎧",
     type: "armor",
-    func_equip: function(){
+    func_equip: async function(){
       player.def_offset += 3;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.def_offset -= 3;
     },
-    func_attacked: function(from){},
+    func_attacked: async function(from){},
   },
   {
     id: 0x380,
     name: "レアルのローブ",
     type: "armor",
-    func_equip: function(){
+    func_equip: async function(){
       player.mp_max_offset += 3;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.mp_max_offset -= 3;
     },
-    func_attacked: function(from){},
+    func_attacked: async function(from){},
   },
   // 指輪 0x4XX
   {
     id: 0x400,
     name: "小生命の指輪",
     type: "ring",
-    func_equip: function(){
+    func_equip: async function(){
       player.hp_max_offset += 10;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.hp_max_offset -= 10;
       addHP(player, 0);
     },
@@ -750,10 +751,10 @@ const item_data = [//TODO
     id: 0x401,
     name: "蛇印の指輪",
     type: "ring",
-    func_equip: function(){
+    func_equip: async function(){
       player.mp_max_offset += 20;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.mp_max_offset -= 20;
       addMP(player, 0);
     },
@@ -762,10 +763,10 @@ const item_data = [//TODO
     id: 0x402,
     name: "緑草の指輪",
     type: "ring",
-    func_equip: function(){
+    func_equip: async function(){
       player.hung_rate_offset += 5;
     },
-    func_unequip: function(){
+    func_unequip: async function(){
       player.hung_rate_offset -= 5;
     },
   },
@@ -774,7 +775,7 @@ const item_data = [//TODO
     id: 0x500,
     name: "千里眼の巻物",
     type: "scroll",
-    func: function(){
+    func: async function(){
       clairvoyance();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
@@ -785,7 +786,7 @@ const item_data = [//TODO
     id: 0x600,
     name: "ソウルの杖",
     type: "staff",
-    func: function(){
+    func: async function(){
       if(player.mp < 4){
         addLog("MP が足りない");
         return false;
@@ -795,7 +796,7 @@ const item_data = [//TODO
       player.magic_using = this;
       return false;
     },
-    func_cast: function(dir){
+    func_cast: async function(dir){
       addMP(player, -4);
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
@@ -806,7 +807,7 @@ const item_data = [//TODO
     id: 0x601,
     name: "回復の聖鈴",
     type: "staff",
-    func: function(){
+    func: async function(){
       if(player.mp < 8){
         addLog("MP が足りない");
         return false;
@@ -818,13 +819,13 @@ const item_data = [//TODO
       audio_heal.play();
       return undefined;
     },
-    func_cast: function(dir){}
+    func_cast: async function(dir){}
   },
   {
     id: 0x602,
     name: "跳躍の杖",
     type: "staff",
-    func: function(){
+    func: async function(){
       if(player.mp < 14){
         addLog("MP が足りない");
         return false;
@@ -834,7 +835,7 @@ const item_data = [//TODO
       player.magic_using = this;
       return false;
     },
-    func_cast: function(dir){
+    func_cast: async function(dir){
       addMP(player, -14);
       if(jump(player, dir, 3)){
         addLog(player.name+" は跳んだ");
@@ -852,8 +853,8 @@ const item_data = [//TODO
     type: "ammo",
     dmg: 4,
     range: 10,
-    func_equip: function(){},
-    func_unequip: function(){},
+    func_equip: async function(){},
+    func_unequip: async function(){},
   },
   {
     id: 0x701,
@@ -861,8 +862,8 @@ const item_data = [//TODO
     type: "ammo",
     dmg: 6,
     range: 8,
-    func_equip: function(){},
-    func_unequip: function(){},
+    func_equip: async function(){},
+    func_unequip: async function(){},
   },
   {
     id: 0x7f0,
@@ -870,8 +871,8 @@ const item_data = [//TODO
     type: "ammo",
     dmg: 0,
     range: 2,
-    func_equip: function(){},
-    func_unequip: function(){},
+    func_equip: async function(){},
+    func_unequip: async function(){},
   },
   // スタックアイテム 0x8XX
   {
@@ -904,7 +905,7 @@ const item_data = [//TODO
     mp_regen_rate: 10,
     sight_range: 3,
     lvup: {hp_max: 2, mp_max: 2},
-    func: function(){
+    func: async function(){
       log_reserve.pop();
       player.job = this.id;
       backLv();
@@ -928,7 +929,7 @@ const item_data = [//TODO
     mp_regen_rate: 10,
     sight_range: 3,
     lvup: {hp_max: 5, mp_max: 0},
-    func: function(){
+    func: async function(){
       if(INVENTORY_SIZE-inventory.length >= 3){
         log_reserve.pop();
         player.job = this.id;
@@ -961,7 +962,7 @@ const item_data = [//TODO
     mp_regen_rate: 10,
     sight_range: 9,
     lvup: {hp_max: 3, mp_max: 2},
-    func: function(){
+    func: async function(){
       if(INVENTORY_SIZE-inventory.length >= 5){
         log_reserve.pop();
         player.job = this.id;
@@ -996,7 +997,7 @@ const item_data = [//TODO
     mp_regen_rate: 7,
     sight_range: 6,
     lvup: {hp_max: 1, mp_max: 4},
-    func: function(){
+    func: async function(){
       if(INVENTORY_SIZE-inventory.length >= 3){
         log_reserve.pop();
         player.job = this.id;
@@ -1087,8 +1088,8 @@ const enemy_data = [//TODO
     distance: 0,
     group_spawn_flag: false,
     exp:2,
-    func_spawn: function(me){},
-    func_died: function(){},
+    func_spawn: async function(me){},
+    func_died: async function(){},
     skill: [],
   },
   {
@@ -1105,11 +1106,11 @@ const enemy_data = [//TODO
     distance: 0,
     group_spawn_flag: true,
     exp:1,
-    func_spawn: function(me){
+    func_spawn: async function(me){
       setConditionTurn(me, 0x03, 1000);
       log_reserve.splice(log_reserve.length-1, 1);
     },
-    func_died: function(){},
+    func_died: async function(){},
     skill: [
       {
         id: 0x000,
@@ -1132,8 +1133,8 @@ const enemy_data = [//TODO
     distance: 0,
     group_spawn_flag: false,
     exp:4,
-    func_spawn: function(me){},
-    func_died: function(){},
+    func_spawn: async function(me){},
+    func_died: async function(){},
     skill: [],
   },
   {
@@ -1150,7 +1151,7 @@ const enemy_data = [//TODO
     distance:3,
     group_spawn_flag: false,
     exp:4,
-    func_spawn: function(me){
+    func_spawn: async function(me){
       this.lv = Math.floor(floor_cnt/2);
       this.hp_max = Math.floor(10*floor_cnt/3);
       this.hp = this.hp_max;
@@ -1158,7 +1159,7 @@ const enemy_data = [//TODO
       this.mp = this.mp_max;
       this.atk = 2+Math.floor(2+2*turn_cnt/3);
     },
-    func_died: function(){},
+    func_died: async function(){},
     skill: [
       {
         id: 0x000,
@@ -1181,8 +1182,8 @@ const enemy_data = [//TODO
     distance: 0,
     group_spawn_flag: false,
     exp:6,
-    func_spawn: function(me){},
-    func_died: function(){},
+    func_spawn: async function(me){},
+    func_died: async function(){},
     skill: [
       {
         id:0x001,
@@ -1204,8 +1205,8 @@ const enemy_data = [//TODO
     distance: 0,
     group_spawn_flag: true,
     exp:5,
-    func_spawn: function(me){},
-    func_died: function(){},
+    func_spawn: async function(me){},
+    func_died: async function(){},
     skill: [
       {
         id: 0x003,
@@ -1227,8 +1228,8 @@ const enemy_data = [//TODO
     distance: 0,
     group_spawn_flag: false,
     exp:8,
-    func_spawn: function(me){},
-    func_died: function(){},
+    func_spawn: async function(me){},
+    func_died: async function(){},
     skill: [
       {
         id: 0x004,
@@ -1273,7 +1274,7 @@ const skill_data = [//TODO
     id: 0x000,
     name: "射撃",
     ammo: undefined,
-    func: function(from, to){
+    func: async function(from, to){
       for(let d in key_direction){
         let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
         let xy = straightRecursive(from.x, from.y, key_direction[d], ammo.range-1);
@@ -1296,7 +1297,7 @@ const skill_data = [//TODO
   {
     id: 0x001,
     name: "受け流し",
-    func: function(from, to){
+    func: async function(from, to){
       setCondition(from, 0x80);
       return true;
     }
@@ -1306,14 +1307,14 @@ const skill_data = [//TODO
     name: "クイックステップ",
     direction: undefined,
     distance: undefined,
-    func: function(from, to){
+    func: async function(from, to){
       return jump(from, this.direction, this.distance);
     }
   },
   {
     id: 0x003,
     name: "毒攻撃",
-    func: function(from, to){
+    func: async function(from, to){
       for(let d in key_direction){
         let x = from.x + key_direction[d].x;
         let y = from.y + key_direction[d].y;
@@ -1340,7 +1341,7 @@ const skill_data = [//TODO
   {
     id: 0x004,
     name: "突撃",
-    func: function(from, to){
+    func: async function(from, to){
       for(let d in key_direction){
         let xy = straightRecursiveDiagonal(from.x, from.y, key_direction[d], SIZEX+SIZEY);
         if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y) && from.map_sight[to.y][to.x]){
@@ -1378,7 +1379,7 @@ const npc_data = [
       "ダンジョンの入り口には治癒士もいるぞ",
     ],
     dialogue_cnt: 0,
-    func: function(){},
+    func: async function(){},
   },
   {
     id: 0x01,
@@ -1389,7 +1390,7 @@ const npc_data = [
       "頑張れよ",
     ],
     dialogue_cnt: 0,
-    func: function(){},
+    func: async function(){},
   },
   {
     id: 0x02,
@@ -1420,7 +1421,7 @@ const npc_data = [
       "メレンは物を買ってくれるよ",
     ],
     dialogue_cnt: 0,
-    func: function(){},
+    func: async function(){},
   },
   {
     id: 0x03,
@@ -1431,7 +1432,7 @@ const npc_data = [
       "回復します",
     ],
     dialogue_cnt: 0,
-    func: function(){
+    func: async function(){
       fullRecovery(player);
     },
   },
@@ -1453,9 +1454,9 @@ const shop_data = [//TODO
       {id: 0x020, price: 5,},
       {id: 0x030, price: 5,},
     ],
-    func_before: function(){},
-    func_buy: function(){},
-    func_after: function(){},
+    func_before: async function(){},
+    func_buy: async function(){},
+    func_after: async function(){},
   },
   {
     id: 0x01,
@@ -1469,7 +1470,7 @@ const shop_data = [//TODO
       {id: 0xf02, price: 0,},
       {id: 0xf03, price: 0,},
     ],
-    func_before: function(){
+    func_before: async function(){
       if(INVENTORY_SIZE-inventory.length < 4){
         addLog(shop_using.name+"「...持ちきれないぞ」");
         shop_using = undefined;
@@ -1477,7 +1478,7 @@ const shop_data = [//TODO
         shop_flag = false;
       }
     },
-    func_buy: function(){
+    func_buy: async function(){
       shop_group.splice(shop_group.indexOf(this),1);
       useItem([inventory.length-1]);
       addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
@@ -1486,7 +1487,7 @@ const shop_data = [//TODO
       shop_flag = false;
       setNPC(0x01, this.x, this.y);
     },
-    func_after: function(){},
+    func_after: async function(){},
   },
   {
     id: 0x02,
@@ -1509,9 +1510,9 @@ const shop_data = [//TODO
       {id: 0x500, price: -20,},
       {id: 0x700, price: -1,},
     ],
-    func_before: function(){},
-    func_buy: function(){},
-    func_after: function(){},
+    func_before: async function(){},
+    func_buy: async function(){},
+    func_after: async function(){},
   },
   {
     id: 0x03,
@@ -1529,9 +1530,9 @@ const shop_data = [//TODO
       {id: 0x401, price: 400,},
       {id: 0x601, price: 500,},
     ],
-    func_before: function(){},
-    func_buy: function(){},
-    func_after: function(){},
+    func_before: async function(){},
+    func_buy: async function(){},
+    func_after: async function(){},
   },
   {
     id: 0x05,
@@ -1551,9 +1552,9 @@ const shop_data = [//TODO
       {id: 0x800, price: 20,},
       {id: 0x030, price: -15,},
     ],
-    func_before: function(){},
-    func_buy: function(){},
-    func_after: function(){},
+    func_before: async function(){},
+    func_buy: async function(){},
+    func_after: async function(){},
   },
 ];
 let shop_group = [];
