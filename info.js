@@ -1,6 +1,6 @@
 //=========================INFO=========================
 
-async function drawInfo(){
+function drawInfo(){
   info.innerHTML = "";
 
   // マップ情報
@@ -44,7 +44,7 @@ async function drawInfo(){
 
 //=========================INVENTORY=========================
 
-async function drawInv(){
+function drawInv(){
   inv.innerHTML = "";
   if(ui_flag) inv.style.border = "solid 1px white";
   else inv.style.border = "solid 1px black";
@@ -76,9 +76,9 @@ async function drawInv(){
 
 //=========================SHOP=========================
 
-async function drawShop(){
-  if(await isPhone() && shop_flag){
-    await drawShopPhone();
+function drawShop(){
+  if(isPhone() && shop_flag){
+    drawShopPhone();
     return;
   }
 
@@ -107,7 +107,7 @@ async function drawShop(){
   }
 }
 
-async function drawShopPhone(){
+function drawShopPhone(){
   inv.innerHTML = "";
   inv.style.border = "solid 1px black";
 
@@ -139,9 +139,9 @@ async function drawShopPhone(){
 
 //=========================LOG=========================
 
-async function drawLog(){
-  if(await isPhone()){
-    await drawLogPhone();
+function drawLog(){
+  if(isPhone()){
+    drawLogPhone();
     return;
   }
 
@@ -151,14 +151,14 @@ async function drawLog(){
   log.insertAdjacentHTML("afterbegin","LOG<br>");
 }
 
-async function drawLogPhone(){
+function drawLogPhone(){
   log.innerHTML = "";
   for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
     log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
   log.insertAdjacentHTML("afterbegin","LOG<br>");
 }
 
-async function addSpaceAfterBreak(str){
+function addSpaceAfterBreak(str){
   if(str.match(/<br>/)){
     let index = [0];
     let br_num = str.match(/<br>/g).length;
@@ -187,58 +187,58 @@ async function addSpaceAfterBreak(str){
   return str;
 }
 
-async function addLog(text){
-  log_reserve.push(await addSpaceAfterBreak(turn_cnt + ": " + text));
+function addLog(text){
+  log_reserve.push(addSpaceAfterBreak(turn_cnt + ": " + text));
   if(log_reserve.length>LOG_RESERVE_SIZE)
     log_reserve.shift();
 }
 
-async function addLogSameLine(text){
+function addLogSameLine(text){
   log_reserve[log_reserve.length-1] += "　" + text;
 }
 
 //=========================NOTE=========================
 
-async function drawNote(){
-  if(await isPhone()) return;
+function drawNote(){
+  if(isPhone()) return;
 
   note.innerHTML = "NOTE<br>";
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
+    colorUI("&nbsp;"+char_map.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;赤 ", "red")+": エネミー<br>");
+    colorUI("&nbsp;赤 ", "red")+": エネミー<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
+    colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.stair+"&nbsp;", "blue")+": 階段<br>");;
+    colorUI("&nbsp;"+char_map.stair+"&nbsp;", "blue")+": 階段<br>");;
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.portal+"&nbsp;", "blue")+": 帰還ゲート<br>");
+    colorUI("&nbsp;"+char_map.portal+"&nbsp;", "blue")+": 帰還ゲート<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.trap+"&nbsp;", "blue")+": 罠<br>");
+    colorUI("&nbsp;"+char_map.trap+"&nbsp;", "blue")+": 罠<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.gold+"&nbsp;", "yellow")+": 金貨<br>");
+    colorUI("&nbsp;"+char_map.gold+"&nbsp;", "yellow")+": 金貨<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.weapon+"&nbsp;", "yellow")+": 武器<br>");
+    colorUI("&nbsp;"+char_map.weapon+"&nbsp;", "yellow")+": 武器<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.armor+"&nbsp;", "yellow")+": 鎧<br>");
+    colorUI("&nbsp;"+char_map.armor+"&nbsp;", "yellow")+": 鎧<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.ring+"&nbsp;", "yellow")+": 指輪<br>");
+    colorUI("&nbsp;"+char_map.ring+"&nbsp;", "yellow")+": 指輪<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.consume+"&nbsp;", "yellow")+": 消耗品<br>");
+    colorUI("&nbsp;"+char_map.consume+"&nbsp;", "yellow")+": 消耗品<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.food+"&nbsp;", "yellow")+": 食料<br>");
+    colorUI("&nbsp;"+char_map.food+"&nbsp;", "yellow")+": 食料<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.scroll+"&nbsp;", "yellow")+": 巻物<br>");
+    colorUI("&nbsp;"+char_map.scroll+"&nbsp;", "yellow")+": 巻物<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.staff+"&nbsp;", "yellow")+": 杖<br>");
+    colorUI("&nbsp;"+char_map.staff+"&nbsp;", "yellow")+": 杖<br>");
   note.insertAdjacentHTML("beforeend", 
-    await colorUI("&nbsp;"+char_map.ammo+"&nbsp;", "yellow")+": 弾薬<br>");
+    colorUI("&nbsp;"+char_map.ammo+"&nbsp;", "yellow")+": 弾薬<br>");
   note.insertAdjacentHTML("beforeend", "<br>");
   note.insertAdjacentHTML("beforeend", "CONTROL<br>");
   note.insertAdjacentHTML("beforeend", "- 移動<br>&nbsp; ←↑↓→<br>");
   note.insertAdjacentHTML("beforeend", "- 斜め移動<br>&nbsp; ←↑↓→ + CTRL<br>");
   note.insertAdjacentHTML("beforeend", "- 高速移動<br>&nbsp; ←↑↓→ + SHIFT<br>");
-  note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←↑↓→ TO "+await colorUI("赤字", "red")+"<br>");
+  note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←↑↓→ TO "+colorUI("赤字", "red")+"<br>");
   note.insertAdjacentHTML("beforeend", "- 待機: Z<br>");
   note.insertAdjacentHTML("beforeend", "- インベントリ: X<br>");
   note.insertAdjacentHTML("beforeend", "- 射撃: C<br>");
@@ -251,6 +251,6 @@ async function drawNote(){
 }
 
 // UI色
-async function colorUI(char, color){
+function colorUI(char, color){
   return '<span style="color:'+color+';">'+char+'</span>';
 }
