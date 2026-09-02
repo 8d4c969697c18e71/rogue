@@ -920,9 +920,9 @@ async function throwing(who, item, direction){
 async function throwDmg(from, to, item){
   let dmg;
   if(item.type=="ammo" || item.type=="weapon")
-    dmg = Math.round(Math.random()+1)
+    dmg = Math.round(Math.random()+3);
   else
-    dmg = Math.round(Math.random())
+    dmg = Math.round(Math.random());
   if(dmg < 0) dmg = 0;
 
   await dealDmg(from, to, dmg);
@@ -1006,6 +1006,7 @@ async function gameoverEvent(){
 function gameover(){
   log_reserve = [];
   addLog("ゲームオーバー");
+  audio_death.play();
   drawGameover();
   drawInfo();
   drawInv();
@@ -1110,6 +1111,7 @@ function lvUp(){
     addMP(player, player.lvup.mp_max)
 
     addLog(player.name+" はレベルが上がった");
+    audio_lvup.play();
     lvUp();
     return true;
   }

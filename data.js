@@ -61,6 +61,8 @@ const audio_portal = new Audio("sound/portal.wav");
 const audio_ray = new Audio("sound/ray.wav");
 const audio_shot = new Audio("sound/shot.wav");
 const audio_stair = new Audio("sound/stair.wav");
+const audio_lvup = new Audio("sound/lvup.wav");
+const audio_death = new Audio("sound/death.wav");
 
 //====================================================================================================
 
@@ -535,6 +537,7 @@ const item_data = [//TODO
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -548,6 +551,7 @@ const item_data = [//TODO
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -561,6 +565,7 @@ const item_data = [//TODO
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -574,6 +579,7 @@ const item_data = [//TODO
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -587,6 +593,7 @@ const item_data = [//TODO
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -599,6 +606,7 @@ const item_data = [//TODO
       let value = 15;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -611,6 +619,7 @@ const item_data = [//TODO
       let value = 30;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -623,6 +632,7 @@ const item_data = [//TODO
       let value = player.mp_max;
       addMP(player, value);
       addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -635,6 +645,7 @@ const item_data = [//TODO
       let value = 30;
       addHung(value);
       addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
+      audio_heal.play();
       inventory.splice(inventory.indexOf(this), 1);
       return true;
     },
@@ -671,18 +682,16 @@ const item_data = [//TODO
     name: "狩猟弓",
     type: "weapon",
     func_equip: async function(){
-      player.atk_offset -= 2;
       bow_flag = true;
-      if(!player.ammo)
-        for(let i of inventory){
-          if(i.type=="ammo"){
-            await equip(inventory.indexOf(i));
-            break;
-          }
-        }
+      //if(!player.ammo)
+      //  for(let i of inventory){
+      //    if(i.type=="ammo"){
+      //      await equip(inventory.indexOf(i));
+      //      break;
+      //    }
+      //  }
     },
     func_unequip: async function(){
-      player.atk_offset += 2;
       bow_flag = false;
     },
     func_attack: async function(to){},
@@ -1090,7 +1099,7 @@ const enemy_data = [//TODO
     escape_flag: false,
     distance: 0,
     group_spawn_flag: false,
-    exp:2,
+    exp:3,
     func_spawn: async function(me){},
     func_died: async function(){},
     skill: [],
@@ -1108,7 +1117,7 @@ const enemy_data = [//TODO
     escape_flag: false,
     distance: 0,
     group_spawn_flag: true,
-    exp:1,
+    exp:2,
     func_spawn: async function(me){
       await setConditionTurn(me, 0x03, 1000);
       log_reserve.splice(log_reserve.length-1, 1);
@@ -1135,7 +1144,7 @@ const enemy_data = [//TODO
     escape_flag: false,
     distance: 0,
     group_spawn_flag: false,
-    exp:4,
+    exp:5,
     func_spawn: async function(me){},
     func_died: async function(){},
     skill: [],
@@ -1144,7 +1153,7 @@ const enemy_data = [//TODO
     id: 0x003,
     name: "白人",
     char: "白",
-    lv:2,
+    lv:1,
     hp:10, hp_max:10, 
     mp:15, mp_max:15,
     atk:4, def:2,
@@ -1153,14 +1162,13 @@ const enemy_data = [//TODO
     escape_flag: false,
     distance:3,
     group_spawn_flag: false,
-    exp:4,
+    exp:7,
     func_spawn: async function(me){
       this.lv = Math.floor(floor_cnt/2);
       this.hp_max = Math.floor(10*floor_cnt/3);
       this.hp = this.hp_max;
       this.mp_max = Math.floor(15*floor_cnt/3);
       this.mp = this.mp_max;
-      this.atk = 2+Math.floor(2+2*turn_cnt/3);
     },
     func_died: async function(){},
     skill: [
@@ -1184,7 +1192,7 @@ const enemy_data = [//TODO
     escape_flag: false,
     distance: 0,
     group_spawn_flag: false,
-    exp:6,
+    exp:7,
     func_spawn: async function(me){},
     func_died: async function(){},
     skill: [
