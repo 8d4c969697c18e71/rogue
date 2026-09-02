@@ -53,6 +53,7 @@ let shop_start_offset = 0;
 const audio_apply = new Audio("sound/apply.wav");
 const audio_fire = new Audio("sound/fire.wav");
 const audio_heal = new Audio("sound/heal.wav");
+const audio_attack = new Audio("sound/attack.wav");
 const audio_hit = new Audio("sound/hit.wav");
 const audio_jump = new Audio("sound/jump.wav");
 const audio_poison = new Audio("sound/poison.wav");
