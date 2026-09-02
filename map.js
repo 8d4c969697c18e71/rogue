@@ -33,6 +33,8 @@ function drawMap(){
           || map_draw[player.y+i][player.x+j]==char_map.ammo
           || map_draw[player.y+i][player.x+j]==char_map.unique)
           ctx.fillStyle = "yellow";
+        else if(map_draw[player.y+i][player.x+j]==char_map.ray)
+          ctx.fillStyle = "skyblue";
         else{
           ctx.fillStyle = "red";
 

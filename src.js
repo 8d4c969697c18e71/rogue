@@ -481,7 +481,6 @@ async function eventPlayer(){
 async function attack(from, to){
   addLog(from.name+" の攻撃");
   audio_hit.play();
-  await wait(300);
 
   let dmg;
   dmg = (3*from.lv)*(from.atk+from.atk_offset+8)/16*(15/16)**(to.def+to.def_offset);
@@ -497,7 +496,6 @@ async function attack(from, to){
       to.cannot_action_flag = false;
       addLog(to.name+" は攻撃を受け流し 反撃した");
       audio_hit.play();
-      await wait(300);
       await dealDmg(to, from, dmg);
       return;
     }
@@ -513,6 +511,7 @@ async function attack(from, to){
 async function dealDmg(from, to, dmg){
   addHP(to, -dmg);
   addLogSameLine(to.name+" に "+dmg+" のダメージ");
+  await animBlink(to);
 
   // 状態異常
   for(let cond of to.condition){
@@ -754,6 +753,7 @@ async function eventShot(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
+      shot_flag = false;
       let enemy = await shot(player, ammo, kd[k]);
       if(!(enemy===undefined) && await isDead(enemy)) addExp(enemy.exp);
       if(ammo.stack_num > 0) ammo.stack_num--;
@@ -762,7 +762,6 @@ async function eventShot(){
         log_reserve.pop();
         inventory.splice(inventory.indexOf(ammo), 1);
       }
-      shot_flag = false;
       return true;
     }
   
@@ -776,11 +775,12 @@ async function eventShot(){
 
 // 射撃
 async function shot(who, ammo, direction){
+  let dst = straightRecursive(who.x, who.y, direction, ammo.range);
+
   addLog(who.name+" は "+ammo.name+" を放った");
   audio_shot.play();
-  await wait(300);
+  await animShot(who, dst, direction);
 
-  let dst = straightRecursive(who.x, who.y, direction, ammo.range);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     await shotDmg(who, enemy, ammo);
@@ -855,6 +855,7 @@ async function eventThrowing(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
+      throwing_flag = false;
       let item = inventory[inv_cursor]
       let enemy = await throwing(player, item, kd[k]);
       if(!(enemy===undefined) && await isDead(enemy)) addExp(enemy.exp);
@@ -869,7 +870,6 @@ async function eventThrowing(){
         inventory.splice(inv_cursor, 1);
 
       //inv_cursor = -1;
-      throwing_flag = false;
       ui_flag = false;
       return true;
     }
@@ -886,11 +886,12 @@ async function eventThrowing(){
 
 // 投擲
 async function throwing(who, item, direction){
+  let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
+
   addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
-  await wait(300);
+  animThrow(who, dst, direction, item);
 
-  let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
     await throwDmg(who, enemy, item);
@@ -945,10 +946,10 @@ async function eventMagic(){
   else kd = key_direction_diagonal;
   for(let k in kd)
     if(key_input[k]){
+      magic_flag = false;
       let enemy = await player.magic_using.func_cast(kd[k]);
       if(!(enemy===undefined) && await isDead(enemy)) addExp(enemy.exp);
       
-      magic_flag = false;
       player.magic_using = undefined;
       ui_flag = false;
       //inv_cursor = -1;
@@ -1419,7 +1420,6 @@ async function eventEnv(){
     addLog("飢えが "+player.name+" を蝕む");
     await dealDmg(undefined, player, -1);
     audio_hit.play();
-    await wait(300);
   }
   if(!safe_flag && turn_cnt % player.hung_rate == 0){
     if(player.hung > 0){

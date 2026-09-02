@@ -198,6 +198,7 @@ const char_map = {
   staff: "／",
   ammo: "”",
   unique: "＆",
+  ray: "＊",
 };
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let stair_pos = {x:undefined, y:undefined};
@@ -279,7 +280,7 @@ let unique_map = [  // 固有マップ
     func: async function(x_offset){
       setStair(5+x_offset, 2);
       //setNPC(0x00, 7+x_offset, 9);
-      setNPC(0x02, 9+x_offset, 9);
+      setNPC(0x02, 8+x_offset, 9);
       setNPC(0x03, 4+x_offset, 5);
       setShop(0x00, 1+x_offset, 7);
       if(player.job == 0xf00) setShop(0x01, 9+x_offset, 6);
@@ -800,6 +801,7 @@ const item_data = [//TODO
       addMP(player, -4);
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
+      await animShot(player, straightRecursive(player.x, player.y, dir, MAGIC_RANGE), dir, char_map.ray);
       return magic(player, player.mp_max/3, dir);
     }
   },
