@@ -27,7 +27,7 @@ async function animBlink(obj, ms = 200, fps = 60) {
 }
 
 // 射撃物描画
-async function animShot(from, dst, direction, char = char_map.ammo, fps = 30) {
+async function animShot(from, dst, direction, char = char_map.ammo, fps = 60) {
     // 描画座標を先に取得
     let draw_pos_list = [];
     for(let i=1; i<SIZEX && i<SIZEY; i++) {
@@ -48,7 +48,7 @@ async function animShot(from, dst, direction, char = char_map.ammo, fps = 30) {
 }
 
 // 投射物描画
-async function animThrow(from, dst, direction, item, fps = 50) {
+async function animThrow(from, dst, direction, item, fps = 100) {
     // 描画文字取得
     let char;
     if(item.type == "consume") char = char_map.consume;

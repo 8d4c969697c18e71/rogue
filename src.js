@@ -480,7 +480,6 @@ async function eventPlayer(){
 // http://000.la.coocan.jp/torneco/damage.html
 async function attack(from, to){
   addLog(from.name+" の攻撃");
-  audio_attack.play();
 
   let dmg;
   dmg = (3*from.lv)*(from.atk+from.atk_offset+8)/16*(15/16)**(to.def+to.def_offset);
@@ -495,7 +494,6 @@ async function attack(from, to){
       to.condition.splice(to.condition.indexOf(cond), 1);
       to.cannot_action_flag = false;
       addLog(to.name+" は攻撃を受け流し 反撃した");
-      audio_attack.play();
       await dealDmg(to, from, dmg);
       return;
     }
@@ -891,7 +889,7 @@ async function throwing(who, item, direction){
 
   addLog(who.name+" は "+item.name+" を投擲した");
   audio_shot.play();
-  animThrow(who, dst, direction, item);
+  await animThrow(who, dst, direction, item);
 
   if(isEnemy(dst.x+direction.x, dst.y+direction.y)){
     let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
