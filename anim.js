@@ -9,11 +9,11 @@ async function animBlink(obj, ms = 200, fps = 60) {
     let visible = true;
     for(let i=0; i<ms; i+=fps) {
         if(visible) {
-            map_draw[obj.y][obj.x] = char_map[map[obj.y][obj.x]];
+            map_draw[obj.y][obj.x] = CHAR_MAP[map[obj.y][obj.x]];
             visible = false;
         }
         else if(obj.id === undefined){
-            map_draw[obj.y][obj.x] = char_map.player;
+            map_draw[obj.y][obj.x] = CHAR_MAP.player;
             visible = true;
         }
         else {
@@ -27,7 +27,7 @@ async function animBlink(obj, ms = 200, fps = 60) {
 }
 
 // 射撃物描画
-async function animShot(from, dst, direction, char = char_map.ammo, fps = 60) {
+async function animShot(from, dst, direction, char = CHAR_MAP.ammo, fps = 60) {
     // 描画座標を先に取得
     let draw_pos_list = [];
     for(let i=1; i<SIZEX && i<SIZEY; i++) {
@@ -51,15 +51,15 @@ async function animShot(from, dst, direction, char = char_map.ammo, fps = 60) {
 async function animThrow(from, dst, direction, item, fps = 100) {
     // 描画文字取得
     let char;
-    if(item.type == "consume") char = char_map.consume;
-    else if(item.type == "food") char = char_map.food;
-    else if(item.type == "weapon") char = char_map.weapon;
-    else if(item.type == "armor") char = char_map.armor;
-    else if(item.type == "ring") char = char_map.ring;
-    else if(item.type == "scroll") char = char_map.scroll;
-    else if(item.type == "staff") char = char_map.staff;
-    else if(item.type == "unique") char = char_map.unique;
-    else char = char_map.ammo;
+    if(item.type == "consume") char = CHAR_MAP.consume;
+    else if(item.type == "food") char = CHAR_MAP.food;
+    else if(item.type == "weapon") char = CHAR_MAP.weapon;
+    else if(item.type == "armor") char = CHAR_MAP.armor;
+    else if(item.type == "ring") char = CHAR_MAP.ring;
+    else if(item.type == "scroll") char = CHAR_MAP.scroll;
+    else if(item.type == "staff") char = CHAR_MAP.staff;
+    else if(item.type == "unique") char = CHAR_MAP.unique;
+    else char = CHAR_MAP.ammo;
 
     // 描画
     await animShot(from, dst, direction, char, fps);

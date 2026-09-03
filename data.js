@@ -67,17 +67,17 @@ const audio_death = new Audio("sound/death.wav");
 //====================================================================================================
 
 // 日付
-const month_list = [
+const MONTH_LIST = [
   "Jan.", "Feb", "Mar.", "Apr.", "May", "Jun.",
   "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec.", 
 ];
-const now = new Date();
-const date = now.getDate();
-const month = month_list[now.getMonth()];
-const year = now.getFullYear();
+const NOW = new Date();
+const DATE = NOW.getDate();
+const MONTH = MONTH_LIST[NOW.getMonth()];
+const YEAR = NOW.getFullYear();
 
 // 名前入力用
-const hiragana = [
+const HIRAGANA = [
   ["あ","い","う","え","お","は","ひ","ふ","へ","ほ",],
   ["か","き","く","け","こ","ま","み","む","め","も",],
   ["さ","し","す","せ","そ","や","　","ゆ","　","よ",],
@@ -85,7 +85,7 @@ const hiragana = [
   ["な","に","ぬ","ね","の","わ","　","を","　","ん",],
   ["っ","ゃ","ゅ","ょ","゛","゜","　","消","ｶﾅ","終",],
 ];
-const katakana = [
+const KATAKANA = [
   ["ア","イ","ウ","エ","オ","ハ","ヒ","フ","ヘ","ホ",],
   ["カ","キ","ク","ケ","コ","マ","ミ","ム","メ","モ",],
   ["サ","シ","ス","セ","ソ","ヤ","　","ユ","　","ヨ",],
@@ -96,7 +96,7 @@ const katakana = [
 let input_name_pos = {x:0, y:0};
 let name_max_length = 12;
 let input_name_flag = true;
-let syllabary = hiragana;
+let syllabary = HIRAGANA;
 
 // キー
 let key_input = {
@@ -119,19 +119,19 @@ let key_input = {
   sub: false,
   esc: false,
 };
-const key_direction = {
+const KEY_DIRECTION = {
   up: {x:0,y:-1},
   down: {x:0,y:1},
   left: {x:-1,y:0},
   right: {x:1,y:0},
 };
-const key_direction_diagonal = {
+const KEY_DIRECTION_DIAGONAL = {
   up_left: {x:-1,y:-1},
   up_right: {x:1,y:-1},
   down_left: {x:-1,y:1},
   down_right: {x:1,y:1},
 };
-const key_code={
+const KEY_CODE={
   left: "ArrowLeft",
   right: "ArrowRight",
   up: "ArrowUp",
@@ -150,7 +150,7 @@ const ROOMNUM = 10;
 const ROOMSIZEMIN = 6;
 const ROOMSIZEMAX = 10;
 let map = [];
-const id_map = {
+const ID_MAP = {
   none: 0,
   room: 1,
   path: 2,
@@ -179,7 +179,7 @@ let map_draw = [];  // 描画用
 //  ammo: "\"",
 //  unique: "&",
 //};
-const char_map = {
+const CHAR_MAP = {
   0: " ",
   1: "．",
   2: "＃",
@@ -206,93 +206,6 @@ const char_map = {
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let stair_pos = {x:undefined, y:undefined};
 let portal_pos = {x:undefined, y:undefined};
-let unique_map = [  // 固有マップ
-  {
-    id: "test",
-    pl_x: 3, pl_y: 3, // プレイヤー位置
-    safe_flag: false,
-    map: [
-  // 0123456789ABCDE
-    "000000000000000",//0
-    "011111000111110",//1
-    "011111000111110",//2
-    "011111222111110",//3
-    "011111020111110",//4
-    "011110020111110",//5
-    "000200020002000",//6
-    "000222222222000",//7
-    "000200020002000",//8
-    "011111020111110",//9
-    "011111020111110",//A
-    "011111222111110",//B
-    "011111000111110",//C
-    "011111000111110",//D
-    "000000000000000",//E
-    ],
-    func: async function(x_offset){
-      setItem(0x800,1+x_offset, 1);
-      setItem(0xf01,2+x_offset, 1);
-      setShop(0x05, 9+x_offset, 1);
-      setTrap(0x00, 1+x_offset, 5);
-      setTrap(0x02, 2+x_offset, 5);
-      //setEnemy(0x006, 11+x_offset, 3);
-    }
-  },
-  {
-    id: "return", // 帰還ポータル
-    pl_x: 4, pl_y: 7,
-    safe_flag: true,
-    map: [
-    "000000000",
-    "001111100",
-    "001111100",
-    "011111110",
-    "011111110",
-    "011111110",
-    "001111100",
-    "001111100",
-    "000000000",
-    ],
-    func: async function(x_offset){
-      setShop(0x05, 6+x_offset, 4);
-      setStair(4+x_offset, 1);
-      setPortal(2+x_offset, 4);
-    }
-  },
-  {
-    id: 0,
-    pl_x: 5, pl_y: 11,
-    safe_flag: true,
-    map: [
-    "00000000000",
-    "00001110000",
-    "00001110000",
-    "00001110000",
-    "00000200000",
-    "01101110110",
-    "01121112110",
-    "01101110110",
-    "00001110000",
-    "01111111110",
-    "01111111110",
-    "01111111110",
-    "01111111110",
-    "01111111110",
-    "00000000000",
-    ],
-    func: async function(x_offset){
-      setStair(5+x_offset, 2);
-      //setNPC(0x00, 7+x_offset, 9);
-      setNPC(0x02, 8+x_offset, 9);
-      setNPC(0x03, 4+x_offset, 5);
-      setShop(0x00, 1+x_offset, 7);
-      if(player.job == 0xf00) setShop(0x01, 9+x_offset, 6);
-      else setNPC(0x01, 9+x_offset, 6);
-      setShop(0x02, 1+x_offset, 9);
-      setShop(0x03, 1+x_offset, 6);
-    }
-  },
-];
 
 //==================================================INFO==================================================
 
@@ -370,7 +283,7 @@ let player = {
 };
 
 // 状態異常
-const condition_data = [//TODO
+const CONDITION_DATA = [//TODO
   // デバフ 0x00~
   {
     id: 0x00,
@@ -458,7 +371,7 @@ const condition_data = [//TODO
 
 //==================================================TRAP==================================================
 
-const trap_data = [//TODO
+const TRAP_DATA = [//TODO
   {
     id: 0x00,
     name: "毒床",
@@ -512,7 +425,7 @@ const trap_data = [//TODO
     },
   },
 ];
-const trap_table = [
+const TRAP_TABLE = [
   [],
   [
     0x00,
@@ -534,7 +447,7 @@ let trap_group = [];
 
 //==================================================ITEM==================================================
 
-const item_data = [//TODO
+const ITEM_DATA = [//TODO
   // 消費アイテム
   {
     id: 0x000,
@@ -799,13 +712,25 @@ const item_data = [//TODO
   },
   {
     id: 0x402,
-    name: "緑草の指輪",
+    name: "飽食の指輪",
     type: "ring",
     func_equip: async function(){
       player.hung_rate_offset += 5;
     },
     func_unequip: async function(){
       player.hung_rate_offset -= 5;
+    },
+  },
+  {
+    id: 0x403,
+    name: "生命の指輪",
+    type: "ring",
+    func_equip: async function(){
+      player.hp_max_offset += 75;
+    },
+    func_unequip: async function(){
+      player.hp_max_offset -= 75;
+      addHP(player, 0);
     },
   },
   // 巻物 0x5XX
@@ -838,7 +763,7 @@ const item_data = [//TODO
       addMP(player, -8);
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
-      await animShot(player, straightRecursive(player.x, player.y, dir, MAGIC_RANGE), dir, char_map.ray);
+      await animShot(player, straightRecursive(player.x, player.y, dir, MAGIC_RANGE), dir, CHAR_MAP.ray);
       return magic(player, 70+player.int*2, dir);
     }
   },
@@ -1075,7 +1000,7 @@ const INVENTORY_SIZE = 20;
 let inv_cursor = 0;
 
 // 落ちてるアイテム
-const item_table = [
+const ITEM_TABLE = [
   [
     0x000, 0x000, 0x000,
     0x010, 0x020, 0x030,
@@ -1124,7 +1049,7 @@ let item_group = [];
 
 //==================================================ENEMY==================================================
 
-const enemy_data = [//TODO
+const ENEMY_DATA = [//TODO
   {
     id: 0x000,
     name: "亡者",
@@ -1288,7 +1213,7 @@ const enemy_data = [//TODO
     ],
   },
 ];
-const other_enemy_info = {
+const OTHER_ENEMY_INFO = {
   //x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], 
   cannot_action_flag: false, cannot_move_flag: false,
   chase_flag: false, chase_count: 0, chase_limit: 5,
@@ -1296,7 +1221,7 @@ const other_enemy_info = {
   hp_max_offset: 0, mp_max_offset: 0, sight_range_offset: 0,
   next_exp: 10, lvup: {},
 };
-const enemy_table = [
+const ENEMY_TABLE = [
   [
     0x000, 0x000, 0x001,
   ],
@@ -1320,25 +1245,25 @@ let enemy_group = [];
 
 //==================================================SKILL==================================================
 
-const skill_data = [//TODO
+const SKILL_DATA = [//TODO
   {
     id: 0x000,
     name: "射撃",
     ammo: undefined,
     func: async function(from, to){
-      for(let d in key_direction){
-        let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
-        let xy = straightRecursive(from.x, from.y, key_direction[d], ammo.range-1);
-        if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && from.map_sight[to.y][to.x]){
-          await shot(from, ammo, key_direction[d]);
+      for(let d in KEY_DIRECTION){
+        let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
+        let xy = straightRecursive(from.x, from.y, KEY_DIRECTION[d], ammo.range-1);
+        if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && from.map_sight[to.y][to.x]){
+          await shot(from, ammo, KEY_DIRECTION[d]);
           return true;
         }
       }
-      for(let d in key_direction_diagonal){
-        let ammo = Object.assign({}, item_data.find(v=>v.id==this.ammo));
-        let xy = straightRecursive(from.x, from.y, key_direction_diagonal[d], ammo.range-1);
-        if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y && from.map_sight[to.y][to.x]){
-          await shot(from, ammo, key_direction_diagonal[d]);
+      for(let d in KEY_DIRECTION_DIAGONAL){
+        let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
+        let xy = straightRecursive(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], ammo.range-1);
+        if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && from.map_sight[to.y][to.x]){
+          await shot(from, ammo, KEY_DIRECTION_DIAGONAL[d]);
           return true;
         }
       }
@@ -1366,20 +1291,20 @@ const skill_data = [//TODO
     id: 0x003,
     name: "毒攻撃",
     func: async function(from, to){
-      for(let d in key_direction){
-        let x = from.x + key_direction[d].x;
-        let y = from.y + key_direction[d].y;
-        if(x == to.x && y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y)){
+      for(let d in KEY_DIRECTION){
+        let x = from.x + KEY_DIRECTION[d].x;
+        let y = from.y + KEY_DIRECTION[d].y;
+        if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)){
           await attack(from, to);
           if(Math.floor(Math.random()+0.33))
             await setCondition(to, 0x00);
           return true;
         }
       }
-      for(let d in key_direction_diagonal){
-        let x = from.x + key_direction_diagonal[d].x;
-        let y = from.y + key_direction_diagonal[d].y;
-        if(x == to.x && y == to.y && canDiagonal(from.x, from.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
+      for(let d in KEY_DIRECTION_DIAGONAL){
+        let x = from.x + KEY_DIRECTION_DIAGONAL[d].x;
+        let y = from.y + KEY_DIRECTION_DIAGONAL[d].y;
+        if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)){
           await attack(from, to);
           if(Math.floor(Math.random()+0.33))
             await setCondition(to, 0x00);
@@ -1393,24 +1318,24 @@ const skill_data = [//TODO
     id: 0x004,
     name: "突撃",
     func: async function(from, to){
-      for(let d in key_direction){
-        let xy = straightRecursiveDiagonal(from.x, from.y, key_direction[d], SIZEX+SIZEY);
-        if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y) && from.map_sight[to.y][to.x]){
+      for(let d in KEY_DIRECTION){
+        let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION[d], SIZEX+SIZEY);
+        if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y) && from.map_sight[to.y][to.x]){
           addLog(from.name+" は "+to.name+" に突撃した");
           await attack(from, to);
-          while(await move(from, key_direction[d])){
+          while(await move(from, KEY_DIRECTION[d])){
             updateMap();
             drawMap();
           }
           return true;
         }
       }
-      for(let d in key_direction_diagonal){
-        let xy = straightRecursiveDiagonal(from.x, from.y, key_direction_diagonal[d], SIZEX+SIZEY);
-        if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y && canDiagonal(from.x, from.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y) && from.map_sight[to.y][to.x]){
+      for(let d in KEY_DIRECTION_DIAGONAL){
+        let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], SIZEX+SIZEY);
+        if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y) && from.map_sight[to.y][to.x]){
           addLog(from.name+" は "+to.name+" に突撃した");
           await attack(from, to);
-          while(await move(from, key_direction_diagonal[d])){
+          while(await move(from, KEY_DIRECTION_DIAGONAL[d])){
             updateMap();
             drawMap();
           }
@@ -1425,7 +1350,7 @@ const skill_data = [//TODO
 //==================================================NPC==================================================
 
 // NPC
-const npc_data = [
+const NPC_DATA = [
   {
     id: 0x00,
     name: "案内人",
@@ -1501,7 +1426,7 @@ const npc_data = [
 let npc_group = [];
 
 // ショップ
-const shop_data = [//TODO
+const SHOP_DATA = [//TODO
   {
     id: 0x00,
     name: "薬屋",
@@ -1583,11 +1508,15 @@ const shop_data = [//TODO
     dialogue_outro: "よい商いだったよ",
     random_flag: false,
     item_table: [
+      {id: 0x010, price: 5,},
+      {id: 0x011, price: 10,},
+      {id: 0x020, price: 5,},
+      {id: 0x030, price: 5,},
       {id: 0x800, price: 15,},
       {id: 0x500, price: 50,},
       {id: 0x101, price: 150,},
       {id: 0x301, price: 250,},
-      {id: 0x400, price: 300,},
+      {id: 0x403, price: 300,},
       {id: 0x401, price: 400,},
       {id: 0x601, price: 500,},
     ],
@@ -1621,3 +1550,94 @@ const shop_data = [//TODO
 let shop_group = [];
 let shop_cursor = -1;
 let shop_using = undefined; // 利用中のショップ
+
+// 
+//==================================================UNIQUE MAP==================================================
+
+let unique_map = [  // 固有マップ
+  {
+    id: "test",
+    pl_x: 3, pl_y: 3, // プレイヤー位置
+    safe_flag: false,
+    map: [
+  // 0123456789ABCDE
+    "000000000000000",//0
+    "011111000111110",//1
+    "011111000111110",//2
+    "011111222111110",//3
+    "011111020111110",//4
+    "011110020111110",//5
+    "000200020002000",//6
+    "000222222222000",//7
+    "000200020002000",//8
+    "011111020111110",//9
+    "011111020111110",//A
+    "011111222111110",//B
+    "011111000111110",//C
+    "011111000111110",//D
+    "000000000000000",//E
+    ],
+    func: async function(x_offset){
+      setItem(0x800,1+x_offset, 1);
+      setItem(0xf01,2+x_offset, 1);
+      setShop(0x05, 9+x_offset, 1);
+      setTrap(0x00, 1+x_offset, 5);
+      setTrap(0x02, 2+x_offset, 5);
+      //setEnemy(0x006, 11+x_offset, 3);
+    }
+  },
+  {
+    id: "return", // 帰還ポータル
+    pl_x: 4, pl_y: 7,
+    safe_flag: true,
+    map: [
+    "000000000",
+    "001111100",
+    "001111100",
+    "011111110",
+    "011111110",
+    "011111110",
+    "001111100",
+    "001111100",
+    "000000000",
+    ],
+    func: async function(x_offset){
+      setShop(0x05, 6+x_offset, 4);
+      setStair(4+x_offset, 1);
+      setPortal(2+x_offset, 4);
+    }
+  },
+  {
+    id: 0,
+    pl_x: 5, pl_y: 11,
+    safe_flag: true,
+    map: [
+    "00000000000",
+    "00001110000",
+    "00001110000",
+    "00001110000",
+    "00000200000",
+    "01101110110",
+    "01121112110",
+    "01101110110",
+    "00001110000",
+    "01111111110",
+    "01111111110",
+    "01111111110",
+    "01111111110",
+    "01111111110",
+    "00000000000",
+    ],
+    func: async function(x_offset){
+      setStair(5+x_offset, 2);
+      //setNPC(0x00, 7+x_offset, 9);
+      setNPC(0x02, 8+x_offset, 9);
+      setNPC(0x03, 4+x_offset, 5);
+      //setShop(0x00, 1+x_offset, 7);
+      if(player.job == 0xf00) setShop(0x01, 9+x_offset, 6);
+      else setNPC(0x01, 9+x_offset, 6);
+      setShop(0x02, 1+x_offset, 9);
+      setShop(0x03, 1+x_offset, 6);
+    }
+  },
+];

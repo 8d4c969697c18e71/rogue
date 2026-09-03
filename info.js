@@ -198,35 +198,35 @@ function drawNote(){
 
   note.innerHTML = "NOTE<br>";
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
+    colorUI("&nbsp;"+CHAR_MAP.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;赤 ", "red")+": エネミー<br>");
   note.insertAdjacentHTML("beforeend", 
     colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.stair+"&nbsp;", "blue")+": 階段<br>");;
+    colorUI("&nbsp;"+CHAR_MAP.stair+"&nbsp;", "blue")+": 階段<br>");;
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.portal+"&nbsp;", "blue")+": 帰還ゲート<br>");
+    colorUI("&nbsp;"+CHAR_MAP.portal+"&nbsp;", "blue")+": 帰還ゲート<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.trap+"&nbsp;", "blue")+": 罠<br>");
+    colorUI("&nbsp;"+CHAR_MAP.trap+"&nbsp;", "blue")+": 罠<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.gold+"&nbsp;", "yellow")+": 金貨<br>");
+    colorUI("&nbsp;"+CHAR_MAP.gold+"&nbsp;", "yellow")+": 金貨<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.weapon+"&nbsp;", "yellow")+": 武器<br>");
+    colorUI("&nbsp;"+CHAR_MAP.weapon+"&nbsp;", "yellow")+": 武器<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.armor+"&nbsp;", "yellow")+": 鎧<br>");
+    colorUI("&nbsp;"+CHAR_MAP.armor+"&nbsp;", "yellow")+": 鎧<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.ring+"&nbsp;", "yellow")+": 指輪<br>");
+    colorUI("&nbsp;"+CHAR_MAP.ring+"&nbsp;", "yellow")+": 指輪<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.consume+"&nbsp;", "yellow")+": 消耗品<br>");
+    colorUI("&nbsp;"+CHAR_MAP.consume+"&nbsp;", "yellow")+": 消耗品<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.food+"&nbsp;", "yellow")+": 食料<br>");
+    colorUI("&nbsp;"+CHAR_MAP.food+"&nbsp;", "yellow")+": 食料<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.scroll+"&nbsp;", "yellow")+": 巻物<br>");
+    colorUI("&nbsp;"+CHAR_MAP.scroll+"&nbsp;", "yellow")+": 巻物<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.staff+"&nbsp;", "yellow")+": 杖<br>");
+    colorUI("&nbsp;"+CHAR_MAP.staff+"&nbsp;", "yellow")+": 杖<br>");
   note.insertAdjacentHTML("beforeend", 
-    colorUI("&nbsp;"+char_map.ammo+"&nbsp;", "yellow")+": 弾薬<br>");
+    colorUI("&nbsp;"+CHAR_MAP.ammo+"&nbsp;", "yellow")+": 弾薬<br>");
   note.insertAdjacentHTML("beforeend", "<br>");
   note.insertAdjacentHTML("beforeend", "CONTROL<br>");
   note.insertAdjacentHTML("beforeend", "- 移動<br>&nbsp; ←↑↓→<br>");

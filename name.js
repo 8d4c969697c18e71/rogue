@@ -9,16 +9,16 @@ async function inputName(){
   if(key_input.left){
     if(input_name_pos.x > 0){
       input_name_pos.x--;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+      if(HIRAGANA[input_name_pos.y][input_name_pos.x]=="　")
         input_name_pos.x--;
     }
     else
-      input_name_pos.x = hiragana[0].length-1;
+      input_name_pos.x = HIRAGANA[0].length-1;
   }
   else if(key_input.right){
-    if(input_name_pos.x < hiragana[0].length-1){
+    if(input_name_pos.x < HIRAGANA[0].length-1){
       input_name_pos.x++;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+      if(HIRAGANA[input_name_pos.y][input_name_pos.x]=="　")
         input_name_pos.x++;
     }
     else
@@ -27,16 +27,16 @@ async function inputName(){
   else if(key_input.up){
     if(input_name_pos.y > 0){
       input_name_pos.y--;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+      if(HIRAGANA[input_name_pos.y][input_name_pos.x]=="　")
         input_name_pos.y--;
     }
     else
-      input_name_pos.y = hiragana.length-1;
+      input_name_pos.y = HIRAGANA.length-1;
   }
   else if(key_input.down){
-    if(input_name_pos.y < hiragana.length-1){
+    if(input_name_pos.y < HIRAGANA.length-1){
       input_name_pos.y++;
-      if(hiragana[input_name_pos.y][input_name_pos.x]=="　")
+      if(HIRAGANA[input_name_pos.y][input_name_pos.x]=="　")
         input_name_pos.y++;
     }
     else
@@ -49,8 +49,8 @@ async function inputName(){
       player.name = player.name.slice(0, -1);
 
     else if(syllabary[input_name_pos.y][input_name_pos.x]=="ｶﾅ"){
-      if(syllabary == katakana) syllabary = hiragana;
-      else syllabary = katakana;
+      if(syllabary == KATAKANA) syllabary = HIRAGANA;
+      else syllabary = KATAKANA;
 
       // 一覧
       displaySyllabary(y_offset+FONT_SIZE*4);

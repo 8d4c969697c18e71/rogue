@@ -20,29 +20,29 @@ function drawMap(){
         ctx.fillStyle = "green";
       }
       else{
-        if(map_draw[player.y+i][player.x+j]==char_map[id_map.path]
-          || map_draw[player.y+i][player.x+j]==char_map[id_map.room]
-          || map_draw[player.y+i][player.x+j]==char_map.door
-          || map_draw[player.y+i][player.x+j]==char_map.wall_h
-          || map_draw[player.y+i][player.x+j]==char_map.wall_v)
+        if(map_draw[player.y+i][player.x+j]==CHAR_MAP[ID_MAP.path]
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP[ID_MAP.room]
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.door
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.wall_h
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.wall_v)
           ctx.fillStyle = "white";
-        else if(map_draw[player.y+i][player.x+j]==char_map.stair
-          || map_draw[player.y+i][player.x+j]==char_map.portal
-          || map_draw[player.y+i][player.x+j]==char_map.trap)
+        else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.stair
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.portal
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.trap)
           ctx.fillStyle = "blue";
-        else if(map_draw[player.y+i][player.x+j]==char_map.player
-          || map_draw[player.y+i][player.x+j]==char_map.gold
-          || map_draw[player.y+i][player.x+j]==char_map.consume
-          || map_draw[player.y+i][player.x+j]==char_map.food
-          || map_draw[player.y+i][player.x+j]==char_map.weapon
-          || map_draw[player.y+i][player.x+j]==char_map.armor
-          || map_draw[player.y+i][player.x+j]==char_map.ring
-          || map_draw[player.y+i][player.x+j]==char_map.scroll
-          || map_draw[player.y+i][player.x+j]==char_map.staff
-          || map_draw[player.y+i][player.x+j]==char_map.ammo
-          || map_draw[player.y+i][player.x+j]==char_map.unique)
+        else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.player
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.gold
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.consume
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.food
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.weapon
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.armor
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.ring
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.scroll
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.staff
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.ammo
+          || map_draw[player.y+i][player.x+j]==CHAR_MAP.unique)
           ctx.fillStyle = "yellow";
-        else if(map_draw[player.y+i][player.x+j]==char_map.ray)
+        else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.ray)
           ctx.fillStyle = "skyblue";
         else{
           ctx.fillStyle = "red";
@@ -71,27 +71,27 @@ function drawMapAll(){
         ctx.fillStyle = "green";
       }
       else{
-        if(map_draw[i][j]==char_map[id_map.path]
-          || map_draw[i][j]==char_map[id_map.room]
-          || map_draw[i][j]==char_map.door
-          || map_draw[i][j]==char_map.wall_h
-          || map_draw[i][j]==char_map.wall_v)
+        if(map_draw[i][j]==CHAR_MAP[ID_MAP.path]
+          || map_draw[i][j]==CHAR_MAP[ID_MAP.room]
+          || map_draw[i][j]==CHAR_MAP.door
+          || map_draw[i][j]==CHAR_MAP.wall_h
+          || map_draw[i][j]==CHAR_MAP.wall_v)
           ctx.fillStyle = "white";
-        else if(map_draw[i][j]==char_map.stair
-          || map_draw[i][j]==char_map.portal
-          || map_draw[i][j]==char_map.trap)
+        else if(map_draw[i][j]==CHAR_MAP.stair
+          || map_draw[i][j]==CHAR_MAP.portal
+          || map_draw[i][j]==CHAR_MAP.trap)
           ctx.fillStyle = "blue";
-        else if(map_draw[i][j]==char_map.player
-          || map_draw[i][j]==char_map.gold
-          || map_draw[i][j]==char_map.consume
-          || map_draw[i][j]==char_map.food
-          || map_draw[i][j]==char_map.weapon
-          || map_draw[i][j]==char_map.armor
-          || map_draw[i][j]==char_map.ring
-          || map_draw[i][j]==char_map.scroll
-          || map_draw[i][j]==char_map.staff
-          || map_draw[i][j]==char_map.ammo
-          || map_draw[i][j]==char_map.unique)
+        else if(map_draw[i][j]==CHAR_MAP.player
+          || map_draw[i][j]==CHAR_MAP.gold
+          || map_draw[i][j]==CHAR_MAP.consume
+          || map_draw[i][j]==CHAR_MAP.food
+          || map_draw[i][j]==CHAR_MAP.weapon
+          || map_draw[i][j]==CHAR_MAP.armor
+          || map_draw[i][j]==CHAR_MAP.ring
+          || map_draw[i][j]==CHAR_MAP.scroll
+          || map_draw[i][j]==CHAR_MAP.staff
+          || map_draw[i][j]==CHAR_MAP.ammo
+          || map_draw[i][j]==CHAR_MAP.unique)
           ctx.fillStyle = "yellow";
         else{
           ctx.fillStyle = "red";
@@ -135,8 +135,8 @@ function drawGameover(){
   }
 
   ctx.fillText(player.name, canvas.width/2, FONT_SIZE*7);
-  ctx.fillText(date+" "+month, canvas.width/2, FONT_SIZE*9);
-  ctx.fillText(year, canvas.width/2, FONT_SIZE*10);
+  ctx.fillText(DATE+" "+MONTH, canvas.width/2, FONT_SIZE*9);
+  ctx.fillText(YEAR, canvas.width/2, FONT_SIZE*10);
 
   ctx.fillStyle = "green";
   ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.width/2, FONT_SIZE*(gameover_fig.length-1));
@@ -174,7 +174,7 @@ function updateMap(){
   // NPC
   updateMDNPCGroup();
   // プレイヤー
-  map_draw[player.y][player.x] = char_map.player;
+  map_draw[player.y][player.x] = CHAR_MAP.player;
 }
 
 // 視界更新
@@ -191,18 +191,18 @@ function updateMapDraw(){
     for(let j=0; j<SIZEX; j++)
       if(map_draw[i][j]=="√" || map_draw[i][j]=="㊦") continue;// debug
       else if(player.map_sight[i][j])
-        map_draw[i][j] = char_map[map[i][j]];
-      else if(map[i][j] != id_map.none
-        && map_draw[i][j] != char_map[id_map.none])
-        map_draw[i][j] = char_map[map[i][j]];
+        map_draw[i][j] = CHAR_MAP[map[i][j]];
+      else if(map[i][j] != ID_MAP.none
+        && map_draw[i][j] != CHAR_MAP[ID_MAP.none])
+        map_draw[i][j] = CHAR_MAP[map[i][j]];
 }
 
 // 階段・ポータル更新
 function updateMDStairPortal(){
   if(!(stair_pos.x === undefined) && !(stair_pos.y === undefined) && player.map_sight[stair_pos.y][stair_pos.x])
-    map_draw[stair_pos.y][stair_pos.x] = char_map.stair;
+    map_draw[stair_pos.y][stair_pos.x] = CHAR_MAP.stair;
   if(!(portal_pos.x === undefined) && !(portal_pos.y === undefined) && player.map_sight[portal_pos.y][portal_pos.x])
-    map_draw[portal_pos.y][portal_pos.x] = char_map.portal;
+    map_draw[portal_pos.y][portal_pos.x] = CHAR_MAP.portal;
 }
 
 // 壁更新
@@ -210,26 +210,26 @@ function updateMDWall(){
   for(let i=0; i<SIZEY; i++)
     for(let j=0; j<SIZEX; j++){
       // 壁
-      if(player.map_sight[i][j] && (map[i][j] == id_map.room || isStair(j, i) || isPortal(j, i))){
+      if(player.map_sight[i][j] && (map[i][j] == ID_MAP.room || isStair(j, i) || isPortal(j, i))){
         // 縦
         for(let k=-1; k<=1; k++)
-          if(map[i][j+k] == id_map.none)
-            map_draw[i][j+k] = char_map.wall_v;
+          if(map[i][j+k] == ID_MAP.none)
+            map_draw[i][j+k] = CHAR_MAP.wall_v;
         // 横
         for(let k=-1; k<=1; k++)
-          if(map[i+k][j] == id_map.none)
-            map_draw[i+k][j] = char_map.wall_h;
+          if(map[i+k][j] == ID_MAP.none)
+            map_draw[i+k][j] = CHAR_MAP.wall_h;
         // 角
         for(let [k, l] of [[1,1],[1,-1],[-1,1],[-1,-1]])
-          if(map_draw[i+k][j+l] == char_map[id_map.none])
-            map_draw[i+k][j+l] = char_map.wall_h;
+          if(map_draw[i+k][j+l] == CHAR_MAP[ID_MAP.none])
+            map_draw[i+k][j+l] = CHAR_MAP.wall_h;
       }
       // 扉
-      else if(map_draw[i][j] == char_map[id_map.path]){
+      else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path]){
         for(let n of [-1, 1])
           for(let m of [-1, 1])
-            if(isInMap(j+m, i+n) && ![id_map.none, id_map.path].includes(map[i+n][j+m]))
-              map_draw[i][j] = char_map.door;
+            if(isInMap(j+m, i+n) && ![ID_MAP.none, ID_MAP.path].includes(map[i+n][j+m]))
+              map_draw[i][j] = CHAR_MAP.door;
       }
     }
 }
@@ -238,7 +238,7 @@ function updateMDWall(){
 function updateMDTrap(){
   for(let t of trap_group)
     if(player.map_sight[t.y][t.x] && t.visible)
-      map_draw[t.y][t.x] = char_map.trap;
+      map_draw[t.y][t.x] = CHAR_MAP.trap;
 }
 
 // エネミー描画
@@ -267,9 +267,9 @@ function updateMDItem(){
   for(let i of item_group)
     if(player.map_sight[i.y][i.x]){
       if(i.type=="stack")
-        map_draw[i.y][i.x] = char_map[item_data.find(v=>v.id==i.item_id).type];
+        map_draw[i.y][i.x] = CHAR_MAP[ITEM_DATA.find(v=>v.id==i.item_id).type];
       else
-        map_draw[i.y][i.x] = char_map[i.type];
+        map_draw[i.y][i.x] = CHAR_MAP[i.type];
     }
 }
 
@@ -279,49 +279,49 @@ function updateShotRange(){
 
   // 左上
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y-cnt][player.x-cnt]==id_map.none)
+    if(map[player.y-cnt][player.x-cnt]==ID_MAP.none)
       break;
     map_shotrange[player.y-cnt][player.x-cnt] = true;
   }
   // 上
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y-cnt][player.x]==id_map.none)
+    if(map[player.y-cnt][player.x]==ID_MAP.none)
       break;
     map_shotrange[player.y-cnt][player.x] = true;
   }
   // 右上
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y-cnt][player.x+cnt]==id_map.none)
+    if(map[player.y-cnt][player.x+cnt]==ID_MAP.none)
       break;
     map_shotrange[player.y-cnt][player.x+cnt] = true;
   }
   // 左
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y][player.x-cnt]==id_map.none)
+    if(map[player.y][player.x-cnt]==ID_MAP.none)
       break;
     map_shotrange[player.y][player.x-cnt] = true;
   }
   // 右
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y][player.x+cnt]==id_map.none)
+    if(map[player.y][player.x+cnt]==ID_MAP.none)
       break;
     map_shotrange[player.y][player.x+cnt] = true;
   }
   // 左下
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y+cnt][player.x-cnt]==id_map.none)
+    if(map[player.y+cnt][player.x-cnt]==ID_MAP.none)
       break;
     map_shotrange[player.y+cnt][player.x-cnt] = true;
   }
   // 下
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y+cnt][player.x]==id_map.none)
+    if(map[player.y+cnt][player.x]==ID_MAP.none)
       break;
     map_shotrange[player.y+cnt][player.x] = true;
   }
   // 右下
   for(let cnt = 1; cnt<=10; cnt++){
-    if(map[player.y+cnt][player.x+cnt]==id_map.none)
+    if(map[player.y+cnt][player.x+cnt]==ID_MAP.none)
       break;
     map_shotrange[player.y+cnt][player.x+cnt] = true;
   }
@@ -334,7 +334,7 @@ function isInMap(x, y){
 }
 
 function isRoom(x, y){
-  if(![id_map.path, id_map.none].includes(map[y][x]))
+  if(![ID_MAP.path, ID_MAP.none].includes(map[y][x]))
     return true;
   return false;
 }
@@ -363,7 +363,7 @@ function getRoomXY(x, y, map){
 
 function canMove(x, y){
   if(!isInMap(x,y) 
-    || map[y][x] == id_map.none
+    || map[y][x] == ID_MAP.none
     || isEnemy(x,y)
     || isShop(x,y)
     || isNPC(x,y)
@@ -378,7 +378,7 @@ function canDiagonal(x, y, dir_x, dir_y){
   if(dir_x==0 || dir_y==0)
     return true;
 
-  if(map[y+dir_y][x]==id_map.none || map[y][x+dir_x]==id_map.none)
+  if(map[y+dir_y][x]==ID_MAP.none || map[y][x+dir_x]==ID_MAP.none)
     return false;
 
   return true;
@@ -441,13 +441,13 @@ function genRoom(path_anchor){
   for(let j=-3; j<room_h+3; j++)
     for(let k=-3; k<room_w+3; k++)
       if(isInMap(anchor_x+k, anchor_y+j)
-      && map[anchor_y+j][anchor_x+k] == id_map.room)
+      && map[anchor_y+j][anchor_x+k] == ID_MAP.room)
         return false;
   
   // 生成
   for(let j=0; j<room_h; j++)
     for(let k=0; k<room_w; k++)
-      map[anchor_y+j][anchor_x+k] = id_map.room;
+      map[anchor_y+j][anchor_x+k] = ID_MAP.room;
   
   // アンカー生成
   let path_anchor_x = Math.floor(Math.random()*(anchor_x+room_w-1-anchor_x)+anchor_x);
@@ -501,12 +501,12 @@ function genPath(path_anchor){
       array_xy = {low_y: n.i.y, high_y: n.j.y, low_x: n.j.x, high_x: n.i.x};
 
     for(let m=array_xy.low_y; m<array_xy.high_y+1; m++){
-      if(map[m][n.i.x] == id_map.none)
-        map[m][n.i.x] = id_map.path;
+      if(map[m][n.i.x] == ID_MAP.none)
+        map[m][n.i.x] = ID_MAP.path;
     }
     for(let m=array_xy.low_x; m<array_xy.high_x+1; m++){
-      if(map[n.j.y][m] == id_map.none)
-        map[n.j.y][m] = id_map.path;
+      if(map[n.j.y][m] == ID_MAP.none)
+        map[n.j.y][m] = ID_MAP.path;
     }
   }
 }
@@ -526,9 +526,9 @@ function generateUniqueMap(um){
 
 function initMaps(){
   // 地形マップ
-  initMap(map, id_map.none);
+  initMap(map, ID_MAP.none);
   // 描画マップ
-  initMap(map_draw, char_map[0]);
+  initMap(map_draw, CHAR_MAP[0]);
 }
 
 function initMap(m, v){

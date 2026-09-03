@@ -206,38 +206,38 @@ document.addEventListener("keydown", async (e) =>{
 
 function toggleKeyInput(e){
   if(!exeEventsFlg) {
-    if(e.key==key_code.left) key_input.left = true;
-    if(e.key==key_code.right) key_input.right = true;
-    if(e.key==key_code.up) key_input.up = true;
-    if(e.key==key_code.down) key_input.down = true;
+    if(e.key==KEY_CODE.left) key_input.left = true;
+    if(e.key==KEY_CODE.right) key_input.right = true;
+    if(e.key==KEY_CODE.up) key_input.up = true;
+    if(e.key==KEY_CODE.down) key_input.down = true;
     if(key_input.left && key_input.up) key_input.up_left = true;
     if(key_input.right && key_input.up) key_input.up_right = true;
     if(key_input.left && key_input.down) key_input.down_left = true;
     if(key_input.right && key_input.down) key_input.down_right = true;
-    if(e.key==key_code.apply) key_input.apply = true;
-    if(e.key==key_code.cancel) key_input.cancel = true;
-    if(e.key==key_code.sub) key_input.sub = true;
-    if(e.key==key_code.esc) key_input.esc = true;
+    if(e.key==KEY_CODE.apply) key_input.apply = true;
+    if(e.key==KEY_CODE.cancel) key_input.cancel = true;
+    if(e.key==KEY_CODE.sub) key_input.sub = true;
+    if(e.key==KEY_CODE.esc) key_input.esc = true;
   }
-  if(e.key==key_code.shift) key_input.shift = true;
-  if(e.key==key_code.ctrl) key_input.ctrl = true;
+  if(e.key==KEY_CODE.shift) key_input.shift = true;
+  if(e.key==KEY_CODE.ctrl) key_input.ctrl = true;
 }
 
 document.addEventListener("keyup", e=>{
-  if(e.key==key_code.left) key_input.left = false;
-  if(e.key==key_code.right) key_input.right = false;
-  if(e.key==key_code.up) key_input.up = false;
-  if(e.key==key_code.down) key_input.down = false;
+  if(e.key==KEY_CODE.left) key_input.left = false;
+  if(e.key==KEY_CODE.right) key_input.right = false;
+  if(e.key==KEY_CODE.up) key_input.up = false;
+  if(e.key==KEY_CODE.down) key_input.down = false;
   if(!key_input.left || !key_input.up) key_input.up_left = false;
   if(!key_input.right || !key_input.up) key_input.up_right = false;
   if(!key_input.left || !key_input.down) key_input.down_left = false;
   if(!key_input.right || !key_input.down) key_input.down_right = false;
-  if(e.key==key_code.shift) key_input.shift = false;
-  if(e.key==key_code.ctrl) key_input.ctrl = false;
-  if(e.key==key_code.apply) key_input.apply = false;
-  if(e.key==key_code.cancel) key_input.cancel = false;
-  if(e.key==key_code.sub) key_input.sub = false;
-  if(e.key==key_code.esc) key_input.esc = false;
+  if(e.key==KEY_CODE.shift) key_input.shift = false;
+  if(e.key==KEY_CODE.ctrl) key_input.ctrl = false;
+  if(e.key==KEY_CODE.apply) key_input.apply = false;
+  if(e.key==KEY_CODE.cancel) key_input.cancel = false;
+  if(e.key==KEY_CODE.sub) key_input.sub = false;
+  if(e.key==KEY_CODE.esc) key_input.esc = false;
 });
 
 // ボタン
@@ -373,8 +373,8 @@ async function events(){
 async function eventPlayer(){
   // 十字キー
   let kd;
-  if(!key_input.ctrl) kd = key_direction;
-  else kd = key_direction_diagonal;
+  if(!key_input.ctrl) kd = KEY_DIRECTION;
+  else kd = KEY_DIRECTION_DIAGONAL;
   for(let k in kd)
     if(key_input[k]){
       let x = player.x + kd[k].x;
@@ -491,8 +491,8 @@ async function sprint(direction){
     return;
   if(!canMove(player.x+direction.x, player.y+direction.y) && canDiagonal(player.x, player.y, direction.x, direction.y))
     return;
-  if(map[player.y][player.x] == id_map.path && map[player.y+direction.y][player.x+direction.x] == id_map.room
-    || map[player.y][player.x] == id_map.room && map[player.y+direction.y][player.x+direction.x] == id_map.path)
+  if(map[player.y][player.x] == ID_MAP.path && map[player.y+direction.y][player.x+direction.x] == ID_MAP.room
+    || map[player.y][player.x] == ID_MAP.room && map[player.y+direction.y][player.x+direction.x] == ID_MAP.path)
     return;
   if(isFrontObj(player, direction))
     return;
@@ -535,10 +535,10 @@ function isAnyObj(x, y){
 
 // 交差点
 function isCrossing(x, y){
-  if(map[y][x] != id_map.path) return false;
+  if(map[y][x] != ID_MAP.path) return false;
   let path_cnt = 0;
   for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]])
-    if(map[y+i][x+j] == id_map.path) path_cnt++;
+    if(map[y+i][x+j] == ID_MAP.path) path_cnt++;
   if(path_cnt > 2) return true;
   return false;
 }
@@ -586,8 +586,8 @@ async function eventShot(){
 
   // 十字キー
   let kd;
-  if(!key_input.ctrl) kd = key_direction;
-  else kd = key_direction_diagonal;
+  if(!key_input.ctrl) kd = KEY_DIRECTION;
+  else kd = KEY_DIRECTION_DIAGONAL;
   for(let k in kd)
     if(key_input[k]){
       shot_flag = false;
@@ -665,8 +665,8 @@ async function shotDmg(from, to, ammo){
 async function eventThrowing(){
   // 十字キー
   let kd;
-  if(!key_input.ctrl) kd = key_direction;
-  else kd = key_direction_diagonal;
+  if(!key_input.ctrl) kd = KEY_DIRECTION;
+  else kd = KEY_DIRECTION_DIAGONAL;
   for(let k in kd)
     if(key_input[k]){
       throwing_flag = false;
@@ -758,8 +758,8 @@ function checkThrowing(index){
 async function eventMagic(){
   // 十字キー
   let kd;
-  if(!key_input.ctrl) kd = key_direction;
-  else kd = key_direction_diagonal;
+  if(!key_input.ctrl) kd = KEY_DIRECTION;
+  else kd = KEY_DIRECTION_DIAGONAL;
   for(let k in kd)
     if(key_input[k]){
       magic_flag = false;
@@ -842,7 +842,7 @@ async function dealDmg(from, to, dmg){
 function straightRecursive(x, y, direction, range){
   if(!canMove(x+direction.x, y+direction.y)
     || range <= 0
-    || map_draw[y+direction.y][x+direction.x] == char_map.door)
+    || map_draw[y+direction.y][x+direction.x] == CHAR_MAP.door)
     return {x:x, y:y};
   return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
@@ -851,7 +851,7 @@ function straightRecursiveDiagonal(x, y, direction, range){
   if(!canMove(x+direction.x, y+direction.y)
     || !canDiagonal(x, y, direction.x, direction.y)
     || range <= 0
-    || map_draw[y+direction.y][x+direction.x] == char_map.door)
+    || map_draw[y+direction.y][x+direction.x] == CHAR_MAP.door)
     return {x:x, y:y};
   return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
@@ -1070,7 +1070,7 @@ function lvUp(who){
 
 // lv1に戻す
 function backLv(){
-  let job = item_data.find(v=>v.id==player.job);
+  let job = ITEM_DATA.find(v=>v.id==player.job);
 
   player.hp = job.hp;
   player.hp_max = job.hp_max;
@@ -1139,7 +1139,7 @@ async function removeRecalc(obj, func) {
 
 // 状態異常追加
 async function setCondition(who, id){
-  let cond = condition_data.find(v=>v.id==id);
+  let cond = CONDITION_DATA.find(v=>v.id==id);
   
   if(!cond || !("condition" in who)){
     console.warn("setCondition: id or who.condtion not found");
@@ -1269,7 +1269,7 @@ async function equip(index){
 
 // アイテム取得
 function addItem(id){
-  let item = item_data.find(v=>v.id==id);
+  let item = ITEM_DATA.find(v=>v.id==id);
   // スタックアイテム
   if(item.type=="stack"){
     if(inventory.length < INVENTORY_SIZE){
@@ -1337,7 +1337,7 @@ function getStackIndex(item){
 
 // アイテム設置
 function setItem(id, x, y){
-  let item = Object.assign({}, item_data.find(v=>v.id==id), {x: x, y: y});
+  let item = Object.assign({}, ITEM_DATA.find(v=>v.id==id), {x: x, y: y});
   item_group.push(item);
 }
 
@@ -1346,10 +1346,10 @@ function setItemGroup(){
   let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
   let table = [];
   
-  if(Math.floor((floor_cnt-1)/3) in item_table)
-    table = item_table[Math.floor((floor_cnt-1)/3)];
+  if(Math.floor((floor_cnt-1)/3) in ITEM_TABLE)
+    table = ITEM_TABLE[Math.floor((floor_cnt-1)/3)];
   else
-    table = item_table[0];
+    table = ITEM_TABLE[0];
   if(table.length==0) return;
 
   for(let i=0; i<num; i++){
@@ -1365,7 +1365,7 @@ function setRandomXY(){
   const y = Math.floor(Math.random() * (SIZEY-1 - 1) + 1);
 
   if(!canMove(x, y)
-    || map[y][x] != id_map.room
+    || map[y][x] != ID_MAP.room
     || isItem(x, y)
     || isTrap(x, y)
     || isEnemy(x, y))
@@ -1526,7 +1526,7 @@ function isPortal(x, y){
 
 // ショップ配置
 function setShop(id, x, y){
-  let shop = shop_data.find(v=>v.id==id);
+  let shop = SHOP_DATA.find(v=>v.id==id);
   let items = [];
 
   if(shop.random_flag){
@@ -1539,13 +1539,13 @@ function setShop(id, x, y){
         n--;
         continue;
       }
-      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
+      let item = Object.assign({}, ITEM_DATA.find(v=>v.id==i.id), {price: i.price});
       items.push(item);
     }
   }
   else
     for(let i of shop.item_table){
-      let item = Object.assign({}, item_data.find(v=>v.id==i.id), {price: i.price});
+      let item = Object.assign({}, ITEM_DATA.find(v=>v.id==i.id), {price: i.price});
       items.push(item);
     }
 
@@ -1563,7 +1563,7 @@ function isShop(x, y){
 
 // NPC配置
 function setNPC(id, x, y){
-  let npc = Object.assign({}, npc_data.find(v=>v.id==id), {x: x, y: y});
+  let npc = Object.assign({}, NPC_DATA.find(v=>v.id==id), {x: x, y: y});
   npc_group.push(npc);
 }
 
@@ -1577,7 +1577,7 @@ function isNPC(x, y){
 
 // 罠
 function setTrap(id, x, y){
-  let trap = Object.assign({}, trap_data.find(v=>v.id==id), {x: x, y: y, visible: false});
+  let trap = Object.assign({}, TRAP_DATA.find(v=>v.id==id), {x: x, y: y, visible: false});
   trap_group.push(trap);
 }
 
@@ -1586,10 +1586,10 @@ function setTrapGroup(){
   let num = Math.floor(Math.random() * (room_num*1 - 1) + 1);
   let table = [];
   
-  if(Math.floor((floor_cnt-1)/3) in trap_table)
-    table = trap_table[Math.floor((floor_cnt-1)/3)];
+  if(Math.floor((floor_cnt-1)/3) in TRAP_TABLE)
+    table = TRAP_TABLE[Math.floor((floor_cnt-1)/3)];
   else
-    table = trap_table[0];
+    table = TRAP_TABLE[0];
   if(table.length==0) return;
 
   for(let i=0; i<num; i++){
@@ -1668,18 +1668,18 @@ async function eventEnemy(enemy){
     }
 
     // プレイヤーへ攻撃
-    for(let d in key_direction){
-      let x = enemy.x + key_direction[d].x;
-      let y = enemy.y + key_direction[d].y;
-      if(x == player.x && y == player.y && canDiagonal(enemy.x, enemy.y, key_direction[d].x, key_direction[d].y)){
+    for(let d in KEY_DIRECTION){
+      let x = enemy.x + KEY_DIRECTION[d].x;
+      let y = enemy.y + KEY_DIRECTION[d].y;
+      if(x == player.x && y == player.y && canDiagonal(enemy.x, enemy.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)){
         await attack(enemy, player);
         return;
       }
     }
-    for(let d in key_direction_diagonal){
-      let x = enemy.x + key_direction_diagonal[d].x;
-      let y = enemy.y + key_direction_diagonal[d].y;
-      if(x == player.x && y == player.y && canDiagonal(enemy.x, enemy.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
+    for(let d in KEY_DIRECTION_DIAGONAL){
+      let x = enemy.x + KEY_DIRECTION_DIAGONAL[d].x;
+      let y = enemy.y + KEY_DIRECTION_DIAGONAL[d].y;
+      if(x == player.x && y == player.y && canDiagonal(enemy.x, enemy.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)){
         await attack(enemy, player);
         return;
       }
@@ -1703,19 +1703,19 @@ async function eventEnemy(enemy){
       if(enemy.berserk_flag) {
         if(other_enemy === enemy) continue; // 保険
 
-        for(let d in key_direction){
-          let x = enemy.x + key_direction[d].x;
-          let y = enemy.y + key_direction[d].y;
-          if(x == other_enemy.x && y == other_enemy.y && canDiagonal(enemy.x, enemy.y, key_direction[d].x, key_direction[d].y)){
+        for(let d in KEY_DIRECTION){
+          let x = enemy.x + KEY_DIRECTION[d].x;
+          let y = enemy.y + KEY_DIRECTION[d].y;
+          if(x == other_enemy.x && y == other_enemy.y && canDiagonal(enemy.x, enemy.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)){
             await attack(enemy, other_enemy);
             if(await isDead(other_enemy)) addExp(enemy, other_enemy.exp);
             return;
           }
         }
-        for(let d in key_direction_diagonal){
-          let x = enemy.x + key_direction_diagonal[d].x;
-          let y = enemy.y + key_direction_diagonal[d].y;
-          if(x == other_enemy.x && y == other_enemy.y && canDiagonal(enemy.x, enemy.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
+        for(let d in KEY_DIRECTION_DIAGONAL){
+          let x = enemy.x + KEY_DIRECTION_DIAGONAL[d].x;
+          let y = enemy.y + KEY_DIRECTION_DIAGONAL[d].y;
+          if(x == other_enemy.x && y == other_enemy.y && canDiagonal(enemy.x, enemy.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)){
             await attack(enemy, other_enemy);
             if(await isDead(other_enemy)) addExp(enemy, other_enemy.exp);
             return;
@@ -1760,7 +1760,7 @@ function getSightPath(x, y, sight_range, map_sight){
   map_sight[y][x] = true;
   for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]){
     if(isInMap(x+j,y+i) 
-      && map[y+i][x+j] != id_map.none 
+      && map[y+i][x+j] != ID_MAP.none 
       && !map_sight[y+i][x+j] 
       && sight_range > 0
       && !isRoom(x, y)
@@ -1920,7 +1920,7 @@ function setNextTravelRoom(enemy){
     let break_flag = true;
     for(let xy of room_xy)
       if(next_room_x==xy.x && next_room_y==xy.y
-        || !canMove(next_room_x, next_room_y) || map[next_room_y][next_room_x]!=id_map.room){
+        || !canMove(next_room_x, next_room_y) || map[next_room_y][next_room_x]!=ID_MAP.room){
         break_flag = false;
         break;
       }
@@ -1942,27 +1942,27 @@ async function moveEnemyRand(enemy){
   let dir_array_diagonal = ["up_left", "up_right", "down_left", "down_right"];
 
   // 垂直水平
-  if(map[enemy.y][enemy.x] != id_map.path || rand_diagonal){
-    let dir = key_direction[dir_array[rand_dir]];
+  if(map[enemy.y][enemy.x] != ID_MAP.path || rand_diagonal){
+    let dir = KEY_DIRECTION[dir_array[rand_dir]];
     return await move(enemy, dir);
   }
   // 斜め
   else{
-    let dir = key_direction_diagonal[dir_array_diagonal[rand_dir]];
+    let dir = KEY_DIRECTION_DIAGONAL[dir_array_diagonal[rand_dir]];
     return await move(enemy, dir);
   }
 }
 
 // エネミー追加
 function setEnemy(id, x, y){
-  let enemy = enemy_data.find(v=>v.id==id);
+  let enemy = ENEMY_DATA.find(v=>v.id==id);
   let e = Object.assign({}, enemy,
     {x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], },
-    other_enemy_info);
+    OTHER_ENEMY_INFO);
 
   // スキル
   for(let s of e.skill){
-    let skill = Object.assign({}, skill_data.find(v=>v.id==s.id), {chance: 0}, s);
+    let skill = Object.assign({}, SKILL_DATA.find(v=>v.id==s.id), {chance: 0}, s);
     Object.assign(s, skill);
 
     // プロパティチェック
@@ -1982,17 +1982,17 @@ async function setEnemyGroup(){
   let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
   let table = [];
 
-  if(Math.floor((floor_cnt-1)/3) in enemy_table)
-    table = enemy_table[Math.floor((floor_cnt-1)/3)];
+  if(Math.floor((floor_cnt-1)/3) in ENEMY_TABLE)
+    table = ENEMY_TABLE[Math.floor((floor_cnt-1)/3)];
   else{
-    table = enemy_table[0];
+    table = ENEMY_TABLE[0];
     console.warn("setEnemyGroup: enemy_table of this floor not found");
   }
   if(table.length==0) return;
 
   for(let i=0; i<num; i++){
     const enemy_id = table[Math.floor(Math.random() * table.length)];
-    const enemy = enemy_data.find(v=>v.id==enemy_id);
+    const enemy = ENEMY_DATA.find(v=>v.id==enemy_id);
     let spawn_cnt = enemy.group_spawn_flag ? 2 : 1;
 
     for(let j=0; j<spawn_cnt; j++){
@@ -2018,7 +2018,7 @@ function setSpawnXY(priority, group_spawn_flag, id){
   let next_wall_flag = false;
   for(let i=-1; i<=1; i++)
     for(let j=-1; j<=1; j++)
-      if(map[y+i][x+j] == id_map.none)
+      if(map[y+i][x+j] == ID_MAP.none)
         next_wall_flag = true;
   if(!next_wall_flag && priority < 200)
     return setSpawnXY(++priority, group_spawn_flag, id);
