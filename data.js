@@ -314,9 +314,12 @@ let safe_flag = false;  // 空腹度無効化
 let clairvoyance_flag = false;  // 透視
 let bow_flag = false;
 
-const multiple_slot = ["ring"];
+const STATUS_LIST= ["str", "dex", "int", "fth"];
+const MULTIPLE_SLOT = ["ring"];
 const THROWING_RANGE = 5;
 const MAGIC_RANGE = 10;
+const ATK_BASE = 25;
+const DEF_BASE = 0;
 
 // プレイヤー
 let player = {
@@ -329,8 +332,18 @@ let player = {
   exp:0, next_exp:0,
   hp:0, hp_max:0, hp_max_offset:0,
   mp:0, mp_max:0, mp_max_offset:0,
-  atk:0, atk_offset:0,
-  def:0, def_offset:0,
+  
+  str:0,
+  dex:0,
+  int:0,
+  fth:0,
+  
+  // 外的要因で変わるやつ
+  atk:0,
+  def:0,
+
+  // st変更時再計算用関数保持
+  recalc: [],
 
   hung:0, hung_max:0, hung_max_offset: 0,
   hung_rate: 0, hung_rate_offset: 0, // 空腹度の減り具合 /turn
@@ -367,8 +380,8 @@ const condition_data = [//TODO
       addLog(who.name+" は毒に侵された");
     },
     func_during: async function(who){
-      let dmg = 2;
-      addHP(who, -2);
+      let dmg = 20;
+      addHP(who, -dmg);
       addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
     },
     func_recovery: async function(who){
@@ -533,7 +546,7 @@ const item_data = [//TODO
     name: "三日月草",
     type: "consume",
     func: async function(){
-      let value = 10;
+      let value = 50;
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
@@ -547,7 +560,7 @@ const item_data = [//TODO
     name: "半月草",
     type: "consume",
     func: async function(){
-      let value = 20;
+      let value = 100;
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
@@ -561,7 +574,7 @@ const item_data = [//TODO
     name: "後月草",
     type: "consume",
     func: async function(){
-      let value = 30;
+      let value = 200;
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
@@ -575,7 +588,7 @@ const item_data = [//TODO
     name: "満月草",
     type: "consume",
     func: async function(){
-      let value = 50;
+      let value = 400;
       addHP(player, value);
       addHung(5);
       addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
@@ -656,11 +669,18 @@ const item_data = [//TODO
     id: 0x100,
     name: "ショートソード",
     type: "weapon",
+    base_dmg: 25,
     func_equip: async function(){
-      player.atk_offset += 2;
+      player.atk += this.base_dmg;
+      calcAtkFromStatus("str", 1.25, true, this.base_dmg);
+      calcAtkFromStatus("dex", 1.25, true, this.base_dmg);
+      pushRecalc(this, this.func_equip);
     },
     func_unequip: async function(){
-      player.atk_offset -= 2;
+      player.atk -= this.base_dmg;
+      calcAtkFromStatus("str", 1.25, false, this.base_dmg);
+      calcAtkFromStatus("dex", 1.25, false, this.base_dmg);
+      removeRecalc(this, this.func_equip);
     },
     func_attack: async function(to){},
   },
@@ -668,11 +688,18 @@ const item_data = [//TODO
     id: 0x101,
     name: "ブロードソード",
     type: "weapon",
+    base_dmg: 40,
     func_equip: async function(){
-      player.atk_offset += 3;
+      player.atk += this.base_dmg;
+      calcAtkFromStatus("str", 1.3, true, this.base_dmg);
+      calcAtkFromStatus("dex", 1.25, true, this.base_dmg);
+      pushRecalc(this.func_equip);
     },
     func_unequip: async function(){
-      player.atk_offset -= 3;
+      player.atk -= this.base_dmg;
+      calcAtkFromStatus("str", 1.3, false, this.base_dmg);
+      calcAtkFromStatus("dex", 1.25, false, this.base_dmg);
+      removeRecalc(this.func_equip);
     },
     func_attack: async function(to){},
   },
@@ -681,18 +708,18 @@ const item_data = [//TODO
     id: 0x200,
     name: "狩猟弓",
     type: "weapon",
+    base_dmg: 25,
     func_equip: async function(){
       bow_flag = true;
-      //if(!player.ammo)
-      //  for(let i of inventory){
-      //    if(i.type=="ammo"){
-      //      await equip(inventory.indexOf(i));
-      //      break;
-      //    }
-      //  }
+      player.atk += this.base_dmg;
+      calcAtkFromStatus("dex", 1.1, true, this.base_dmg);
+      pushRecalc(this.func_equip);
     },
     func_unequip: async function(){
       bow_flag = false;
+      player.atk -= this.base_dmg;
+      calcAtkFromStatus("dex", 1.1, false, this.base_dmg);
+      removeRecalc(this.func_equip);
     },
     func_attack: async function(to){},
   },
@@ -702,10 +729,10 @@ const item_data = [//TODO
     name: "レザーアーマー",
     type: "armor",
     func_equip: async function(){
-      player.def_offset += 1;
+      player.def += 10;
     },
     func_unequip: async function(){
-      player.def_offset -= 1;
+      player.def -= 10;
     },
     func_attacked: async function(from){},
   },
@@ -714,10 +741,10 @@ const item_data = [//TODO
     name: "チェインメイル",
     type: "armor",
     func_equip: async function(){
-      player.def_offset += 2;
+      player.def += 12;
     },
     func_unequip: async function(){
-      player.def_offset -= 2;
+      player.def -= 12;
     },
     func_attacked: async function(from){},
   },
@@ -726,10 +753,10 @@ const item_data = [//TODO
     name: "無名騎士の鎧",
     type: "armor",
     func_equip: async function(){
-      player.def_offset += 3;
+      player.def += 14;
     },
     func_unequip: async function(){
-      player.def_offset -= 3;
+      player.def -= 14;
     },
     func_attacked: async function(from){},
   },
@@ -751,10 +778,10 @@ const item_data = [//TODO
     name: "小生命の指輪",
     type: "ring",
     func_equip: async function(){
-      player.hp_max_offset += 10;
+      player.hp_max_offset += 25;
     },
     func_unequip: async function(){
-      player.hp_max_offset -= 10;
+      player.hp_max_offset -= 25;
       addHP(player, 0);
     },
   },
@@ -798,21 +825,21 @@ const item_data = [//TODO
     name: "ソウルの杖",
     type: "staff",
     func: async function(){
-      if(player.mp < 4){
+      if(player.mp < 8){
         addLog("MP が足りない");
         return false;
       }
-      addLog(this.name+" を構えた");
+      addLog(player.name+" は "+this.name+" を構えた");
       magic_flag = true;
       player.magic_using = this;
       return false;
     },
     func_cast: async function(dir){
-      addMP(player, -4);
+      addMP(player, -8);
       addLog(player.name+" はソウルの光を放った");
       audio_ray.play();
       await animShot(player, straightRecursive(player.x, player.y, dir, MAGIC_RANGE), dir, char_map.ray);
-      return magic(player, player.mp_max/3, dir);
+      return magic(player, 70+player.int*2, dir);
     }
   },
   {
@@ -825,7 +852,7 @@ const item_data = [//TODO
         return false;
       }
       addMP(player, -8);
-      let value = 15;
+      let value = 30 + player.fth * 2;
       addHP(player, value);
       addLog("淡い光が "+player.name+" を包む　HPが "+value+" 回復した");
       audio_heal.play();
@@ -838,7 +865,7 @@ const item_data = [//TODO
     name: "跳躍の杖",
     type: "staff",
     func: async function(){
-      if(player.mp < 14){
+      if(player.mp < 7){
         addLog("MP が足りない");
         return false;
       }
@@ -848,7 +875,7 @@ const item_data = [//TODO
       return false;
     },
     func_cast: async function(dir){
-      addMP(player, -14);
+      addMP(player, -7);
       if(jump(player, dir, 3)){
         addLog(player.name+" は跳んだ");
         audio_jump.play();
@@ -863,7 +890,7 @@ const item_data = [//TODO
     id: 0x700,
     name: "木の矢",
     type: "ammo",
-    dmg: 4,
+    dmg: 20,
     range: 10,
     func_equip: async function(){},
     func_unequip: async function(){},
@@ -872,7 +899,7 @@ const item_data = [//TODO
     id: 0x701,
     name: "鉄の矢",
     type: "ammo",
-    dmg: 6,
+    dmg: 30,
     range: 8,
     func_equip: async function(){},
     func_unequip: async function(){},
@@ -881,7 +908,7 @@ const item_data = [//TODO
     id: 0x7f0,
     name: "胞子",
     type: "ammo",
-    dmg: 0,
+    dmg: 10,
     range: 2,
     func_equip: async function(){},
     func_unequip: async function(){},
@@ -906,17 +933,20 @@ const item_data = [//TODO
     id: 0xf00,
     name: "持たざる者",
     type: "unique",
-    hp: 10,
-    hp_max: 10,
-    mp: 5,
-    mp_max: 5,
-    atk: 1,
-    def: 1,
+    hp: 100,
+    hp_max: 100,
+    mp: 10,
+    mp_max: 10,
+    str: 2,
+    dex: 2,
+    int: 2,
+    fth: 4,
+    def: 5,
     hung_rate: 30,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
     sight_range: 3,
-    lvup: {hp_max: 2, mp_max: 2},
+    lvup: {hp_max: 30, mp_max: 3, str: 2, dex: 2, fth: 3},
     func: async function(){
       log_reserve.pop();
       player.job = this.id;
@@ -930,17 +960,20 @@ const item_data = [//TODO
     id: 0xf01,
     name: "戦士",
     type: "unique",
-    hp: 20,
-    hp_max: 20,
+    hp: 200,
+    hp_max: 200,
     mp: 0,
     mp_max: 0,
-    atk: 4,
-    def: 3,
+    str: 4,
+    dex: 2,
+    int: 1,
+    fth: 3,
+    def: 10,
     hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
     sight_range: 3,
-    lvup: {hp_max: 5, mp_max: 0},
+    lvup: {hp_max: 40, mp_max: 1, str: 3, dex: 2},
     func: async function(){
       if(INVENTORY_SIZE-inventory.length >= 3){
         log_reserve.pop();
@@ -963,17 +996,20 @@ const item_data = [//TODO
     id: 0xf02,
     name: "弓兵",
     type: "unique",
-    hp: 15,
-    hp_max: 15,
+    hp: 150,
+    hp_max: 150,
     mp: 10,
     mp_max: 10,
-    atk: 3,
-    def: 1,
+    str: 2,
+    dex: 4,
+    int: 3,
+    fth: 1,
+    def: 7,
     hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 10,
     sight_range: 9,
-    lvup: {hp_max: 3, mp_max: 2},
+    lvup: {hp_max: 25, mp_max: 2, dex: 4, int: 1},
     func: async function(){
       if(INVENTORY_SIZE-inventory.length >= 5){
         log_reserve.pop();
@@ -998,17 +1034,20 @@ const item_data = [//TODO
     id: 0xf03,
     name: "魔法使い",
     type: "unique",
-    hp: 10,
-    hp_max: 10,
+    hp: 100,
+    hp_max: 100,
     mp: 20,
     mp_max: 20,
-    atk: 2,
-    def: 0,
+    str: 1,
+    dex: 2,
+    int: 6,
+    fth: 1,
+    def: 2,
     hung_rate: 10,
     hp_regen_rate: 10,
     mp_regen_rate: 7,
     sight_range: 6,
-    lvup: {hp_max: 1, mp_max: 4},
+    lvup: {hp_max: 10, mp_max: 4, int: 4, fth: 1},
     func: async function(){
       if(INVENTORY_SIZE-inventory.length >= 3){
         log_reserve.pop();
@@ -1028,8 +1067,8 @@ const item_data = [//TODO
     },
   },
 ];
-const equip_type = ["weapon", "armor", "ring", "ammo"];
-const stack_type = ["ammo"];
+const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
+const STACK_TYPE = ["ammo"];
 const STACK_MAX = 32;
 let inventory = [];
 const INVENTORY_SIZE = 20;
@@ -1091,9 +1130,9 @@ const enemy_data = [//TODO
     name: "亡者",
     char: "亡",
     lv:1,
-    hp:5, hp_max:5, 
+    hp:120, hp_max:120, 
     mp:0, mp_max:0, 
-    atk:4, def:2,
+    atk:30, def:10,
     speed:1,
     sight_range:5,
     escape_flag: false,
@@ -1109,9 +1148,9 @@ const enemy_data = [//TODO
     name: "ミランダフラワー",
     char: "花",
     lv:1,
-    hp:1, hp_max:1, 
+    hp:50, hp_max:50, 
     mp:0, mp_max:0, 
-    atk:1, def:0,
+    atk:20, def:5,
     speed:1,
     sight_range:2,
     escape_flag: false,
@@ -1136,9 +1175,9 @@ const enemy_data = [//TODO
     name: "亡者兵士",
     char: "兵",
     lv:2,
-    hp:13, hp_max:13,
+    hp:150, hp_max:150,
     mp:0, mp_max:0,
-    atk:7, def:6,
+    atk:50, def:15,
     speed:1,
     sight_range:4,
     escape_flag: false,
@@ -1154,9 +1193,9 @@ const enemy_data = [//TODO
     name: "白人",
     char: "白",
     lv:1,
-    hp:10, hp_max:10, 
+    hp:100, hp_max:100, 
     mp:15, mp_max:15,
-    atk:4, def:2,
+    atk:40, def:6,
     speed:1,
     sight_range:6,
     escape_flag: false,
@@ -1184,9 +1223,9 @@ const enemy_data = [//TODO
     name: "スケルトン",
     char: "骨",
     lv:3,
-    hp:15, hp_max:15,
+    hp:150, hp_max:150,
     mp:5, mp_max:5,
-    atk:8, def:3,
+    atk:60, def:5,
     speed:1,
     sight_range:5,
     escape_flag: false,
@@ -1207,9 +1246,9 @@ const enemy_data = [//TODO
     name: "ネズミ",
     char: "鼠",
     lv:3,
-    hp:15, hp_max:15,
+    hp:110, hp_max:110,
     mp:3, mp_max:3,
-    atk:4, def:4,
+    atk:20, def:5,
     speed:2,
     sight_range:8,
     escape_flag: false,
@@ -1230,9 +1269,9 @@ const enemy_data = [//TODO
     name: "車輪骸骨",
     char: "車",
     lv:4,
-    hp:20, hp_max:20,
+    hp:200, hp_max:200,
     mp:5, mp_max:5,
-    atk:4, def:2,
+    atk:40, def:10,
     speed:1,
     sight_range:5,
     escape_flag: false,
@@ -1253,7 +1292,8 @@ const other_enemy_info = {
   //x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], 
   cannot_action_flag: false, cannot_move_flag: false,
   chase_flag: false, chase_count: 5,
-  hp_max_offset: 0, mp_max_offset: 0, atk_offset: 0, def_offset: 0, sight_range_offset: 0,
+  hp_max_offset: 0, mp_max_offset: 0, sight_range_offset: 0,
+  next_exp: 10, lvup: {},
 };
 const enemy_table = [
   [
@@ -1357,8 +1397,11 @@ const skill_data = [//TODO
         let xy = straightRecursiveDiagonal(from.x, from.y, key_direction[d], SIZEX+SIZEY);
         if(xy.x+key_direction[d].x == to.x && xy.y+key_direction[d].y == to.y && canDiagonal(from.x, from.y, key_direction[d].x, key_direction[d].y) && from.map_sight[to.y][to.x]){
           addLog(from.name+" は "+to.name+" に突撃した");
-          attack(from, to);
-          while(move(from, key_direction[d]));
+          await attack(from, to);
+          while(await move(from, key_direction[d])){
+            updateMap();
+            drawMap();
+          }
           return true;
         }
       }
@@ -1366,8 +1409,11 @@ const skill_data = [//TODO
         let xy = straightRecursiveDiagonal(from.x, from.y, key_direction_diagonal[d], SIZEX+SIZEY);
         if(xy.x+key_direction_diagonal[d].x == to.x && xy.y+key_direction_diagonal[d].y == to.y && canDiagonal(from.x, from.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y) && from.map_sight[to.y][to.x]){
           addLog(from.name+" は "+to.name+" に突撃した");
-          attack(from, to);
-          while(move(from, key_direction_diagonal[d]));
+          await attack(from, to);
+          while(await move(from, key_direction_diagonal[d])){
+            updateMap();
+            drawMap();
+          }
           return true;
         }
       }
@@ -1396,12 +1442,15 @@ const npc_data = [
     id: 0x01,
     name: "職安",
     char: "職",
-    loop: false,
+    loop: true,
     dialogue: [
-      "頑張れよ",
+      "今のお前のステータスを教えてやろう",
+      "",
     ],
     dialogue_cnt: 0,
-    func: async function(){},
+    func: async function(){
+      this.dialogue[1] = "STR: "+player.str+", DEX: "+player.dex+", INT: "+player.int+", FTH: "+player.fth;
+    },
   },
   {
     id: 0x02,
@@ -1420,16 +1469,16 @@ const npc_data = [
       "戦士は基礎ステータスが高いよ",
       "弓兵は視界が広いよ",
       "魔法使いはMPの自然回復が速いよ",
-      "職業毎にHPとMPの成長率が違うよ",
+      "職業毎にHP・MP・ステータス値の成長率が違うよ",
       "指輪は2つ装備できるよ",
-      "弓を装備すると、一番上の矢が自動的に装備されるよ",
-      "弓は近距離戦闘が苦手だよ",
-      "基本的に杖の威力は最大MP依存だよ",
+      //"弓を装備すると、一番上の矢が自動的に装備されるよ",
+      //"基本的に杖の威力は最大MP依存だよ",
       "職業で装備できるものに差はないよ",
       // 拠点
       "10階層毎にここに戻れるよ",
       "戻ってくるとレベルは1に戻るよ",
       "メレンは物を買ってくれるよ",
+      "職安はステータス値を教えてくれるよ",
     ],
     dialogue_cnt: 0,
     func: async function(){},
@@ -1445,6 +1494,7 @@ const npc_data = [
     dialogue_cnt: 0,
     func: async function(){
       fullRecovery(player);
+      audio_heal.play();
     },
   },
 ];
