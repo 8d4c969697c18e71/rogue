@@ -886,7 +886,7 @@ let item_group = [];
 
 //==================================================ENEMY==================================================
 
-const ENEMY_DATA = [//TODO
+const ENEMY_DATA = [
   {
     id: 0x000,
     name: "亡者",
@@ -1082,7 +1082,7 @@ let enemy_group = [];
 
 //==================================================SKILL==================================================
 
-const SKILL_DATA = [//TODO
+const SKILL_DATA = [
   {
     id: 0x000,
     name: "射撃",
@@ -1186,7 +1186,7 @@ const SKILL_DATA = [//TODO
 
 //==================================================CONDITION==================================================
 
-const CONDITION_DATA = [//TODO
+const CONDITION_DATA = [
   // デバフ 0x00~
   {
     id: 0x00,
@@ -1274,7 +1274,7 @@ const CONDITION_DATA = [//TODO
 
 //==================================================TRAP==================================================
 
-const TRAP_DATA = [//TODO
+const TRAP_DATA = [
   {
     id: 0x00,
     name: "毒床",
@@ -1427,7 +1427,7 @@ const NPC_DATA = [
 let npc_group = [];
 
 // ショップ
-const SHOP_DATA = [//TODO
+const SHOP_DATA = [
   {
     id: 0x00,
     name: "薬屋",
