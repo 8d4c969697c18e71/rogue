@@ -543,7 +543,8 @@ async function sprint(direction){
   turn_cnt++;
 
   // 視界更新
-  updateMap();
+  await wait(20);
+  drawAll();
 
   // 停止
   if(log_reserve[log_reserve.length-1] != log_before)
@@ -1637,6 +1638,7 @@ async function eventEnemies(){
       await eventEnemy(enemy);
       drawAll();
     }
+    await isDead(player);
   }
 }
 
@@ -1646,10 +1648,18 @@ async function eventEnemy(enemy){
   getSight(enemy);
   if(enemy.map_sight[player.y][player.x])
     findPl(enemy);
+  else if(enemy.berserk_flag && !enemy.chase_flag) {
+    for(let other_enemy of enemy_group){
+      if(enemy.map_sight[other_enemy.y][other_enemy.x])
+        findBerserk(enemy);
+    }
+  }
   else
     enemy.chase_count--;
-  if(enemy.chase_count < 0)
+  if(enemy.chase_count < 0) {
     enemy.chase_flag = false;
+    enemy.berserk_chase_flag = false;
+  }
 
   // 発見済み
   if(enemy.chase_flag){
@@ -1659,7 +1669,7 @@ async function eventEnemy(enemy){
       if(await skill.func(enemy, player)) return;
     }
 
-    // 攻撃
+    // プレイヤーへ攻撃
     for(let d in key_direction){
       let x = enemy.x + key_direction[d].x;
       let y = enemy.y + key_direction[d].y;
@@ -1677,10 +1687,49 @@ async function eventEnemy(enemy){
       }
     }
 
-    // 移動
+    // プレイヤー追跡
     if(!enemy.cannot_move_flag){
-      // 追跡
-      await moveEnemyChase(enemy);
+      await moveEnemyChase(enemy, player);
+      return;
+    }
+  }
+  // 発見済み(くびかりぞく)
+  else if(enemy.berserk_chase_flag) {
+    for(let other_enemy of enemy_group){
+      // スキル
+      for(let skill of enemy.skill){
+        if(!(Math.floor(Math.random()+skill.chance))) continue;
+        if(await skill.func(enemy, other_enemy)) return;
+      }
+
+      if(enemy.berserk_flag) {
+        if(other_enemy === enemy) continue; // 保険
+
+        for(let d in key_direction){
+          let x = enemy.x + key_direction[d].x;
+          let y = enemy.y + key_direction[d].y;
+          if(x == other_enemy.x && y == other_enemy.y && canDiagonal(enemy.x, enemy.y, key_direction[d].x, key_direction[d].y)){
+            await attack(enemy, other_enemy);
+            if(await isDead(other_enemy)) addExp(enemy, other_enemy.exp);
+            return;
+          }
+        }
+        for(let d in key_direction_diagonal){
+          let x = enemy.x + key_direction_diagonal[d].x;
+          let y = enemy.y + key_direction_diagonal[d].y;
+          if(x == other_enemy.x && y == other_enemy.y && canDiagonal(enemy.x, enemy.y, key_direction_diagonal[d].x, key_direction_diagonal[d].y)){
+            await attack(enemy, other_enemy);
+            if(await isDead(other_enemy)) addExp(enemy, other_enemy.exp);
+            return;
+          }
+        }
+      }
+
+      // プレイヤー追跡
+      if(!enemy.cannot_move_flag){
+        await moveEnemyChase(enemy, other_enemy);
+        return;
+      }
     }
   }
   // 未発見
@@ -1691,7 +1740,6 @@ async function eventEnemy(enemy){
       await moveEnemyTravel(enemy);
     }
   }
-  await isDead(player);
 }
 
 // 視界取得
@@ -1727,22 +1775,28 @@ function getSightPath(x, y, sight_range, map_sight){
 
 function findPl(who){
   who.chase_flag = true;
-  who.chase_count = chase_count_init;
+  who.berserk_chase_flag = false;
+  who.chase_count = who.chase_limit;
+}
+
+function findBerserk(who){
+  who.berserk_chase_flag = true;
+  who.chase_count = who.chase_limit;
 }
 
 // エネミー移動（追跡）
-async function moveEnemyChase(enemy){
+async function moveEnemyChase(who, to){
   let route
-  route = astar(enemy.x, enemy.y, player.x, player.y, enemy.distance, enemy.escape_flag);  
+  route = astar(who.x, who.y, to.x, to.y, who.distance, who.escape_flag);  
   let dir = {
-    x: route[route.length-1].x - enemy.x,
-    y: route[route.length-1].y - enemy.y
+    x: route[route.length-1].x - who.x,
+    y: route[route.length-1].y - who.y
   };
   // debug
   //for(let r of route)
   //  map_draw[r.y][r.x] = "√";
 
-  return await move(enemy, dir);
+  return await move(who, dir);
 }
 
 // A-star

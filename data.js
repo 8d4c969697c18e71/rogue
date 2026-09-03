@@ -693,13 +693,13 @@ const item_data = [//TODO
       player.atk += this.base_dmg;
       calcAtkFromStatus("str", 1.3, true, this.base_dmg);
       calcAtkFromStatus("dex", 1.25, true, this.base_dmg);
-      pushRecalc(this.func_equip);
+      pushRecalc(this, this.func_equip);
     },
     func_unequip: async function(){
       player.atk -= this.base_dmg;
       calcAtkFromStatus("str", 1.3, false, this.base_dmg);
       calcAtkFromStatus("dex", 1.25, false, this.base_dmg);
-      removeRecalc(this.func_equip);
+      removeRecalc(this, this.func_equip);
     },
     func_attack: async function(to){},
   },
@@ -713,13 +713,13 @@ const item_data = [//TODO
       bow_flag = true;
       player.atk += this.base_dmg;
       calcAtkFromStatus("dex", 1.1, true, this.base_dmg);
-      pushRecalc(this.func_equip);
+      pushRecalc(this, this.func_equip);
     },
     func_unequip: async function(){
       bow_flag = false;
       player.atk -= this.base_dmg;
       calcAtkFromStatus("dex", 1.1, false, this.base_dmg);
-      removeRecalc(this.func_equip);
+      removeRecalc(this, this.func_equip);
     },
     func_attack: async function(to){},
   },
@@ -1291,7 +1291,8 @@ const enemy_data = [//TODO
 const other_enemy_info = {
   //x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], 
   cannot_action_flag: false, cannot_move_flag: false,
-  chase_flag: false, chase_count: 5,
+  chase_flag: false, chase_count: 0, chase_limit: 5,
+  berserk_flag: false, berserk_chase_flag: false,
   hp_max_offset: 0, mp_max_offset: 0, sight_range_offset: 0,
   next_exp: 10, lvup: {},
 };
@@ -1316,7 +1317,6 @@ const enemy_table = [
   ],
 ];
 let enemy_group = [];
-const chase_count_init = 10;
 
 //==================================================SKILL==================================================
 
