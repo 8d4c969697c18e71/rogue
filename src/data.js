@@ -282,172 +282,9 @@ let player = {
   map_sight: [], //TODO: 全域のt/fを保存するのは非効率
 };
 
-// 状態異常
-const CONDITION_DATA = [//TODO
-  // デバフ 0x00~
-  {
-    id: 0x00,
-    name: "毒",
-    turn: 5,
-    func_be: async function(who){
-      addLog(who.name+" は毒に侵された");
-    },
-    func_during: async function(who){
-      let dmg = 20;
-      addHP(who, -dmg);
-      addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
-    },
-    func_recovery: async function(who){
-      addLog(who.name+" の毒は取り除かれた");
-    },
-  },
-  {
-    id: 0x01,
-    name: "眠",
-    turn: 5,
-    func_be: async function(who){
-      addLog(who.name+" は眠りに落ちた");
-      who.cannot_action_flag = true;
-    },
-    func_during: async function(who){
-      addLog(who.name+" は眠っている");
-      who.cannot_action_flag = true;
-    },
-    func_recovery: async function(who){
-      addLog(who.name+" は目を覚ました");
-      who.cannot_action_flag = false;
-    },
-  },
-  {
-    id: 0x02,
-    name: "盲",
-    turn: 10,
-    func_be: async function(who){
-      addLog(who.name+" は前が見えない");
-      who.sight_range_offset = -who.sight_range;
-    },
-    func_during: async function(who){
-    },
-    func_recovery: async function(who){
-      addLog(who.name+" の視力は回復した");
-      who.sight_range_offset = 0;
-    },
-  },
-  {
-    id: 0x03,
-    name: "縛",
-    turn: 10,
-    func_be: async function(who){
-      addLog(who.name+" は身動きがとれない");
-      who.cannot_move_flag = true;
-    },
-    func_during: async function(who){
-      who.cannot_move_flag = true;
-    },
-    func_recovery: async function(who){
-      addLog(who.name+" は動けるようになった");
-      who.cannot_move_flag = false;
-    },
-  },
-  // バフ 0x80~
-  {
-    id: 0x80,
-    name: "受",
-    turn: 2,
-    func_be: async function(who){
-      addLog(who.name+" は受け流しの構えをとった");
-      who.cannot_action_flag = true;
-      if(who == player) turn--;
-    },
-    func_during: async function(who){
-      who.cannot_action_flag = true;
-    },
-    func_recovery: async function(who){
-      addLog(who.name+" は受け流しの構えを解いた");
-      who.cannot_action_flag = false;
-    },
-  },
-];
-
-//==================================================TRAP==================================================
-
-const TRAP_DATA = [//TODO
-  {
-    id: 0x00,
-    name: "毒床",
-    func: async function(who){
-      await setCondition(who, 0x00);
-      addLog(who.name+" は毒の床を踏んだ");
-      audio_poison.play();
-    },
-  },
-  {
-    id: 0x01,
-    name: "睡眠ガス",
-    func: async function(who){
-      await setCondition(who, 0x01);
-      addLog(who.name+" は睡眠ガスに包まれた");
-      audio_poison.play();
-    },
-  },
-  {
-    id: 0x02,
-    name: "黒い霧",
-    func: async function(who){
-      await setCondition(who, 0x02);
-      addLog(who.name+" の周囲が黒い霧に包まれた");
-      audio_poison.play();
-    },
-  },
-  {
-    id: 0x03,
-    name: "トラばさみ",
-    func: async function(who){
-      await setCondition(who, 0x03);
-      addLog(who.name+" はトラばさみにかかった");
-      audio_hit.play();
-    },
-  },
-  {
-    id: 0x04,
-    name: "転送罠",
-    func: async function(who){
-      let [x,y] = [];
-      while(1){
-        [x,y] = setRandomXY();
-        if(!isSameRoom(who.x, who.y, x, y))
-          break;
-      }
-      who.x = x;
-      who.y = y;
-      addLog(who.name+" は転送罠にかかった");
-      audio_portal.play();
-    },
-  },
-];
-const TRAP_TABLE = [
-  [],
-  [
-    0x00,
-  ],
-  [
-    0x00, 0x01, 0x04,
-  ],
-  [
-    0x00, 0x02, 0x04,
-  ],
-  [
-    0x01, 0x02, 0x03, 0x04,
-  ],
-  [
-    0x01, 0x02, 0x03, 0x04,
-  ],
-];
-let trap_group = [];
-
 //==================================================ITEM==================================================
 
-const ITEM_DATA = [//TODO
+const ITEM_DATA = [
   // 消費アイテム
   {
     id: 0x000,
@@ -1346,6 +1183,170 @@ const SKILL_DATA = [//TODO
     }
   },
 ];
+
+//==================================================CONDITION==================================================
+
+const CONDITION_DATA = [//TODO
+  // デバフ 0x00~
+  {
+    id: 0x00,
+    name: "毒",
+    turn: 5,
+    func_be: async function(who){
+      addLog(who.name+" は毒に侵された");
+    },
+    func_during: async function(who){
+      let dmg = 20;
+      addHP(who, -dmg);
+      addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
+    },
+    func_recovery: async function(who){
+      addLog(who.name+" の毒は取り除かれた");
+    },
+  },
+  {
+    id: 0x01,
+    name: "眠",
+    turn: 5,
+    func_be: async function(who){
+      addLog(who.name+" は眠りに落ちた");
+      who.cannot_action_flag = true;
+    },
+    func_during: async function(who){
+      addLog(who.name+" は眠っている");
+      who.cannot_action_flag = true;
+    },
+    func_recovery: async function(who){
+      addLog(who.name+" は目を覚ました");
+      who.cannot_action_flag = false;
+    },
+  },
+  {
+    id: 0x02,
+    name: "盲",
+    turn: 10,
+    func_be: async function(who){
+      addLog(who.name+" は前が見えない");
+      who.sight_range_offset = -who.sight_range;
+    },
+    func_during: async function(who){
+    },
+    func_recovery: async function(who){
+      addLog(who.name+" の視力は回復した");
+      who.sight_range_offset = 0;
+    },
+  },
+  {
+    id: 0x03,
+    name: "縛",
+    turn: 10,
+    func_be: async function(who){
+      addLog(who.name+" は身動きがとれない");
+      who.cannot_move_flag = true;
+    },
+    func_during: async function(who){
+      who.cannot_move_flag = true;
+    },
+    func_recovery: async function(who){
+      addLog(who.name+" は動けるようになった");
+      who.cannot_move_flag = false;
+    },
+  },
+  // バフ 0x80~
+  {
+    id: 0x80,
+    name: "受",
+    turn: 2,
+    func_be: async function(who){
+      addLog(who.name+" は受け流しの構えをとった");
+      who.cannot_action_flag = true;
+      if(who == player) turn--;
+    },
+    func_during: async function(who){
+      who.cannot_action_flag = true;
+    },
+    func_recovery: async function(who){
+      addLog(who.name+" は受け流しの構えを解いた");
+      who.cannot_action_flag = false;
+    },
+  },
+];
+
+//==================================================TRAP==================================================
+
+const TRAP_DATA = [//TODO
+  {
+    id: 0x00,
+    name: "毒床",
+    func: async function(who){
+      await setCondition(who, 0x00);
+      addLog(who.name+" は毒の床を踏んだ");
+      audio_poison.play();
+    },
+  },
+  {
+    id: 0x01,
+    name: "睡眠ガス",
+    func: async function(who){
+      await setCondition(who, 0x01);
+      addLog(who.name+" は睡眠ガスに包まれた");
+      audio_poison.play();
+    },
+  },
+  {
+    id: 0x02,
+    name: "黒い霧",
+    func: async function(who){
+      await setCondition(who, 0x02);
+      addLog(who.name+" の周囲が黒い霧に包まれた");
+      audio_poison.play();
+    },
+  },
+  {
+    id: 0x03,
+    name: "トラばさみ",
+    func: async function(who){
+      await setCondition(who, 0x03);
+      addLog(who.name+" はトラばさみにかかった");
+      audio_hit.play();
+    },
+  },
+  {
+    id: 0x04,
+    name: "転送罠",
+    func: async function(who){
+      let [x,y] = [];
+      while(1){
+        [x,y] = setRandomXY();
+        if(!isSameRoom(who.x, who.y, x, y))
+          break;
+      }
+      who.x = x;
+      who.y = y;
+      addLog(who.name+" は転送罠にかかった");
+      audio_portal.play();
+    },
+  },
+];
+const TRAP_TABLE = [
+  [],
+  [
+    0x00,
+  ],
+  [
+    0x00, 0x01, 0x04,
+  ],
+  [
+    0x00, 0x02, 0x04,
+  ],
+  [
+    0x01, 0x02, 0x03, 0x04,
+  ],
+  [
+    0x01, 0x02, 0x03, 0x04,
+  ],
+];
+let trap_group = [];
 
 //==================================================NPC==================================================
 
