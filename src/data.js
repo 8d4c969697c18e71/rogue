@@ -1366,7 +1366,7 @@ const NPC_DATA = [
     },
     {
         id: 0x01,
-        name: "職安",
+        name: "職安ダーマ",
         char: "職",
         loop: true,
         dialogue: [
@@ -1380,7 +1380,7 @@ const NPC_DATA = [
     },
     {
         id: 0x02,
-        name: "助言者",
+        name: "助言者ゲル",
         char: "助",
         loop: true,
         dialogue: [
@@ -1411,7 +1411,7 @@ const NPC_DATA = [
     },
     {
         id: 0x03,
-        name: "治癒士",
+        name: "治癒士サロリナ",
         char: "癒",
         loop: false,
         dialogue: [
@@ -1447,7 +1447,7 @@ const SHOP_DATA = [
     },
     {
         id: 0x01,
-        name: "職安",
+        name: "職安ダーマ",
         char: "職",
         dialogue_intro: "3つから選んでくれ",
         dialogue_outro: "頑張れよ",
