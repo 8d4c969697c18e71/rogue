@@ -353,7 +353,7 @@ async function events(){
         turn_flag = await eventPlayer();
     }
 
-        // 描画
+    // 描画
     if(!gameover_flag) drawAll();
 
     // ターン経過
@@ -365,6 +365,7 @@ async function events(){
 
     // 描画
     if(!gameover_flag) drawAll();
+    
     exeEventsFlg = false;
 }
 
