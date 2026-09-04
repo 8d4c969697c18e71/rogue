@@ -225,12 +225,8 @@ function updateMDWall(){
             map_draw[i+k][j+l] = CHAR_MAP.wall_h;
       }
       // 扉
-      else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path]){
-        for(let n of [-1, 1])
-          for(let m of [-1, 1])
-            if(isInMap(j+m, i+n) && ![ID_MAP.none, ID_MAP.path].includes(map[i+n][j+m]))
-              map_draw[i][j] = CHAR_MAP.door;
-      }
+      else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path] && isDoor(j, i))
+        map_draw[i][j] = CHAR_MAP.door;
     }
 }
 
@@ -346,6 +342,16 @@ function isSameRoom(a_x, a_y, b_x, b_y){
   for(let i of checked_map)
     if(i.x==b_x && i.y==b_y)
       return true;
+  return false;
+}
+
+function isDoor(x, y){
+  if(!(map[y][x] == ID_MAP.path))
+    return false;
+  for(let n of [-1, 1])
+    for(let m of [-1, 1])
+      if(isInMap(x+m, y+n) && ![ID_MAP.none, ID_MAP.path].includes(map[y+n][x+m]))
+        return true;
   return false;
 }
 

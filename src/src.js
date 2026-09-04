@@ -491,8 +491,7 @@ async function sprint(direction){
     return;
   if(!canMove(player.x+direction.x, player.y+direction.y) && canDiagonal(player.x, player.y, direction.x, direction.y))
     return;
-  if(map[player.y][player.x] == ID_MAP.path && map[player.y+direction.y][player.x+direction.x] == ID_MAP.room
-    || map[player.y][player.x] == ID_MAP.room && map[player.y+direction.y][player.x+direction.x] == ID_MAP.path)
+  if(isDoor(player.x+direction.x, player.y+direction.y))
     return;
   if(isFrontObj(player, direction))
     return;
@@ -842,7 +841,7 @@ async function dealDmg(from, to, dmg){
 function straightRecursive(x, y, direction, range){
   if(!canMove(x+direction.x, y+direction.y)
     || range <= 0
-    || map_draw[y+direction.y][x+direction.x] == CHAR_MAP.door)
+    || isDoor(x+direction.x, y+direction.y))
     return {x:x, y:y};
   return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
@@ -851,7 +850,7 @@ function straightRecursiveDiagonal(x, y, direction, range){
   if(!canMove(x+direction.x, y+direction.y)
     || !canDiagonal(x, y, direction.x, direction.y)
     || range <= 0
-    || map_draw[y+direction.y][x+direction.x] == CHAR_MAP.door)
+    || isDoor(x+direction.x, y+direction.y))
     return {x:x, y:y};
   return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
