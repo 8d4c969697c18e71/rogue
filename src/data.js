@@ -1468,7 +1468,8 @@ const SHOP_DATA = [
         func_buy: async function(){
             shop_group.splice(shop_group.indexOf(this),1);
             await useItem([inventory.length-1]);
-            addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
+            if(shop_using.name !== "") addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
+            else addLog(shop_using.name+shop_using.dialogue_intro);
             shop_using = undefined;
             shop_cursor = -1;
             shop_flag = false;

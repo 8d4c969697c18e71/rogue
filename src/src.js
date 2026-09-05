@@ -388,16 +388,18 @@ async function eventPlayer(){
             }
             else if(isShop(x, y)){
                 shop_using = shop_group.find(v=>v.x==x && v.y==y);
-                addLog(shop_using.name+"「"+shop_using.dialogue_intro+"」");
+                if(shop_using.name !== "") addLog(shop_using.name+"「"+shop_using.dialogue_intro+"」");
+                else addLog(shop_using.name+shop_using.dialogue_intro);
                 audio_apply.play();
                 shop_cursor = 0;
                 shop_flag = true;
                 shop_using.func_before();
-                return false;
+                return true;
             }
             else if(isNPC(x, y)){
                 let npc = npc_group.find(v=>v.x==x && v.y==y);
-                addLog(npc.name+"「"+npc.dialogue[npc.dialogue_cnt]+"」");
+                if(shop_using.name !== "") addLog(npc.name+"「"+npc.dialogue[npc.dialogue_cnt]+"」");
+                else addLog(shop_using.name+shop_using.dialogue_intro);
                 audio_apply.play();
                 if(npc.dialogue_cnt<npc.dialogue.length-1)
                     npc.dialogue_cnt++;
@@ -969,7 +971,8 @@ function eventShop(){
     }
     // cancel
     if(key_input.cancel){
-        addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
+        if(shop_using.name !== "") addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
+        else addLog(shop_using.name+shop_using.dialogue_intro);
         shop_using.func_after();
         shop_using = undefined;
         shop_cursor = -1;
