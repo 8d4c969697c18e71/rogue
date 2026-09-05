@@ -779,7 +779,7 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x200);
-                for(let i=0; i<8; i++)
+                for(let i=0; i<4; i++)
                     addItem(0x800);
                 addItem(0x010);
                 addItem(0x602);
