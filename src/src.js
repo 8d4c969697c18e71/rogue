@@ -456,17 +456,17 @@ async function eventPlayer(){
     }
     // sub
     if(key_input.sub){
-        if(!bow_flag){
-            addLog("射撃武器を装備していない");
-            return false;
+        if(!player.ammo) addLog("弾薬を装備していない");
+        else if(bow_flag){
+            addLog(player.name+" は "+player.weapon.name+" を構えた");
+            audio_apply.play();
+            shot_flag = true;
         }
-        else if(!player.ammo){
-            addLog("弾薬を装備していない");
-            return false;
+        else{
+            addLog(player.name+" は "+player.ammo.name+" を振り被った")
+            audio_apply.play();
+            throwing_flag = true;
         }
-        addLog(player.weapon.name+" を構えた");
-        audio_apply.play();
-        shot_flag = true;
         return false;
     }
 }
@@ -680,13 +680,16 @@ async function eventThrowing(){
     for(let k in kd)
         if(key_input[k]){
             throwing_flag = false;
-            let item = inventory[inv_cursor]
+            let item;
+            if(ui_flag) item = inventory[inv_cursor];
+            else item = player.ammo;
             let enemy = await throwing(player, item, kd[k]);
             if(!(enemy===undefined) && await isDead(enemy)) addExp(player, enemy.exp);
             // インベントリから削除
             if(STACK_TYPE.includes(item.type)){
                 if(item.stack_num > 0) item.stack_num--;
-                if(inventory[inv_cursor].stack_num <= 0){
+                if(item.stack_num <= 0){
+                    if(isEquiped(item)) equip(inventory.findIndex(v=>v.id==player.ammo.id && v.equip_flag));
                     inventory.splice(inv_cursor, 1);
                 }
             }
@@ -753,15 +756,6 @@ async function throwDmg(from, to, item){
     if(dmg < 0) dmg = 0;
 
     await dealDmg(from, to, dmg);
-}
-
-// 投擲物選択
-function checkThrowing(index){
-    if(inventory[index].equip_flag){
-        addLog(inventory[index].name+" は投擲できない");
-        return false;
-    }
-    return true;
 }
 
 // 魔法イベント
@@ -905,12 +899,15 @@ async function eventUI(){
     }
     // sub
     if(key_input.sub){
-        if(inv_cursor<inventory.length && checkThrowing(inv_cursor)){
-            addLog(inventory[inv_cursor].name+" を振り被った")
-            audio_apply.play();
-            throwing_flag = true;
-            return false;
+        if(inv_cursor<inventory.length){
+            if(!isEquiped(inventory[inv_cursor])){
+                addLog(player.name+" は "+inventory[inv_cursor].name+" を振り被った");
+                audio_apply.play();
+                throwing_flag = true;
+            }
+            else addLog(inventory[inv_cursor].name+" は投擲できない");
         }
+        return false;
     }
 }
 
@@ -1407,6 +1404,14 @@ function isItem(x, y){
     for(let i in item_group)
         if(x==item_group[i].x && y==item_group[i].y)
             return true;
+    return false;
+}
+
+// 装備中
+function isEquiped(item){
+    if(item.equip_flag){
+        return true;
+    }
     return false;
 }
 
