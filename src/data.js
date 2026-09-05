@@ -211,7 +211,7 @@ let portal_pos = {x:undefined, y:undefined};
 
 let room_num;
 let turn_cnt = 1;
-let floor_cnt = -1;
+let floor_cnt;
 
 // 遷移フラグ
 let exeEventsFlg = false;
@@ -707,7 +707,7 @@ const ITEM_DATA = [
         hung_rate: 30,
         hp_regen_rate: 10,
         mp_regen_rate: 10,
-        sight_range: 3,
+        sight_range: 5,
         lvup: {hp_max: 30, mp_max: 3, str: 2, dex: 2, fth: 3},
         func: async function(){
             log_reserve.pop();
@@ -808,7 +808,7 @@ const ITEM_DATA = [
         hung_rate: 10,
         hp_regen_rate: 10,
         mp_regen_rate: 7,
-        sight_range: 6,
+        sight_range: 7,
         lvup: {hp_max: 10, mp_max: 4, int: 4, fth: 1},
         func: async function(){
             if(INVENTORY_SIZE-inventory.length >= 3){
@@ -1447,10 +1447,10 @@ const SHOP_DATA = [
     },
     {
         id: 0x01,
-        name: "職安ダーマ",
-        char: "職",
-        dialogue_intro: "3つから選んでくれ",
-        dialogue_outro: "頑張れよ",
+        name: "",
+        char: "棺",
+        dialogue_intro: "自分が納められていた棺だ",
+        dialogue_outro: "",
         random_flag: false,
         item_table: [
             {id: 0xf01, price: 0,},
@@ -1459,7 +1459,7 @@ const SHOP_DATA = [
         ],
         func_before: async function(){
             if(INVENTORY_SIZE-inventory.length < 4){
-                addLog(shop_using.name+"「...持ちきれないぞ」");
+                addLog(shop_using.name+"反応がない");
                 shop_using = undefined;
                 shop_cursor = -1;
                 shop_flag = false;
@@ -1468,12 +1468,10 @@ const SHOP_DATA = [
         func_buy: async function(){
             shop_group.splice(shop_group.indexOf(this),1);
             await useItem([inventory.length-1]);
-            if(shop_using.name !== "") addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
-            else addLog(shop_using.name+shop_using.dialogue_intro);
+            addLog("棺は音もなく消え去った");
             shop_using = undefined;
             shop_cursor = -1;
             shop_flag = false;
-            setNPC(0x01, this.x, this.y);
         },
         func_after: async function(){},
     },
@@ -1589,6 +1587,62 @@ let unique_map = [    // 固有マップ
         }
     },
     {
+        id: -1,
+        pl_x: 5, pl_y: 12,
+        safe_flag: true,
+        map: [
+        "00000000000",
+        "00000000000",
+        "00000100000",
+        "00000200000",
+        "00000200000",
+        "00000200000",
+        "00000200000",
+        "00000200000",
+        "00000200000",
+        "00000200000",
+        "00000200000",
+        "00001110000",
+        "00001110000",
+        "00001110000",
+        "00000000000",
+        ],
+        func: async function(x_offset){
+            setStair(5+x_offset, 2);
+            setShop(0x01, 5+x_offset, 13);
+        }
+    },
+    {
+        id: 0,
+        pl_x: 5, pl_y: 11,
+        safe_flag: true,
+        map: [
+        "00000000000",
+        "00001110000",
+        "00001110000",
+        "00001110000",
+        "00000200000",
+        "01101111110",
+        "01121111110",
+        "01101111110",
+        "00001111110",
+        "01111111110",
+        "01111111110",
+        "01111111110",
+        "01111111110",
+        "01111111110",
+        "00000000000",
+        ],
+        func: async function(x_offset){
+            setStair(5+x_offset, 2);
+            setNPC(0x02, 9+x_offset, 5);
+            setNPC(0x03, 7+x_offset, 5);
+            setNPC(0x01, 9+x_offset, 9);
+            setShop(0x02, 1+x_offset, 9);
+            setShop(0x03, 1+x_offset, 6);
+        }
+    },
+    {
         id: "return", // 帰還ポータル
         pl_x: 4, pl_y: 7,
         safe_flag: true,
@@ -1607,39 +1661,6 @@ let unique_map = [    // 固有マップ
             setShop(0x05, 6+x_offset, 4);
             setStair(4+x_offset, 1);
             setPortal(2+x_offset, 4);
-        }
-    },
-    {
-        id: 0,
-        pl_x: 5, pl_y: 11,
-        safe_flag: true,
-        map: [
-        "00000000000",
-        "00001110000",
-        "00001110000",
-        "00001110000",
-        "00000200000",
-        "01101110110",
-        "01121112110",
-        "01101110110",
-        "00001110000",
-        "01111111110",
-        "01111111110",
-        "01111111110",
-        "01111111110",
-        "01111111110",
-        "00000000000",
-        ],
-        func: async function(x_offset){
-            setStair(5+x_offset, 2);
-            //setNPC(0x00, 7+x_offset, 9);
-            setNPC(0x02, 8+x_offset, 9);
-            setNPC(0x03, 4+x_offset, 5);
-            //setShop(0x00, 1+x_offset, 7);
-            if(player.job == 0xf00) setShop(0x01, 9+x_offset, 6);
-            else setNPC(0x01, 9+x_offset, 6);
-            setShop(0x02, 1+x_offset, 9);
-            setShop(0x03, 1+x_offset, 6);
         }
     },
 ];

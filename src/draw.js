@@ -348,10 +348,12 @@ function isSameRoom(a_x, a_y, b_x, b_y){
 function isDoor(x, y){
     if(!(map[y][x] == ID_MAP.path))
         return false;
-    for(let n of [-1, 1])
-        for(let m of [-1, 1])
-            if(isInMap(x+m, y+n) && ![ID_MAP.none, ID_MAP.path].includes(map[y+n][x+m]))
-                return true;
+    for(let i of [-1, 1]){
+        if(isInMap(x+i, y) && ![ID_MAP.none, ID_MAP.path].includes(map[y][x+i]))
+            return true;
+        else if(isInMap(x, y+i) && ![ID_MAP.none, ID_MAP.path].includes(map[y+i][x]))
+            return true;
+    }
     return false;
 }
 

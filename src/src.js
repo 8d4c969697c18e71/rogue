@@ -173,6 +173,7 @@ function setButton(){
 // 初期化
 async function init(){
     initStatusAll();
+    floor_cnt = -2;
     await nextFloor();
     
     updateMap();
@@ -388,8 +389,11 @@ async function eventPlayer(){
             }
             else if(isShop(x, y)){
                 shop_using = shop_group.find(v=>v.x==x && v.y==y);
-                if(shop_using.name !== "") addLog(shop_using.name+"「"+shop_using.dialogue_intro+"」");
-                else addLog(shop_using.name+shop_using.dialogue_intro);
+                let dialog = shop_using.dialogue_intro;
+                if(dialog != ""){
+                    if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
+                    else addLog(dialog);
+                }
                 audio_apply.play();
                 shop_cursor = 0;
                 shop_flag = true;
@@ -398,8 +402,11 @@ async function eventPlayer(){
             }
             else if(isNPC(x, y)){
                 let npc = npc_group.find(v=>v.x==x && v.y==y);
-                if(shop_using.name !== "") addLog(npc.name+"「"+npc.dialogue[npc.dialogue_cnt]+"」");
-                else addLog(shop_using.name+shop_using.dialogue_intro);
+                let dialog = npc.dialogue[npc.dialogue_cnt];
+                if(dialog != ""){
+                    if(npc.name != "") addLog(npc.name+"「"+dialog+"」");
+                    else addLog(dialog);
+                }
                 audio_apply.play();
                 if(npc.dialogue_cnt<npc.dialogue.length-1)
                     npc.dialogue_cnt++;
@@ -971,8 +978,11 @@ function eventShop(){
     }
     // cancel
     if(key_input.cancel){
-        if(shop_using.name !== "") addLog(shop_using.name+"「"+shop_using.dialogue_outro+"」");
-        else addLog(shop_using.name+shop_using.dialogue_intro);
+        let dialog = shop_using.dialogue_outro;
+        if(dialog != ""){
+            if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
+            else addLog(dialog);
+        }
         shop_using.func_after();
         shop_using = undefined;
         shop_cursor = -1;
