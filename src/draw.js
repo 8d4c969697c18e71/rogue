@@ -391,11 +391,3 @@ function canDiagonal(x, y, dir_x, dir_y){
 
     return true;
 }
-
-// 千里眼
-function clairvoyance(){
-    clairvoyance_flag = true;
-    for(let i=0; i<SIZEY; i++)
-        for(let j=0; j<SIZEX; j++)
-            player.map_sight[i][j] = true;
-}

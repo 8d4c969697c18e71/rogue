@@ -295,6 +295,7 @@ const ITEM_DATA = [
         id: 0x010,
         name: "三日月草",
         type: "consume",
+        price: 5,
         func: async function(){
             let value = 50;
             addHP(player, value);
@@ -309,6 +310,7 @@ const ITEM_DATA = [
         id: 0x011,
         name: "半月草",
         type: "consume",
+        price: 10,
         func: async function(){
             let value = 100;
             addHP(player, value);
@@ -323,6 +325,7 @@ const ITEM_DATA = [
         id: 0x012,
         name: "後月草",
         type: "consume",
+        price: 20,
         func: async function(){
             let value = 200;
             addHP(player, value);
@@ -337,8 +340,9 @@ const ITEM_DATA = [
         id: 0x013,
         name: "満月草",
         type: "consume",
+        price: 35,
         func: async function(){
-            let value = 400;
+            let value = 300;
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
@@ -351,6 +355,7 @@ const ITEM_DATA = [
         id: 0x014,
         name: "新月草",
         type: "consume",
+        price: 50,
         func: async function(){
             let value = player.hp_max;
             addHP(player, value);
@@ -365,6 +370,7 @@ const ITEM_DATA = [
         id: 0x020,
         name: "香料",
         type: "consume",
+        price: 10,
         func: async function(){
             let value = 15;
             addMP(player, value);
@@ -378,6 +384,7 @@ const ITEM_DATA = [
         id: 0x021,
         name: "芳しい香料",
         type: "consume",
+        price: 30,
         func: async function(){
             let value = 30;
             addMP(player, value);
@@ -391,6 +398,7 @@ const ITEM_DATA = [
         id: 0x022,
         name: "祝福された香料",
         type: "consume",
+        price: 60,
         func: async function(){
             let value = player.mp_max;
             addMP(player, value);
@@ -404,6 +412,7 @@ const ITEM_DATA = [
         id: 0x030,
         name: "糧食",
         type: "food",
+        price: 7,
         func: async function(){
             let value = 30;
             addHung(value);
@@ -420,6 +429,7 @@ const ITEM_DATA = [
         name: "ショートソード",
         type: "weapon",
         base_dmg: 25,
+        price: 30,
         func_equip: async function(){
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.25, true, this.base_dmg);
@@ -439,6 +449,7 @@ const ITEM_DATA = [
         name: "ブロードソード",
         type: "weapon",
         base_dmg: 40,
+        price: 46,
         func_equip: async function(){
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.3, true, this.base_dmg);
@@ -459,6 +470,7 @@ const ITEM_DATA = [
         name: "狩猟弓",
         type: "weapon",
         base_dmg: 25,
+        price: 36,
         func_equip: async function(){
             bow_flag = true;
             player.atk += this.base_dmg;
@@ -478,6 +490,7 @@ const ITEM_DATA = [
         id: 0x300,
         name: "レザーアーマー",
         type: "armor",
+        price: 40,
         func_equip: async function(){
             player.def += 10;
         },
@@ -490,6 +503,7 @@ const ITEM_DATA = [
         id: 0x301,
         name: "チェインメイル",
         type: "armor",
+        price: 56,
         func_equip: async function(){
             player.def += 12;
         },
@@ -502,6 +516,7 @@ const ITEM_DATA = [
         id: 0x302,
         name: "無名騎士の鎧",
         type: "armor",
+        price: 64,
         func_equip: async function(){
             player.def += 14;
         },
@@ -514,6 +529,7 @@ const ITEM_DATA = [
         id: 0x380,
         name: "レアルのローブ",
         type: "armor",
+        price: 44,
         func_equip: async function(){
             player.mp_max_offset += 3;
         },
@@ -527,6 +543,7 @@ const ITEM_DATA = [
         id: 0x400,
         name: "小生命の指輪",
         type: "ring",
+        price: 68,
         func_equip: async function(){
             player.hp_max_offset += 25;
         },
@@ -539,6 +556,7 @@ const ITEM_DATA = [
         id: 0x401,
         name: "蛇印の指輪",
         type: "ring",
+        price: 78,
         func_equip: async function(){
             player.mp_max_offset += 20;
         },
@@ -551,6 +569,7 @@ const ITEM_DATA = [
         id: 0x402,
         name: "飽食の指輪",
         type: "ring",
+        price: 56,
         func_equip: async function(){
             player.hung_rate_offset += 5;
         },
@@ -562,6 +581,7 @@ const ITEM_DATA = [
         id: 0x403,
         name: "生命の指輪",
         type: "ring",
+        price: 82,
         func_equip: async function(){
             player.hp_max_offset += 75;
         },
@@ -575,6 +595,7 @@ const ITEM_DATA = [
         id: 0x500,
         name: "千里眼の巻物",
         type: "scroll",
+        price: 21,
         func: async function(){
             clairvoyance();
             inventory.splice(inventory.indexOf(this), 1);
@@ -586,6 +607,7 @@ const ITEM_DATA = [
         id: 0x600,
         name: "ソウルの杖",
         type: "staff",
+        price: 129,
         func: async function(){
             if(player.mp < 8){
                 addLog("MP が足りない");
@@ -608,6 +630,7 @@ const ITEM_DATA = [
         id: 0x601,
         name: "回復の聖鈴",
         type: "staff",
+        price: 96,
         func: async function(){
             if(player.mp < 8){
                 addLog("MP が足りない");
@@ -626,6 +649,7 @@ const ITEM_DATA = [
         id: 0x602,
         name: "跳躍の杖",
         type: "staff",
+        price: 112,
         func: async function(){
             if(player.mp < 7){
                 addLog("MP が足りない");
@@ -652,6 +676,7 @@ const ITEM_DATA = [
         id: 0x700,
         name: "木の矢",
         type: "ammo",
+        price: 1,
         dmg: 20,
         range: 10,
         func_equip: async function(){},
@@ -661,6 +686,7 @@ const ITEM_DATA = [
         id: 0x701,
         name: "鉄の矢",
         type: "ammo",
+        price: 2,
         dmg: 30,
         range: 8,
         func_equip: async function(){},
@@ -670,6 +696,7 @@ const ITEM_DATA = [
         id: 0x7f0,
         name: "胞子",
         type: "ammo",
+        price: 1,
         dmg: 10,
         range: 2,
         func_equip: async function(){},
@@ -680,6 +707,7 @@ const ITEM_DATA = [
         id: 0x800,
         name: "木の矢の束",
         type: "stack",
+        price: 16,
         item_id: 0x700,
         num: 8,
     },
@@ -687,14 +715,16 @@ const ITEM_DATA = [
         id: 0x801,
         name: "鉄の矢の束",
         type: "stack",
+        price: 24,
         item_id: 0x701,
         num: 8,
     },
     // ユニーク 0xfXX
     {
         id: 0xf00,
-        name: "持たざる者",
+        name: "持たざる者の追憶",
         type: "unique",
+        price: 0,
         hp: 100,
         hp_max: 100,
         mp: 10,
@@ -720,8 +750,9 @@ const ITEM_DATA = [
     },
     {
         id: 0xf01,
-        name: "戦士",
+        name: "戦士の追憶",
         type: "unique",
+        price: 0,
         hp: 200,
         hp_max: 200,
         mp: 0,
@@ -756,8 +787,9 @@ const ITEM_DATA = [
     },
     {
         id: 0xf02,
-        name: "弓兵",
+        name: "弓兵の追憶",
         type: "unique",
+        price: 0,
         hp: 150,
         hp_max: 150,
         mp: 10,
@@ -794,8 +826,9 @@ const ITEM_DATA = [
     },
     {
         id: 0xf03,
-        name: "魔法使い",
+        name: "魔術師の追憶",
         type: "unique",
+        price: 0,
         hp: 100,
         hp_max: 100,
         mp: 20,
@@ -832,8 +865,8 @@ const ITEM_DATA = [
 const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
 const STACK_TYPE = ["ammo"];
 const STACK_MAX = 32;
-let inventory = [];
 const INVENTORY_SIZE = 20;
+let inventory = [];
 let inv_cursor = 0;
 
 // 落ちてるアイテム
@@ -1191,12 +1224,12 @@ const CONDITION_DATA = [
     {
         id: 0x00,
         name: "毒",
-        turn: 5,
+        turn: 10,
         func_be: async function(who){
             addLog(who.name+" は毒に侵された");
         },
         func_during: async function(who){
-            let dmg = 20;
+            let dmg = 5;
             addHP(who, -dmg);
             addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
         },
@@ -1362,21 +1395,22 @@ const NPC_DATA = [
             "ダンジョンの入り口には治癒士もいるぞ",
         ],
         dialogue_cnt: 0,
-        func: async function(){},
+        func_before: async function(){},
+        func_after: async function(){},
     },
     {
         id: 0x01,
-        name: "職安ダーマ",
-        char: "職",
+        name: "薪のメルナ",
+        char: "メ",
         loop: true,
         dialogue: [
-            "今のお前のステータスを教えてやろう",
-            "",
+            "今の貴方の能力を教える<br>tmp",
         ],
         dialogue_cnt: 0,
-        func: async function(){
-            this.dialogue[1] = "STR: "+player.str+", DEX: "+player.dex+", INT: "+player.int+", FTH: "+player.fth;
+        func_before: async function(){
+            this.dialogue[0] = "今の貴方の能力を教える<br>"+"STR: "+player.str+", DEX: "+player.dex+", INT: "+player.int+", FTH: "+player.fth;
         },
+        func_after: async function(){},
     },
     {
         id: 0x02,
@@ -1387,27 +1421,27 @@ const NPC_DATA = [
             "助言するよ",
             // ダンジョン
             "射撃で届く距離は弾によって変わるよ",
-            "投擲は5マス先まで投げられるよ",
+            "投擲は5歩先まで投げられるよ",
             "4階以降は罠があるよ",
             "待機すると周りにある罠を看破できるよ",
-            "モンスターは君が見えなくなってしばらくすると追跡を諦めるよ",
+            "怪物は君が見えなくなってしばらくすると追跡を諦めるよ",
             // 職業
-            "戦士は基礎ステータスが高いよ",
+            "戦士は耐久力が高いよ",
             "弓兵は視界が広いよ",
-            "魔法使いはMPの自然回復が速いよ",
-            "職業毎にHP・MP・ステータス値の成長率が違うよ",
+            "魔術師は魔力の自然回復が速いよ",
+            "職業毎に能力の成長率が違うよ",
             "指輪は2つ装備できるよ",
             //"弓を装備すると、一番上の矢が自動的に装備されるよ",
             //"基本的に杖の威力は最大MP依存だよ",
             "職業で装備できるものに差はないよ",
             // 拠点
             "10階層毎にここに戻れるよ",
-            "戻ってくるとレベルは1に戻るよ",
+            "戻ってくると位階は元に戻るよ",
             "メレンは物を買ってくれるよ",
-            "職安はステータス値を教えてくれるよ",
         ],
         dialogue_cnt: 0,
-        func: async function(){},
+        func_before: async function(){},
+        func_after: async function(){},
     },
     {
         id: 0x03,
@@ -1418,7 +1452,8 @@ const NPC_DATA = [
             "回復します",
         ],
         dialogue_cnt: 0,
-        func: async function(){
+        func_before: async function(){},
+        func_after: async function(){
             fullRecovery(player);
             audio_heal.play();
         },
@@ -1436,10 +1471,10 @@ const SHOP_DATA = [
         dialogue_outro: "またどうぞ",
         random_flag: false,
         item_table: [
-            {id: 0x010, price: 5,},
-            {id: 0x011, price: 10,},
-            {id: 0x020, price: 5,},
-            {id: 0x030, price: 5,},
+            {id: 0x010},
+            {id: 0x011},
+            {id: 0x020},
+            {id: 0x030},
         ],
         func_before: async function(){},
         func_buy: async function(){},
@@ -1453,51 +1488,49 @@ const SHOP_DATA = [
         dialogue_outro: "",
         random_flag: false,
         item_table: [
-            {id: 0xf01, price: 0,},
-            {id: 0xf02, price: 0,},
-            {id: 0xf03, price: 0,},
+            {id: 0xf01},
+            {id: 0xf02},
+            {id: 0xf03},
         ],
         func_before: async function(){
             if(INVENTORY_SIZE-inventory.length < 4){
-                addLog(shop_using.name+"反応がない");
-                shop_using = undefined;
-                shop_cursor = -1;
-                shop_flag = false;
+                addLog("反応がない");
+                setNotUseShop()
             }
         },
         func_buy: async function(){
             shop_group.splice(shop_group.indexOf(this),1);
             await useItem([inventory.length-1]);
             addLog("棺は音もなく消え去った");
-            shop_using = undefined;
-            shop_cursor = -1;
-            shop_flag = false;
+            setNotUseShop()
         },
         func_after: async function(){},
     },
     {
         id: 0x02,
-        name: "行商メレン",
-        char: "メ",
+        name: "行商人メレン",
+        char: "売",
         dialogue_intro: "売っておくれ...　何か売っておくれよ...",
         dialogue_outro: "すまないねぇ...　ヒヒヒッ... ",
         random_flag: false,
         item_table: [
-            {id: 0x010, price: -3,},
-            {id: 0x011, price: -6,},
-            {id: 0x012, price: -9,},
-            {id: 0x020, price: -4,},
-            {id: 0x021, price: -8,},
-            {id: 0x030, price: -3,},
-            {id: 0x100, price: -30,},
-            {id: 0x200, price: -30,},
-            {id: 0x300, price: -30,},
-            {id: 0x400, price: -100,},
-            {id: 0x500, price: -20,},
-            {id: 0x700, price: -1,},
         ],
-        func_before: async function(){},
-        func_buy: async function(){},
+        func_before: async function(){
+            setSellList(this.item);
+            if(this.item.length <= 0) {
+                setNotUseShop();
+                addLog(this.name+"「...何も持ってないじゃないか」");
+            }
+        },
+        func_buy: async function(){
+            this.item.length = 0;
+            shop_cursor = 0;
+            setSellList(this.item);
+            if(this.item.length <= 0) {
+                setNotUseShop();
+                addLog(this.name+"「"+this.dialogue_outro+"」");
+            }
+        },
         func_after: async function(){},
     },
     {
@@ -1508,17 +1541,17 @@ const SHOP_DATA = [
         dialogue_outro: "よい商いだったよ",
         random_flag: false,
         item_table: [
-            {id: 0x010, price: 5,},
-            {id: 0x011, price: 10,},
-            {id: 0x020, price: 5,},
-            {id: 0x030, price: 5,},
-            {id: 0x800, price: 15,},
-            {id: 0x500, price: 50,},
-            {id: 0x101, price: 150,},
-            {id: 0x301, price: 250,},
-            {id: 0x403, price: 300,},
-            {id: 0x401, price: 400,},
-            {id: 0x601, price: 500,},
+            {id: 0x010},
+            {id: 0x011},
+            {id: 0x020},
+            {id: 0x030},
+            {id: 0x800},
+            {id: 0x500},
+            {id: 0x101},
+            {id: 0x301},
+            {id: 0x403},
+            {id: 0x401},
+            {id: 0x601},
         ],
         func_before: async function(){},
         func_buy: async function(){},
@@ -1530,17 +1563,43 @@ const SHOP_DATA = [
         char: "ガ",
         dialogue_intro: "オマエ　ガヴァ　ショウダイ？　...ショウバイ！",
         dialogue_outro: "マイダ...　マイドアリ！",
-        random_flag: true,
-        item_num: 5,    // 販売品の個数(テーブルからランダム)
+        random_flag: false,
         item_table: [
-            {id: 0x011, price: 5,},
-            {id: 0x021, price: 15,},
-            {id: 0x100, price: 50,},
-            {id: 0x200, price: 50,},
-            {id: 0x300, price: 50,},
-            {id: 0x400, price: 150,},
-            {id: 0x800, price: 20,},
-            {id: 0x030, price: -15,},
+        ],
+        func_before: async function(){
+            setSellList(this.item);
+            if(this.item.length <= 0) {
+                setNotUseShop();
+                addLog(this.name+"「モノ　ナイ...」");
+            }
+        },
+        func_buy: async function(){
+            this.item.length = 0;
+            shop_cursor = 0;
+            setSellList(this.item);
+            if(this.item.length <= 0) {
+                setNotUseShop();
+                addLog(this.name+"「"+this.dialogue_outro+"」");
+            }
+        },
+        func_after: async function(){},
+    },
+    {
+        id: 0x06,
+        name: "",
+        char: "霊",
+        dialogue_intro: "霊体の商人のようだ",
+        dialogue_outro: "霊体商人は頷いている",
+        random_flag: true,
+        item_num: 4,    // 販売品の個数(テーブルからランダム)
+        item_table: [
+            {id: 0x010},
+            {id: 0x011},
+            {id: 0x012},
+            {id: 0x020},
+            {id: 0x021},
+            {id: 0x030},
+            {id: 0x800},
         ],
         func_before: async function(){},
         func_buy: async function(){},
@@ -1581,6 +1640,7 @@ let unique_map = [    // 固有マップ
             setItem(0x800,1+x_offset, 1);
             setItem(0xf01,2+x_offset, 1);
             setShop(0x05, 9+x_offset, 1);
+            setShop(0x06, 10+x_offset, 1);
             setTrap(0x00, 1+x_offset, 5);
             setTrap(0x02, 2+x_offset, 5);
             //setEnemy(0x006, 11+x_offset, 3);
@@ -1623,11 +1683,11 @@ let unique_map = [    // 固有マップ
         "00001110000",
         "00000200000",
         "01101111110",
+        "01101111110",
         "01121111110",
         "01101111110",
+        "01101111110",
         "00001111110",
-        "01111111110",
-        "01111111110",
         "01111111110",
         "01111111110",
         "01111111110",
@@ -1638,8 +1698,8 @@ let unique_map = [    // 固有マップ
             setNPC(0x02, 9+x_offset, 5);
             setNPC(0x03, 7+x_offset, 5);
             setNPC(0x01, 9+x_offset, 9);
-            setShop(0x02, 1+x_offset, 9);
-            setShop(0x03, 1+x_offset, 6);
+            setShop(0x02, 2+x_offset, 5);
+            setShop(0x03, 1+x_offset, 7);
         }
     },
     {

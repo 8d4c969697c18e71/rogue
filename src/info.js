@@ -200,7 +200,7 @@ function drawNote(){
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;"+CHAR_MAP.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;赤 ", "red")+": エネミー<br>");
+        colorUI("&nbsp;赤 ", "red")+": 敵<br>");
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
     note.insertAdjacentHTML("beforeend", 

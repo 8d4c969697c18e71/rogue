@@ -402,6 +402,7 @@ async function eventPlayer(){
             }
             else if(isNPC(x, y)){
                 let npc = npc_group.find(v=>v.x==x && v.y==y);
+                npc.func_before();
                 let dialog = npc.dialogue[npc.dialogue_cnt];
                 if(dialog != ""){
                     if(npc.name != "") addLog(npc.name+"「"+dialog+"」");
@@ -412,7 +413,7 @@ async function eventPlayer(){
                     npc.dialogue_cnt++;
                 else if(npc.loop && npc.dialogue_cnt>=npc.dialogue.length-1)
                     npc.dialogue_cnt = 0;
-                npc.func();
+                npc.func_after();
                 return true;
             }
             else if(!player.cannot_move_flag){
@@ -937,14 +938,12 @@ function eventShop(){
             if(player.gold >= shop_using.item[shop_cursor].price){
                 if(addItem(shop_using.item[shop_cursor].id)){
                     player.gold -= shop_using.item[shop_cursor].price;
-                    //shop_using.item.splice(shop_cursor, 1);
                     shop_using.func_buy();
+                    audio_apply.play();
+                    return true;
                 }
-                audio_apply.play();
-                return true;
             }
-            else
-                addLog("金貨が足りない");
+            else addLog("金貨が足りない");
             return false;
         }
         // sell
@@ -955,18 +954,16 @@ function eventShop(){
                     addLog("装備中だ");
                     return false;
                 }
-                    
+                
+                // 売った分削除
                 if(STACK_TYPE.includes(item_sell.type)){
                     if(item_sell.stack_num > 0) item_sell.stack_num--;
-                    if(item_sell.stack_num <= 0){
-                        inventory.splice(inventory.indexOf(item_sell), 1);
-                    }
-                    player.gold += -shop_using.item[shop_cursor].price;
+                    if(item_sell.stack_num <= 0) inventory.splice(inventory.indexOf(item_sell), 1);
                 }
-                else{
-                    inventory.splice(inventory.indexOf(item_sell), 1);
-                    player.gold += -shop_using.item[shop_cursor].price;
-                }
+                else inventory.splice(inventory.indexOf(item_sell), 1);
+
+                player.gold += -shop_using.item[shop_cursor].price;
+                shop_using.func_buy();
                 audio_apply.play();
                 addLog(item_sell.name+" を売った");
                 return true;
@@ -984,11 +981,15 @@ function eventShop(){
             else addLog(dialog);
         }
         shop_using.func_after();
-        shop_using = undefined;
-        shop_cursor = -1;
-        shop_flag = false;
+        setNotUseShop()
         return false;
     }
+}
+
+function setNotUseShop(){
+    shop_using = undefined;
+    shop_cursor = -1;
+    shop_flag = false;
 }
 
 // ゲームオーバー
@@ -1099,7 +1100,7 @@ function backLv(){
     player.hp_regen_rate = job.hp_regen_rate;
     player.mp_regen_rate = job.mp_regen_rate;
     player.sight_range = job.sight_range;
-    player.job_name = job.name;
+    player.job_name = job.name.substring(0, job.name.length-3);
     player.lvup = job.lvup;
 
     player.lv = 1;
@@ -1415,14 +1416,14 @@ function isItem(x, y){
 async function eventEnv(){
     // 自然回復
     if(turn_cnt % (player.hp_regen_rate + player.hp_regen_rate_offset) == 0)
-        addHP(player, 8);
+        addHP(player, 10);
     if(turn_cnt % (player.mp_regen_rate + player.mp_regen_rate_offset) == 0)
         addMP(player, 2);
 
     // 空腹度
     if(player.hung <= 0){
         addLog("飢えが "+player.name+" を蝕む");
-        await dealDmg(undefined, player, -30);
+        await dealDmg(undefined, player, -15);
         audio_hit.play();
     }
     if(!safe_flag && turn_cnt % player.hung_rate == 0){
@@ -1500,7 +1501,7 @@ async function nextFloor(){
     floor_cnt++;
     clairvoyance_flag = false;
 
-    // テスト用//FIXME
+    // TODO: テスト用
     //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
     if(um = unique_map.find(v=>v.id==floor_cnt)){ // 固有マップ
@@ -1567,14 +1568,12 @@ function setShop(id, x, y){
                 n--;
                 continue;
             }
-            let item = Object.assign({}, ITEM_DATA.find(v=>v.id==i.id), {price: i.price});
-            items.push(item);
+            items.push(ITEM_DATA.find(v=>v.id==i.id));
         }
     }
     else
         for(let i of shop.item_table){
-            let item = Object.assign({}, ITEM_DATA.find(v=>v.id==i.id), {price: i.price});
-            items.push(item);
+            items.push(ITEM_DATA.find(v=>v.id==i.id));
         }
 
     let s = Object.assign({}, shop, {x: x, y: y, item: items});
@@ -1587,6 +1586,16 @@ function isShop(x, y){
             return true;
 
     return false;
+}
+
+function setSellList(item_list){
+    for(let idx in inventory){
+        if(item_list.length == 0 || item_list.find(v=>v.id==inventory[idx].id) === undefined){
+            let item = inventory[idx];
+            item.price = -inventory[idx].price;
+            item_list.push(item);
+        }
+    }
 }
 
 // NPC配置
@@ -1611,7 +1620,7 @@ function setTrap(id, x, y){
 
 // マップ内罠
 function setTrapGroup(){
-    let num = Math.floor(Math.random() * (room_num*1 - 1) + 1);
+    let num = Math.floor(Math.random() * (room_num*2 - 1) + 1);
     let table = [];
     
     if(Math.floor((floor_cnt-1)/3) in TRAP_TABLE)
@@ -1646,6 +1655,14 @@ function checkTrap(x, y){
                 ret = true;
             }
     return ret;
+}
+
+// 千里眼
+function clairvoyance(){
+    clairvoyance_flag = true;
+    for(let i=0; i<SIZEY; i++)
+        for(let j=0; j<SIZEX; j++)
+            player.map_sight[i][j] = true;
 }
 
 //==================================================ENEMY==================================================
