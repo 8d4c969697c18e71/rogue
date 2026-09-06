@@ -1597,8 +1597,7 @@ function setSellList(item_list){
     for(let idx in inventory){
         if(item_list.length == 0 || item_list.find(v=>v.id==inventory[idx].id) === undefined){
             let item = inventory[idx];
-            item.price = -inventory[idx].price;
-            item_list.push(item);
+            item_list.push(Object.assign({}, item, {price: -(inventory[idx].price)}));
         }
     }
 }
