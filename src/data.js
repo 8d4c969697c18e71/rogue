@@ -430,19 +430,14 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 25,
         price: 30,
-        func_equip: async function(){
+        func_equip: async function(){},
+        func_unequip: async function(){},
+        func_attack: async function(to){},
+        func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.25, true, this.base_dmg);
             calcAtkFromStatus("dex", 1.25, true, this.base_dmg);
-            pushRecalc(this, this.func_equip);
         },
-        func_unequip: async function(){
-            player.atk -= this.base_dmg;
-            calcAtkFromStatus("str", 1.25, false, this.base_dmg);
-            calcAtkFromStatus("dex", 1.25, false, this.base_dmg);
-            removeRecalc(this, this.func_equip);
-        },
-        func_attack: async function(to){},
     },
     {
         id: 0x101,
@@ -450,19 +445,14 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 40,
         price: 46,
-        func_equip: async function(){
+        func_equip: async function(){},
+        func_unequip: async function(){},
+        func_attack: async function(to){},
+        func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.3, true, this.base_dmg);
             calcAtkFromStatus("dex", 1.25, true, this.base_dmg);
-            pushRecalc(this, this.func_equip);
         },
-        func_unequip: async function(){
-            player.atk -= this.base_dmg;
-            calcAtkFromStatus("str", 1.3, false, this.base_dmg);
-            calcAtkFromStatus("dex", 1.25, false, this.base_dmg);
-            removeRecalc(this, this.func_equip);
-        },
-        func_attack: async function(to){},
     },
     // 射撃武器 0x2XX
     {
@@ -473,17 +463,15 @@ const ITEM_DATA = [
         price: 36,
         func_equip: async function(){
             bow_flag = true;
-            player.atk += this.base_dmg;
-            calcAtkFromStatus("dex", 1.1, true, this.base_dmg);
-            pushRecalc(this, this.func_equip);
         },
         func_unequip: async function(){
             bow_flag = false;
-            player.atk -= this.base_dmg;
-            calcAtkFromStatus("dex", 1.1, false, this.base_dmg);
-            removeRecalc(this, this.func_equip);
         },
         func_attack: async function(to){},
+        func_recalc: async function() {
+            player.atk += this.base_dmg;
+            calcAtkFromStatus("dex", 1.1, true, this.base_dmg);
+        },
     },
     // 鎧 0x3XX
     {
@@ -498,6 +486,7 @@ const ITEM_DATA = [
             player.def -= 10;
         },
         func_attacked: async function(from){},
+        func_recalc: async function() {},
     },
     {
         id: 0x301,
@@ -511,6 +500,7 @@ const ITEM_DATA = [
             player.def -= 12;
         },
         func_attacked: async function(from){},
+        func_recalc: async function() {},
     },
     {
         id: 0x302,
@@ -524,6 +514,7 @@ const ITEM_DATA = [
             player.def -= 14;
         },
         func_attacked: async function(from){},
+        func_recalc: async function() {},
     },
     {
         id: 0x380,
@@ -537,6 +528,7 @@ const ITEM_DATA = [
             player.mp_max_offset -= 3;
         },
         func_attacked: async function(from){},
+        func_recalc: async function() {},
     },
     // 指輪 0x4XX
     {
@@ -551,6 +543,7 @@ const ITEM_DATA = [
             player.hp_max_offset -= 25;
             addHP(player, 0);
         },
+        func_recalc: async function() {},
     },
     {
         id: 0x401,
@@ -564,6 +557,7 @@ const ITEM_DATA = [
             player.mp_max_offset -= 20;
             addMP(player, 0);
         },
+        func_recalc: async function() {},
     },
     {
         id: 0x402,
@@ -576,6 +570,7 @@ const ITEM_DATA = [
         func_unequip: async function(){
             player.hung_rate_offset -= 5;
         },
+        func_recalc: async function() {},
     },
     {
         id: 0x403,
@@ -589,6 +584,7 @@ const ITEM_DATA = [
             player.hp_max_offset -= 75;
             addHP(player, 0);
         },
+        func_recalc: async function() {},
     },
     // 巻物 0x5XX
     {
@@ -601,6 +597,7 @@ const ITEM_DATA = [
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
+        func_recalc: async function() {},
     },
     // 杖 0x6XX
     {

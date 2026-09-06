@@ -1066,11 +1066,7 @@ function lvUp(who){
         for(let st in who.lvup) who[st] += who.lvup[st];
         
         // atk再計算
-        if(who == player) {
-            who.atk = ATK_BASE;
-            for(let idx in player.recalc)
-                player.recalc[idx].obj[player.recalc[idx].func_name]();
-        }
+        if(who == player) recalcAtk(who);
 
         addLog(who.name+" はレベルが上がった");
         audio_lvup.play();
@@ -1153,14 +1149,23 @@ async function calcAtkFromStatus(status, rate, add_flg, offset = 0) {
     else player.atk -= val;
 }
 
+// atk再計算
+async function recalcAtk(who) {
+    who.atk = ATK_BASE;
+    for(let idx in who.recalc)
+        who.recalc[idx].obj[who.recalc[idx].func_name]();
+}
+
 async function pushRecalc(obj, func) {
     player.recalc.push({obj: obj, func_name: func.name});
 }
 
 async function removeRecalc(obj, func) {
     for(let e in player.recalc)
-        if(player.recalc[e].obj === obj && player.recalc[e].func_name === func.name)
+        if(player.recalc[e].obj === obj && player.recalc[e].func_name === func.name){
             player.recalc.splice(e, 1);
+            return;
+        }
 }
 
 // 状態異常追加
@@ -1267,6 +1272,8 @@ async function equip(index){
         else
             player[equip_item.type] = equip_item;
         
+        await equip_item.func_recalc();
+        await pushRecalc(equip_item, equip_item.func_recalc);
         await equip_item.func_equip(player);
 
         addLog(equip_item.name+" を装備した");
@@ -1286,6 +1293,8 @@ async function equip(index){
         else
             player[equip_item.type] = undefined;
         
+        await removeRecalc(equip_item, equip_item.func_recalc);
+        await recalcAtk(player);
         await equip_item.func_unequip(player);
 
         addLog(equip_item.name+" を外した");
