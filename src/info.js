@@ -27,8 +27,8 @@ function drawInfo() {
     info.insertAdjacentHTML("beforeend", "COND: "+cond_info+"<br>");
     info.insertAdjacentHTML("beforeend", "HP&nbsp; : "+player.hp+" / "+(player.hp_max+player.hp_max_offset)+"<br>");
     info.insertAdjacentHTML("beforeend", "MP&nbsp; : "+player.mp+" / "+(player.mp_max+player.mp_max_offset)+"<br>");
-    info.insertAdjacentHTML("beforeend", "ATK : "+player.atk+"<br>");
-    info.insertAdjacentHTML("beforeend", "DEF : "+player.def+"<br>");
+    info.insertAdjacentHTML("beforeend", "ATK : "+(player.atk+player.atk_offset)+"<br>");
+    info.insertAdjacentHTML("beforeend", "DEF : "+(player.def+player.def_offset)+"<br>");
     info.insertAdjacentHTML("beforeend", "HUNG: "+player.hung+" / "+(player.hung_max+player.hung_max_offset)+"<br>");
     info.insertAdjacentHTML("beforeend", "GOLD: "+player.gold+"<br>");
     info.insertAdjacentHTML("beforeend", "<br>");
