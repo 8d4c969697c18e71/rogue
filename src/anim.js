@@ -12,7 +12,7 @@ async function animBlink(obj, ms = 200, fps = 60) {
             map_draw[obj.y][obj.x] = CHAR_MAP[map[obj.y][obj.x]];
             visible = false;
         }
-        else if(obj.id === undefined){
+        else if(obj.id === undefined) {
             map_draw[obj.y][obj.x] = CHAR_MAP.player;
             visible = true;
         }

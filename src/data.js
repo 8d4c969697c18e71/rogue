@@ -296,7 +296,7 @@ const ITEM_DATA = [
         name: "三日月草",
         type: "consume",
         price: 5,
-        func: async function(){
+        func: async function() {
             let value = 50;
             addHP(player, value);
             addHung(5);
@@ -311,7 +311,7 @@ const ITEM_DATA = [
         name: "半月草",
         type: "consume",
         price: 10,
-        func: async function(){
+        func: async function() {
             let value = 100;
             addHP(player, value);
             addHung(5);
@@ -326,7 +326,7 @@ const ITEM_DATA = [
         name: "後月草",
         type: "consume",
         price: 20,
-        func: async function(){
+        func: async function() {
             let value = 200;
             addHP(player, value);
             addHung(5);
@@ -341,7 +341,7 @@ const ITEM_DATA = [
         name: "満月草",
         type: "consume",
         price: 35,
-        func: async function(){
+        func: async function() {
             let value = 300;
             addHP(player, value);
             addHung(5);
@@ -356,7 +356,7 @@ const ITEM_DATA = [
         name: "新月草",
         type: "consume",
         price: 50,
-        func: async function(){
+        func: async function() {
             let value = player.hp_max;
             addHP(player, value);
             addHung(5);
@@ -371,7 +371,7 @@ const ITEM_DATA = [
         name: "香料",
         type: "consume",
         price: 10,
-        func: async function(){
+        func: async function() {
             let value = 15;
             addMP(player, value);
             addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -385,7 +385,7 @@ const ITEM_DATA = [
         name: "芳しい香料",
         type: "consume",
         price: 30,
-        func: async function(){
+        func: async function() {
             let value = 30;
             addMP(player, value);
             addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -399,7 +399,7 @@ const ITEM_DATA = [
         name: "祝福された香料",
         type: "consume",
         price: 60,
-        func: async function(){
+        func: async function() {
             let value = player.mp_max;
             addMP(player, value);
             addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
@@ -413,7 +413,7 @@ const ITEM_DATA = [
         name: "糧食",
         type: "food",
         price: 7,
-        func: async function(){
+        func: async function() {
             let value = 30;
             addHung(value);
             addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
@@ -430,9 +430,9 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 25,
         price: 30,
-        func_equip: async function(){},
-        func_unequip: async function(){},
-        func_attack: async function(to){},
+        func_equip: async function() {},
+        func_unequip: async function() {},
+        func_attack: async function(to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.25, true, this.base_dmg);
@@ -445,9 +445,9 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 40,
         price: 46,
-        func_equip: async function(){},
-        func_unequip: async function(){},
-        func_attack: async function(to){},
+        func_equip: async function() {},
+        func_unequip: async function() {},
+        func_attack: async function(to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.3, true, this.base_dmg);
@@ -461,13 +461,13 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 25,
         price: 36,
-        func_equip: async function(){
+        func_equip: async function() {
             bow_flag = true;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             bow_flag = false;
         },
-        func_attack: async function(to){},
+        func_attack: async function(to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("dex", 1.1, true, this.base_dmg);
@@ -479,13 +479,13 @@ const ITEM_DATA = [
         name: "レザーアーマー",
         type: "armor",
         price: 40,
-        func_equip: async function(){
+        func_equip: async function() {
             player.def += 10;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.def -= 10;
         },
-        func_attacked: async function(from){},
+        func_attacked: async function(from) {},
         func_recalc: async function() {},
     },
     {
@@ -493,13 +493,13 @@ const ITEM_DATA = [
         name: "チェインメイル",
         type: "armor",
         price: 56,
-        func_equip: async function(){
+        func_equip: async function() {
             player.def += 12;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.def -= 12;
         },
-        func_attacked: async function(from){},
+        func_attacked: async function(from) {},
         func_recalc: async function() {},
     },
     {
@@ -507,13 +507,13 @@ const ITEM_DATA = [
         name: "無名騎士の鎧",
         type: "armor",
         price: 64,
-        func_equip: async function(){
+        func_equip: async function() {
             player.def += 14;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.def -= 14;
         },
-        func_attacked: async function(from){},
+        func_attacked: async function(from) {},
         func_recalc: async function() {},
     },
     {
@@ -521,13 +521,13 @@ const ITEM_DATA = [
         name: "レアルのローブ",
         type: "armor",
         price: 44,
-        func_equip: async function(){
+        func_equip: async function() {
             player.mp_max_offset += 3;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.mp_max_offset -= 3;
         },
-        func_attacked: async function(from){},
+        func_attacked: async function(from) {},
         func_recalc: async function() {},
     },
     // 指輪 0x4XX
@@ -536,10 +536,10 @@ const ITEM_DATA = [
         name: "小生命の指輪",
         type: "ring",
         price: 68,
-        func_equip: async function(){
+        func_equip: async function() {
             player.hp_max_offset += 25;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.hp_max_offset -= 25;
             addHP(player, 0);
         },
@@ -550,10 +550,10 @@ const ITEM_DATA = [
         name: "蛇印の指輪",
         type: "ring",
         price: 78,
-        func_equip: async function(){
+        func_equip: async function() {
             player.mp_max_offset += 20;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.mp_max_offset -= 20;
             addMP(player, 0);
         },
@@ -564,10 +564,10 @@ const ITEM_DATA = [
         name: "飽食の指輪",
         type: "ring",
         price: 56,
-        func_equip: async function(){
+        func_equip: async function() {
             player.hung_rate_offset += 5;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.hung_rate_offset -= 5;
         },
         func_recalc: async function() {},
@@ -577,10 +577,10 @@ const ITEM_DATA = [
         name: "生命の指輪",
         type: "ring",
         price: 82,
-        func_equip: async function(){
+        func_equip: async function() {
             player.hp_max_offset += 75;
         },
-        func_unequip: async function(){
+        func_unequip: async function() {
             player.hp_max_offset -= 75;
             addHP(player, 0);
         },
@@ -592,7 +592,7 @@ const ITEM_DATA = [
         name: "千里眼の巻物",
         type: "scroll",
         price: 21,
-        func: async function(){
+        func: async function() {
             clairvoyance();
             inventory.splice(inventory.indexOf(this), 1);
             return true;
@@ -605,8 +605,8 @@ const ITEM_DATA = [
         name: "ソウルの杖",
         type: "staff",
         price: 129,
-        func: async function(){
-            if(player.mp < 8){
+        func: async function() {
+            if(player.mp < 8) {
                 addLog("MP が足りない");
                 return false;
             }
@@ -615,7 +615,7 @@ const ITEM_DATA = [
             player.magic_using = this;
             return false;
         },
-        func_cast: async function(dir){
+        func_cast: async function(dir) {
             addMP(player, -8);
             addLog(player.name+" はソウルの光を放った");
             audio_ray.play();
@@ -628,8 +628,8 @@ const ITEM_DATA = [
         name: "回復の聖鈴",
         type: "staff",
         price: 96,
-        func: async function(){
-            if(player.mp < 8){
+        func: async function() {
+            if(player.mp < 8) {
                 addLog("MP が足りない");
                 return false;
             }
@@ -640,15 +640,15 @@ const ITEM_DATA = [
             audio_heal.play();
             return undefined;
         },
-        func_cast: async function(dir){}
+        func_cast: async function(dir) {}
     },
     {
         id: 0x602,
         name: "跳躍の杖",
         type: "staff",
         price: 112,
-        func: async function(){
-            if(player.mp < 7){
+        func: async function() {
+            if(player.mp < 7) {
                 addLog("MP が足りない");
                 return false;
             }
@@ -657,9 +657,9 @@ const ITEM_DATA = [
             player.magic_using = this;
             return false;
         },
-        func_cast: async function(dir){
+        func_cast: async function(dir) {
             addMP(player, -7);
-            if(jump(player, dir, 3)){
+            if(jump(player, dir, 3)) {
                 addLog(player.name+" は跳んだ");
                 audio_jump.play();
             }
@@ -676,8 +676,8 @@ const ITEM_DATA = [
         price: 1,
         dmg: 20,
         range: 10,
-        func_equip: async function(){},
-        func_unequip: async function(){},
+        func_equip: async function() {},
+        func_unequip: async function() {},
     },
     {
         id: 0x701,
@@ -686,8 +686,8 @@ const ITEM_DATA = [
         price: 2,
         dmg: 30,
         range: 8,
-        func_equip: async function(){},
-        func_unequip: async function(){},
+        func_equip: async function() {},
+        func_unequip: async function() {},
     },
     {
         id: 0x7f0,
@@ -696,8 +696,8 @@ const ITEM_DATA = [
         price: 1,
         dmg: 10,
         range: 2,
-        func_equip: async function(){},
-        func_unequip: async function(){},
+        func_equip: async function() {},
+        func_unequip: async function() {},
     },
     // スタックアイテム 0x8XX
     {
@@ -736,7 +736,7 @@ const ITEM_DATA = [
         mp_regen_rate: 10,
         sight_range: 5,
         lvup: {hp_max: 30, mp_max: 3, str: 2, dex: 2, fth: 3},
-        func: async function(){
+        func: async function() {
             log_reserve.pop();
             player.job = this.id;
             backLv();
@@ -764,8 +764,8 @@ const ITEM_DATA = [
         mp_regen_rate: 10,
         sight_range: 3,
         lvup: {hp_max: 40, mp_max: 1, str: 3, dex: 2},
-        func: async function(){
-            if(INVENTORY_SIZE-inventory.length >= 3){
+        func: async function() {
+            if(INVENTORY_SIZE-inventory.length >= 3) {
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
@@ -801,8 +801,8 @@ const ITEM_DATA = [
         mp_regen_rate: 10,
         sight_range: 9,
         lvup: {hp_max: 25, mp_max: 2, dex: 4, int: 1},
-        func: async function(){
-            if(INVENTORY_SIZE-inventory.length >= 5){
+        func: async function() {
+            if(INVENTORY_SIZE-inventory.length >= 5) {
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
@@ -840,8 +840,8 @@ const ITEM_DATA = [
         mp_regen_rate: 7,
         sight_range: 7,
         lvup: {hp_max: 10, mp_max: 4, int: 4, fth: 1},
-        func: async function(){
-            if(INVENTORY_SIZE-inventory.length >= 3){
+        func: async function() {
+            if(INVENTORY_SIZE-inventory.length >= 3) {
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
@@ -931,8 +931,8 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         exp:3,
-        func_spawn: async function(me){},
-        func_died: async function(){},
+        func_spawn: async function(me) {},
+        func_died: async function() {},
         skill: [],
     },
     {
@@ -949,11 +949,11 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: true,
         exp:2,
-        func_spawn: async function(me){
+        func_spawn: async function(me) {
             await setConditionTurn(me, 0x03, 1000);
             log_reserve.splice(log_reserve.length-1, 1);
         },
-        func_died: async function(){},
+        func_died: async function() {},
         skill: [
             {
                 id: 0x000,
@@ -976,8 +976,8 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         exp:5,
-        func_spawn: async function(me){},
-        func_died: async function(){},
+        func_spawn: async function(me) {},
+        func_died: async function() {},
         skill: [],
     },
     {
@@ -994,14 +994,14 @@ const ENEMY_DATA = [
         distance:3,
         group_spawn_flag: false,
         exp:7,
-        func_spawn: async function(me){
+        func_spawn: async function(me) {
             this.lv = Math.floor(floor_cnt/2);
             this.hp_max = Math.floor(10*floor_cnt/3);
             this.hp = this.hp_max;
             this.mp_max = Math.floor(15*floor_cnt/3);
             this.mp = this.mp_max;
         },
-        func_died: async function(){},
+        func_died: async function() {},
         skill: [
             {
                 id: 0x000,
@@ -1024,8 +1024,8 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         exp:7,
-        func_spawn: async function(me){},
-        func_died: async function(){},
+        func_spawn: async function(me) {},
+        func_died: async function() {},
         skill: [
             {
                 id:0x001,
@@ -1047,8 +1047,8 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: true,
         exp:5,
-        func_spawn: async function(me){},
-        func_died: async function(){},
+        func_spawn: async function(me) {},
+        func_died: async function() {},
         skill: [
             {
                 id: 0x003,
@@ -1070,8 +1070,8 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         exp:8,
-        func_spawn: async function(me){},
-        func_died: async function(){},
+        func_spawn: async function(me) {},
+        func_died: async function() {},
         skill: [
             {
                 id: 0x004,
@@ -1117,19 +1117,19 @@ const SKILL_DATA = [
         id: 0x000,
         name: "射撃",
         ammo: undefined,
-        func: async function(from, to){
-            for(let d in KEY_DIRECTION){
+        func: async function(from, to) {
+            for(let d in KEY_DIRECTION) {
                 let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
                 let xy = straightRecursive(from.x, from.y, KEY_DIRECTION[d], ammo.range-1);
-                if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && from.map_sight[to.y][to.x]){
+                if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && from.map_sight[to.y][to.x]) {
                     await shot(from, ammo, KEY_DIRECTION[d]);
                     return true;
                 }
             }
-            for(let d in KEY_DIRECTION_DIAGONAL){
+            for(let d in KEY_DIRECTION_DIAGONAL) {
                 let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
                 let xy = straightRecursive(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], ammo.range-1);
-                if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && from.map_sight[to.y][to.x]){
+                if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && from.map_sight[to.y][to.x]) {
                     await shot(from, ammo, KEY_DIRECTION_DIAGONAL[d]);
                     return true;
                 }
@@ -1140,7 +1140,7 @@ const SKILL_DATA = [
     {
         id: 0x001,
         name: "受け流し",
-        func: async function(from, to){
+        func: async function(from, to) {
             await setCondition(from, 0x80);
             return true;
         }
@@ -1150,28 +1150,28 @@ const SKILL_DATA = [
         name: "クイックステップ",
         direction: undefined,
         distance: undefined,
-        func: async function(from, to){
+        func: async function(from, to) {
             return jump(from, this.direction, this.distance);
         }
     },
     {
         id: 0x003,
         name: "毒攻撃",
-        func: async function(from, to){
-            for(let d in KEY_DIRECTION){
+        func: async function(from, to) {
+            for(let d in KEY_DIRECTION) {
                 let x = from.x + KEY_DIRECTION[d].x;
                 let y = from.y + KEY_DIRECTION[d].y;
-                if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)){
+                if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)) {
                     await attack(from, to);
                     if(Math.floor(Math.random()+0.33))
                         await setCondition(to, 0x00);
                     return true;
                 }
             }
-            for(let d in KEY_DIRECTION_DIAGONAL){
+            for(let d in KEY_DIRECTION_DIAGONAL) {
                 let x = from.x + KEY_DIRECTION_DIAGONAL[d].x;
                 let y = from.y + KEY_DIRECTION_DIAGONAL[d].y;
-                if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)){
+                if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)) {
                     await attack(from, to);
                     if(Math.floor(Math.random()+0.33))
                         await setCondition(to, 0x00);
@@ -1184,25 +1184,25 @@ const SKILL_DATA = [
     {
         id: 0x004,
         name: "突撃",
-        func: async function(from, to){
-            for(let d in KEY_DIRECTION){
+        func: async function(from, to) {
+            for(let d in KEY_DIRECTION) {
                 let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION[d], SIZEX+SIZEY);
-                if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y) && from.map_sight[to.y][to.x]){
+                if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y) && from.map_sight[to.y][to.x]) {
                     addLog(from.name+" は "+to.name+" に突撃した");
                     await attack(from, to);
-                    while(await move(from, KEY_DIRECTION[d])){
+                    while(await move(from, KEY_DIRECTION[d])) {
                         updateMap();
                         drawMap();
                     }
                     return true;
                 }
             }
-            for(let d in KEY_DIRECTION_DIAGONAL){
+            for(let d in KEY_DIRECTION_DIAGONAL) {
                 let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], SIZEX+SIZEY);
-                if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y) && from.map_sight[to.y][to.x]){
+                if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y) && from.map_sight[to.y][to.x]) {
                     addLog(from.name+" は "+to.name+" に突撃した");
                     await attack(from, to);
-                    while(await move(from, KEY_DIRECTION_DIAGONAL[d])){
+                    while(await move(from, KEY_DIRECTION_DIAGONAL[d])) {
                         updateMap();
                         drawMap();
                     }
@@ -1222,15 +1222,15 @@ const CONDITION_DATA = [
         id: 0x00,
         name: "毒",
         turn: 10,
-        func_be: async function(who){
+        func_be: async function(who) {
             addLog(who.name+" は毒に侵された");
         },
-        func_during: async function(who){
+        func_during: async function(who) {
             let dmg = 5;
             addHP(who, -dmg);
             addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
         },
-        func_recovery: async function(who){
+        func_recovery: async function(who) {
             addLog(who.name+" の毒は取り除かれた");
         },
     },
@@ -1238,15 +1238,15 @@ const CONDITION_DATA = [
         id: 0x01,
         name: "眠",
         turn: 5,
-        func_be: async function(who){
+        func_be: async function(who) {
             addLog(who.name+" は眠りに落ちた");
             who.cannot_action_flag = true;
         },
-        func_during: async function(who){
+        func_during: async function(who) {
             addLog(who.name+" は眠っている");
             who.cannot_action_flag = true;
         },
-        func_recovery: async function(who){
+        func_recovery: async function(who) {
             addLog(who.name+" は目を覚ました");
             who.cannot_action_flag = false;
         },
@@ -1255,13 +1255,13 @@ const CONDITION_DATA = [
         id: 0x02,
         name: "盲",
         turn: 10,
-        func_be: async function(who){
+        func_be: async function(who) {
             addLog(who.name+" は前が見えない");
             who.sight_range_offset = -who.sight_range;
         },
-        func_during: async function(who){
+        func_during: async function(who) {
         },
-        func_recovery: async function(who){
+        func_recovery: async function(who) {
             addLog(who.name+" の視力は回復した");
             who.sight_range_offset = 0;
         },
@@ -1270,14 +1270,14 @@ const CONDITION_DATA = [
         id: 0x03,
         name: "縛",
         turn: 10,
-        func_be: async function(who){
+        func_be: async function(who) {
             addLog(who.name+" は身動きがとれない");
             who.cannot_move_flag = true;
         },
-        func_during: async function(who){
+        func_during: async function(who) {
             who.cannot_move_flag = true;
         },
-        func_recovery: async function(who){
+        func_recovery: async function(who) {
             addLog(who.name+" は動けるようになった");
             who.cannot_move_flag = false;
         },
@@ -1287,15 +1287,15 @@ const CONDITION_DATA = [
         id: 0x80,
         name: "受",
         turn: 2,
-        func_be: async function(who){
+        func_be: async function(who) {
             addLog(who.name+" は受け流しの構えをとった");
             who.cannot_action_flag = true;
             if(who == player) turn--;
         },
-        func_during: async function(who){
+        func_during: async function(who) {
             who.cannot_action_flag = true;
         },
-        func_recovery: async function(who){
+        func_recovery: async function(who) {
             addLog(who.name+" は受け流しの構えを解いた");
             who.cannot_action_flag = false;
         },
@@ -1308,7 +1308,7 @@ const TRAP_DATA = [
     {
         id: 0x00,
         name: "毒床",
-        func: async function(who){
+        func: async function(who) {
             await setCondition(who, 0x00);
             addLog(who.name+" は毒の床を踏んだ");
             audio_poison.play();
@@ -1317,7 +1317,7 @@ const TRAP_DATA = [
     {
         id: 0x01,
         name: "睡眠ガス",
-        func: async function(who){
+        func: async function(who) {
             await setCondition(who, 0x01);
             addLog(who.name+" は睡眠ガスに包まれた");
             audio_poison.play();
@@ -1326,7 +1326,7 @@ const TRAP_DATA = [
     {
         id: 0x02,
         name: "黒い霧",
-        func: async function(who){
+        func: async function(who) {
             await setCondition(who, 0x02);
             addLog(who.name+" の周囲が黒い霧に包まれた");
             audio_poison.play();
@@ -1335,7 +1335,7 @@ const TRAP_DATA = [
     {
         id: 0x03,
         name: "トラばさみ",
-        func: async function(who){
+        func: async function(who) {
             await setCondition(who, 0x03);
             addLog(who.name+" はトラばさみにかかった");
             audio_hit.play();
@@ -1344,9 +1344,9 @@ const TRAP_DATA = [
     {
         id: 0x04,
         name: "転送罠",
-        func: async function(who){
+        func: async function(who) {
             let [x,y] = [];
-            while(1){
+            while(1) {
                 [x,y] = setRandomXY();
                 if(!isSameRoom(who.x, who.y, x, y))
                     break;
@@ -1392,8 +1392,8 @@ const NPC_DATA = [
             "ダンジョンの入り口には治癒士もいるぞ",
         ],
         dialogue_cnt: 0,
-        func_before: async function(){},
-        func_after: async function(){},
+        func_before: async function() {},
+        func_after: async function() {},
     },
     {
         id: 0x01,
@@ -1404,10 +1404,10 @@ const NPC_DATA = [
             "今の貴方の能力を教える<br>tmp",
         ],
         dialogue_cnt: 0,
-        func_before: async function(){
+        func_before: async function() {
             this.dialogue[0] = "今の貴方の能力を教える<br>"+"STR: "+player.str+", DEX: "+player.dex+", INT: "+player.int+", FTH: "+player.fth;
         },
-        func_after: async function(){},
+        func_after: async function() {},
     },
     {
         id: 0x02,
@@ -1437,8 +1437,8 @@ const NPC_DATA = [
             "メレンは物を買ってくれるよ",
         ],
         dialogue_cnt: 0,
-        func_before: async function(){},
-        func_after: async function(){},
+        func_before: async function() {},
+        func_after: async function() {},
     },
     {
         id: 0x03,
@@ -1449,8 +1449,8 @@ const NPC_DATA = [
             "回復します",
         ],
         dialogue_cnt: 0,
-        func_before: async function(){},
-        func_after: async function(){
+        func_before: async function() {},
+        func_after: async function() {
             fullRecovery(player);
             audio_heal.play();
         },
@@ -1473,9 +1473,9 @@ const SHOP_DATA = [
             {id: 0x020},
             {id: 0x030},
         ],
-        func_before: async function(){},
-        func_buy: async function(){},
-        func_after: async function(){},
+        func_before: async function() {},
+        func_buy: async function() {},
+        func_after: async function() {},
     },
     {
         id: 0x01,
@@ -1489,19 +1489,19 @@ const SHOP_DATA = [
             {id: 0xf02},
             {id: 0xf03},
         ],
-        func_before: async function(){
-            if(INVENTORY_SIZE-inventory.length < 4){
+        func_before: async function() {
+            if(INVENTORY_SIZE-inventory.length < 4) {
                 addLog("反応がない");
                 setNotUseShop()
             }
         },
-        func_buy: async function(){
+        func_buy: async function() {
             shop_group.splice(shop_group.indexOf(this),1);
             await useItem([inventory.length-1]);
             addLog("棺は音もなく消え去った");
             setNotUseShop()
         },
-        func_after: async function(){},
+        func_after: async function() {},
     },
     {
         id: 0x02,
@@ -1512,14 +1512,14 @@ const SHOP_DATA = [
         random_flag: false,
         item_table: [
         ],
-        func_before: async function(){
+        func_before: async function() {
             setSellList(this.item);
             if(this.item.length <= 0) {
                 setNotUseShop();
                 addLog(this.name+"「...何も持ってないじゃないか」");
             }
         },
-        func_buy: async function(){
+        func_buy: async function() {
             this.item.length = 0;
             shop_cursor = 0;
             setSellList(this.item);
@@ -1528,7 +1528,7 @@ const SHOP_DATA = [
                 addLog(this.name+"「"+this.dialogue_outro+"」");
             }
         },
-        func_after: async function(){},
+        func_after: async function() {},
     },
     {
         id: 0x03,
@@ -1555,9 +1555,9 @@ const SHOP_DATA = [
             {id: 0x601},
             {id: 0x800},
         ],
-        func_before: async function(){},
-        func_buy: async function(){},
-        func_after: async function(){},
+        func_before: async function() {},
+        func_buy: async function() {},
+        func_after: async function() {},
     },
     {
         id: 0x05,
@@ -1568,14 +1568,14 @@ const SHOP_DATA = [
         random_flag: false,
         item_table: [
         ],
-        func_before: async function(){
+        func_before: async function() {
             setSellList(this.item);
             if(this.item.length <= 0) {
                 setNotUseShop();
                 addLog(this.name+"「モノ　ナイ...」");
             }
         },
-        func_buy: async function(){
+        func_buy: async function() {
             this.item.length = 0;
             shop_cursor = 0;
             setSellList(this.item);
@@ -1584,7 +1584,7 @@ const SHOP_DATA = [
                 addLog(this.name+"「"+this.dialogue_outro+"」");
             }
         },
-        func_after: async function(){},
+        func_after: async function() {},
     },
     {
         id: 0x06,
@@ -1603,9 +1603,9 @@ const SHOP_DATA = [
             {id: 0x030},
             {id: 0x800},
         ],
-        func_before: async function(){},
-        func_buy: async function(){},
-        func_after: async function(){},
+        func_before: async function() {},
+        func_buy: async function() {},
+        func_after: async function() {},
     },
 ];
 let shop_group = [];
@@ -1638,7 +1638,7 @@ let unique_map = [    // 固有マップ
         "011111000111110",//D
         "000000000000000",//E
         ],
-        func: async function(x_offset){
+        func: async function(x_offset) {
             setItem(0x800,1+x_offset, 1);
             setItem(0xf01,2+x_offset, 1);
             setShop(0x05, 9+x_offset, 1);
@@ -1669,7 +1669,7 @@ let unique_map = [    // 固有マップ
         "00001110000",
         "00000000000",
         ],
-        func: async function(x_offset){
+        func: async function(x_offset) {
             setStair(5+x_offset, 2);
             setShop(0x01, 5+x_offset, 13);
         }
@@ -1695,7 +1695,8 @@ let unique_map = [    // 固有マップ
         "01111111110",
         "00000000000",
         ],
-        func: async function(x_offset){
+        func: async function(x_offset) {
+            setCookie();
             setStair(5+x_offset, 2);
             setNPC(0x02, 9+x_offset, 5);
             setNPC(0x03, 7+x_offset, 5);
@@ -1719,7 +1720,7 @@ let unique_map = [    // 固有マップ
         "001111100",
         "000000000",
         ],
-        func: async function(x_offset){
+        func: async function(x_offset) {
             setShop(0x05, 6+x_offset, 4);
             setStair(4+x_offset, 1);
             setPortal(2+x_offset, 4);

@@ -1,6 +1,6 @@
 //=========================INFO=========================
 
-function drawInfo(){
+function drawInfo() {
     info.innerHTML = "";
 
     // マップ情報
@@ -36,7 +36,7 @@ function drawInfo(){
 
 //=========================INVENTORY=========================
 
-function drawInv(){
+function drawInv() {
     inv.innerHTML = "";
     if(ui_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
@@ -45,14 +45,14 @@ function drawInv(){
     if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
 
     inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
-    for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++){
+    for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++) {
         if(i == inv_cursor)
             inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
         else if(i<9)
             inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
         else
             inv.insertAdjacentHTML("beforeend", (i+1)+": ");
-        if(i < inventory.length){
+        if(i < inventory.length) {
             if(inventory[i].equip_flag)
                 inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
             else
@@ -68,25 +68,25 @@ function drawInv(){
 
 //=========================SHOP=========================
 
-function drawShop(){
-    if(isPhone() && shop_flag){
+function drawShop() {
+    if(isPhone() && shop_flag) {
         drawShopPhone();
         return;
     }
 
     shop.innerHTML = "";
     shop.style.border = "solid 1px black";
-    if(shop_flag){
+    if(shop_flag) {
         shop.style.border = "solid 1px white";
         shop.insertAdjacentHTML("beforeend", "SHOP<br>");
-        for(let i=0; i<shop_using.item.length; i++){
+        for(let i=0; i<shop_using.item.length; i++) {
             if(i == shop_cursor)
                 shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
             else if(i<9)
                 shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
             else
                 shop.insertAdjacentHTML("beforeend", (i+1)+": ");
-            if(shop_using.item[i].price>=0){
+            if(shop_using.item[i].price>=0) {
                 shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
                 shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
             }
@@ -99,24 +99,24 @@ function drawShop(){
     }
 }
 
-function drawShopPhone(){
+function drawShopPhone() {
     inv.innerHTML = "";
     inv.style.border = "solid 1px black";
 
     if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
     if(shop_cursor >= inv_display_num + shop_start_offset) shop_start_offset = shop_cursor - inv_display_num + 1;
 
-    if(shop_flag){
+    if(shop_flag) {
         inv.style.border = "solid 1px white";
         inv.insertAdjacentHTML("beforeend", "SHOP<br>");
-        for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_num+shop_start_offset; i++){
+        for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_num+shop_start_offset; i++) {
             if(i == shop_cursor)
                 inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
             else if(i<9)
                 inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
             else
                 inv.insertAdjacentHTML("beforeend", (i+1)+": ");
-            if(shop_using.item[i].price>=0){
+            if(shop_using.item[i].price>=0) {
                 inv.insertAdjacentHTML("beforeend", shop_using.item[i].name);
                 inv.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
             }
@@ -131,8 +131,8 @@ function drawShopPhone(){
 
 //=========================LOG=========================
 
-function drawLog(){
-    if(isPhone()){
+function drawLog() {
+    if(isPhone()) {
         drawLogPhone();
         return;
     }
@@ -143,18 +143,18 @@ function drawLog(){
     log.insertAdjacentHTML("afterbegin","LOG<br>");
 }
 
-function drawLogPhone(){
+function drawLogPhone() {
     log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
         log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
     log.insertAdjacentHTML("afterbegin","LOG<br>");
 }
 
-function addSpaceAfterBreak(str){
-    if(str.match(/<br>/)){
+function addSpaceAfterBreak(str) {
+    if(str.match(/<br>/)) {
         let index = [0];
         let br_num = str.match(/<br>/g).length;
-        for(let i=0; i<br_num; i++){
+        for(let i=0; i<br_num; i++) {
             index.push(str.indexOf("<br>", index[i]+1));
         }
         
@@ -168,7 +168,7 @@ function addSpaceAfterBreak(str){
 
         let space_num;
         space_num = str.indexOf(":") + 2;
-        for(let i=0; i<str_slice.length-1; i++){
+        for(let i=0; i<str_slice.length-1; i++) {
             str_slice[i].replace("<br>", "");
             str_slice[i] += "<br>";
             for(let n=0; n<space_num; n++)
@@ -179,21 +179,21 @@ function addSpaceAfterBreak(str){
     return str;
 }
 
-function addLog(text){
+function addLog(text) {
     log_reserve.push(addSpaceAfterBreak(turn_cnt + ": " + text));
     if(log_reserve.length>LOG_RESERVE_SIZE)
         log_reserve.shift();
     drawLog();
 }
 
-function addLogSameLine(text){
+function addLogSameLine(text) {
     log_reserve[log_reserve.length-1] += "　" + text;
     drawLog();
 }
 
 //=========================NOTE=========================
 
-function drawNote(){
+function drawNote() {
     if(isPhone()) return;
 
     note.innerHTML = "NOTE<br>";
@@ -245,6 +245,6 @@ function drawNote(){
 }
 
 // UI色
-function colorUI(char, color){
+function colorUI(char, color) {
     return '<span style="color:'+color+';">'+char+'</span>';
 }
