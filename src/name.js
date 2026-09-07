@@ -44,30 +44,39 @@ async function inputName() {
     }
     // apply
     if(key_input.apply) {
-        audio_apply.play();
-        if(syllabary[input_name_pos.y][input_name_pos.x]=="消")
+        if(syllabary[input_name_pos.y][input_name_pos.x]=="消") {
             player.name = player.name.slice(0, -1);
-
+            audio_apply.play();
+        }
         else if(syllabary[input_name_pos.y][input_name_pos.x]=="ｶﾅ") {
             if(syllabary == KATAKANA) syllabary = HIRAGANA;
             else syllabary = KATAKANA;
+            audio_apply.play();
 
             // 一覧
             displaySyllabary(y_offset+FONT_SIZE*4);
         }
-
         else if(syllabary[input_name_pos.y][input_name_pos.x]=="終") {
-            ctx.textAlign = "start";
-            input_name_flag = false;
-            await initFirst();
-            return;
+            if(player.name.length < 1) {
+                audio_cancel.play();
+            }
+            else {
+                ctx.textAlign = "start";
+                input_name_flag = false;
+                audio_apply.play();
+                initFirst();
+                return;
+            }
         }
-        else
+        else {
             player.name += syllabary[input_name_pos.y][input_name_pos.x];
+            audio_apply.play();
+        }
     }
     // cancel
-    if(key_input.cancel)
+    if(key_input.cancel) {
         player.name = player.name.slice(0, -1);
+    }
 
     // 一覧
     displaySyllabary(y_offset+FONT_SIZE*4);

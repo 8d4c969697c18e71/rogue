@@ -551,6 +551,7 @@ async function eventShot() {
     // cancel
     if(key_input.cancel) {
         addLog("構えを解いた");
+        audio_cancel.play();
         shot_flag = false;
         return false;
     }
@@ -641,6 +642,7 @@ async function eventThrowing() {
     // cancel
     if(key_input.cancel) {
         addLog("投擲をやめた");
+        audio_cancel.play();
         //inv_cursor = -1;
         throwing_flag = false;
         ui_flag = false;
@@ -716,6 +718,7 @@ async function eventMagic() {
     // cancel
     if(key_input.cancel) {
         addLog("構えを解いた");
+        audio_cancel.play();
         magic_flag = false;
         player.magic_using = undefined;
         //inv_cursor = -1;
@@ -872,7 +875,7 @@ function eventShop() {
                 if(addItem(shop_using.item[shop_cursor].id)) {
                     player.gold -= shop_using.item[shop_cursor].price;
                     shop_using.func_buy();
-                    audio_apply.play();
+                    audio_coin.play();
                     return true;
                 }
             }
@@ -897,7 +900,7 @@ function eventShop() {
 
                 player.gold += -shop_using.item[shop_cursor].price;
                 shop_using.func_buy();
-                audio_apply.play();
+                audio_coin.play();
                 addLog(item_sell.name+" を売った");
                 return true;
             }
@@ -915,6 +918,7 @@ function eventShop() {
         }
         shop_using.func_after();
         setNotUseShop()
+        
         return false;
     }
 }

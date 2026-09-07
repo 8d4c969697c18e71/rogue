@@ -51,6 +51,7 @@ let shop_start_offset = 0;
 
 
 const audio_apply = new Audio("sound/apply.wav");
+const audio_cancel = new Audio("sound/cancel.wav");
 const audio_fire = new Audio("sound/fire.wav");
 const audio_heal = new Audio("sound/heal.wav");
 const audio_attack = new Audio("sound/attack.wav");
@@ -63,6 +64,7 @@ const audio_shot = new Audio("sound/shot.wav");
 const audio_stair = new Audio("sound/stair.wav");
 const audio_lvup = new Audio("sound/lvup.wav");
 const audio_death = new Audio("sound/death.wav");
+const audio_coin = new Audio("sound/coin.wav");
 
 //====================================================================================================
 
@@ -1705,9 +1707,7 @@ let unique_map = [    // 固有マップ
         ],
         func: async function(x_offset) {
             fullRecovery(player);
-            //for(let i=0; i<17; i++) addItem(0x601);
             setCookie();
-            loadCookie();
             setStair(5+x_offset, 2);
             setNPC(0x02, 9+x_offset, 5);
             setNPC(0x03, 7+x_offset, 5);
