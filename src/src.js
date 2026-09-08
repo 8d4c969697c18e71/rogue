@@ -1088,7 +1088,7 @@ function backLv() {
     player.int = job.int;
     player.fth = job.fth;
     player.atk = job.atk;
-    player.def = job.def;
+    //player.def = job.def;
     player.hung_rate = job.hung_rate;
     player.hp_regen_rate = job.hp_regen_rate;
     player.mp_regen_rate = job.mp_regen_rate;
@@ -1114,6 +1114,7 @@ function initStatusAll() {
     player.hp_regen_rate_offset = 0;
     player.mp_regen_rate_offset = 0;
     player.sight_range_offset = 0;
+    player.def = getItemData(player.job).def;
     player.condition = [];
     player.weapon = undefined;
     player.ammo = undefined;
