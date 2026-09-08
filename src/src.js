@@ -134,9 +134,7 @@ function initGroups() {
 // 操作、各イベント
 document.addEventListener("keydown", async (e) =>{
     toggleKeyInput(e);
-    if(!exeEventsFlg) {
-        await events();
-    }
+    if(!exeEventsFlg) await events();
 });
 
 function toggleKeyInput(e) {
@@ -176,66 +174,110 @@ document.addEventListener("keyup", e=>{
 });
 
 // ボタン
-btn_z.addEventListener("click", () =>{
-    key_input.apply = true;
-    events();
+btn_z.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.apply = true;
+        events();
+    }
+});
+btn_z.addEventListener("touchend", () =>{
     key_input.apply = false;
 });
-btn_x.addEventListener("click", () =>{
-    key_input.cancel = true;
-    events();
+btn_x.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.cancel = true;
+        events();
+    }
+});
+btn_x.addEventListener("touchend", () =>{
     key_input.cancel = false;
 });
-btn_c.addEventListener("click", () =>{
-    key_input.sub = true;
-    events();
+btn_c.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.sub = true;
+        events();
+    }
+});
+btn_c.addEventListener("touchend", () =>{
     key_input.sub = false;
 });
-btn_left.addEventListener("click", () =>{
-    key_input.left = true;
-    events();
+btn_left.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.left = true;
+        events();
+    }
+});
+btn_left.addEventListener("touchend", () =>{
     key_input.left = false;
 });
-btn_up.addEventListener("click", () =>{
-    key_input.up = true;
-    events();
+btn_up.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.up = true;
+        events();
+    }
+});
+btn_up.addEventListener("touchend", () =>{
     key_input.up = false;
 });
-btn_down.addEventListener("click", () =>{
-    key_input.down = true;
-    events();
+btn_down.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.down = true;
+        events();
+    }
+});
+btn_down.addEventListener("touchend", () =>{
     key_input.down = false;
 });
-btn_right.addEventListener("click", () =>{
-    key_input.right = true;
-    events();
+btn_right.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.right = true;
+        events();
+    }
+});
+btn_right.addEventListener("touchend", () =>{
     key_input.right = false;
 });
-btn_upleft.addEventListener("click", () =>{
-    key_input.ctrl = true;
-    key_input.up_left = true;
-    events();
+btn_upleft.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.ctrl = true;
+        key_input.up_left = true;
+        events();
+    }
+});
+btn_upleft.addEventListener("touchend", () =>{
     key_input.ctrl = false;
     key_input.up_left = false;
 });
-btn_downleft.addEventListener("click", () =>{
-    key_input.ctrl = true;
-    key_input.down_left = true;
-    events();
+btn_downleft.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.ctrl = true;
+        key_input.down_left = true;
+        events();
+    }
+});
+btn_downleft.addEventListener("touchend", () =>{
     key_input.ctrl = false;
     key_input.down_left = false;
 });
-btn_upright.addEventListener("click", () =>{
-    key_input.ctrl = true;
-    key_input.up_right = true;
-    events();
+btn_upright.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.ctrl = true;
+        key_input.up_right = true;
+        events();
+    }
+});
+btn_upright.addEventListener("touchend", () =>{
     key_input.ctrl = false;
     key_input.up_right = false;
 });
-btn_downright.addEventListener("click", () =>{
-    key_input.ctrl = true;
-    key_input.down_right = true;
-    events();
+btn_downright.addEventListener("touchstart", () =>{
+    if(!exeEventsFlg) {
+        key_input.ctrl = true;
+        key_input.down_right = true;
+        events();
+    }
+});
+btn_downright.addEventListener("touchend", () =>{
     key_input.ctrl = false;
     key_input.down_right = false;
 });
