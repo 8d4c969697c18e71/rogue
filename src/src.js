@@ -537,6 +537,9 @@ function jump(who, direction, distance) {
         return false;
     who.x = who.x+direction.x*distance;
     who.y = who.y+direction.y*distance;
+    
+    addLog(who.name+" は跳び退いた");
+    audio_jump.play();
     return true;
 }
 
@@ -770,16 +773,16 @@ async function eventMagic() {
 }
 
 // 魔法
-function magic(who, value, direction) {
+async function magic(who, value, direction) {
     let dst = straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
     if(isEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
-        magicDmg(who, enemy, value);
+        await magicDmg(who, enemy, value);
         if(who == player) findPl(enemy);
         return enemy;
     }
     else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
-        magicDmg(who, player, value);
+        await magicDmg(who, player, value);
         return player;
     }
 }
@@ -942,6 +945,7 @@ function eventShop() {
 
                 player.gold += -shop_using.item[shop_cursor].price;
                 shop_using.func_buy();
+                if(shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined) shop_cursor--;
                 audio_coin.play();
                 addLog(item_sell.name+" を売った");
                 return true;
@@ -959,7 +963,7 @@ function eventShop() {
             else addLog(dialog);
         }
         shop_using.func_after();
-        setNotUseShop()
+        setNotUseShop();
         
         return false;
     }
@@ -1047,7 +1051,7 @@ function lvUp(who) {
         for(let st in who.lvup) who[st] += who.lvup[st];
         
         // atk再計算
-        if(who == player) recalcAtk(who);
+        if(who == player) recalcStatus(who);
 
         addLog(who.name+" はレベルが上がった");
         audio_lvup.play();
@@ -1066,12 +1070,12 @@ async function calcAtkFromStatus(status, rate, offset = 0) {
 }
 
 // atk再計算
-async function recalcAtk(who) {
+async function recalcStatus(who) {
     who.atk = getItemData(who.job).atk;
     const EQ_TYPE = [...EQUIP_TYPE, ...["ring1", "ring2"]];
     for(let idx in EQ_TYPE) {
         const eq_id = who[EQ_TYPE[idx]];
-        if(eq_id !== undefined && getItemData(eq_id).func_atk !== undefined) getItemData(eq_id).func_atk();
+        if(eq_id !== undefined && getItemData(eq_id).func_recalc !== undefined) getItemData(eq_id).func_recalc();
     }
 }
 
@@ -1102,7 +1106,7 @@ function backLv() {
     player.hung = 100;
     player.hung_max = 100;
 
-    recalcAtk(player);
+    recalcStatus(player);
 }
 
 // 全ステ初期化
@@ -1114,7 +1118,6 @@ function initStatusAll() {
     player.hp_regen_rate_offset = 0;
     player.mp_regen_rate_offset = 0;
     player.sight_range_offset = 0;
-    player.def = getItemData(player.job).def;
     player.condition = [];
     player.weapon = undefined;
     player.ammo = undefined;
@@ -1126,6 +1129,8 @@ function initStatusAll() {
 
     player.job = 0xf00;
     backLv();
+    
+    player.def = getItemData(player.job).def;
 }
 
 // 初期化（死亡時用）
@@ -1259,7 +1264,7 @@ async function equip(index) {
         else
             player[equip_item.type] = equip_item.id;
         
-        await equip_item.func_atk();
+        await equip_item.func_recalc();
         await equip_item.func_equip(player);
 
         addLog(equip_item.name+" を装備した");
@@ -1279,7 +1284,7 @@ async function equip(index) {
         else
             player[equip_item.type] = undefined;
         
-        await recalcAtk(player);
+        await recalcStatus(player);
         await equip_item.func_unequip(player);
 
         addLog(equip_item.name+" を外した");
@@ -1407,6 +1412,10 @@ function isEquiped(item) {
         return true;
     }
     return false;
+}
+
+function getSkillData(id) {
+    return SKILL_DATA.find(v=>v.id == id);
 }
 
 //==================================================ENVIRONMENT==================================================
@@ -2009,7 +2018,7 @@ function setEnemy(id, x, y) {
 
     // スキル
     for(let s of e.skill) {
-        let skill = Object.assign({}, SKILL_DATA.find(v=>v.id==s.id), {chance: 0}, s);
+        let skill = Object.assign({}, getSkillData(s.id), {chance: 0}, s);
         Object.assign(s, skill);
 
         // プロパティチェック

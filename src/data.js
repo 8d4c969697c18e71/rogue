@@ -433,7 +433,7 @@ const ITEM_DATA = [
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
-        func_atk: async function() {
+        func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.25, this.base_dmg);
             calcAtkFromStatus("dex", 1.25, this.base_dmg);
@@ -448,7 +448,7 @@ const ITEM_DATA = [
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
-        func_atk: async function() {
+        func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.3, this.base_dmg);
             calcAtkFromStatus("dex", 1.25, this.base_dmg);
@@ -468,7 +468,7 @@ const ITEM_DATA = [
             bow_flag = false;
         },
         func_attack: async function(to) {},
-        func_atk: async function() {
+        func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("dex", 1.1, this.base_dmg);
         },
@@ -486,7 +486,7 @@ const ITEM_DATA = [
             player.def -= 10;
         },
         func_attacked: async function(from) {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x301,
@@ -500,7 +500,7 @@ const ITEM_DATA = [
             player.def -= 12;
         },
         func_attacked: async function(from) {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x302,
@@ -514,7 +514,7 @@ const ITEM_DATA = [
             player.def -= 14;
         },
         func_attacked: async function(from) {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x380,
@@ -528,7 +528,7 @@ const ITEM_DATA = [
             player.mp_max_offset -= 3;
         },
         func_attacked: async function(from) {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     // 指輪 0x4XX
     {
@@ -543,7 +543,7 @@ const ITEM_DATA = [
             player.hp_max_offset -= 25;
             addHP(player, 0);
         },
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x401,
@@ -557,7 +557,7 @@ const ITEM_DATA = [
             player.mp_max_offset -= 20;
             addMP(player, 0);
         },
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x402,
@@ -570,7 +570,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             player.hung_rate_offset -= 5;
         },
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x403,
@@ -584,7 +584,7 @@ const ITEM_DATA = [
             player.hp_max_offset -= 75;
             addHP(player, 0);
         },
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     // 巻物 0x5XX
     {
@@ -597,7 +597,7 @@ const ITEM_DATA = [
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     // 杖 0x6XX
     {
@@ -617,10 +617,9 @@ const ITEM_DATA = [
         },
         func_cast: async function(dir) {
             addMP(player, -8);
-            addLog(player.name+" はソウルの光を放った");
-            audio_ray.play();
-            await animShot(player, straightRecursive(player.x, player.y, dir, MAGIC_RANGE), dir, CHAR_MAP.ray);
-            return magic(player, 70+player.int*2, dir);
+            
+            const skill = getSkillData(0x400);
+            return skill.func(player, dir, player.int);
         }
     },
     {
@@ -633,11 +632,10 @@ const ITEM_DATA = [
                 addLog("MP が足りない");
                 return false;
             }
+            const skill = getSkillData(0x300);
+
             addMP(player, -8);
-            let value = 30 + player.fth * 2;
-            addHP(player, value);
-            addLog("淡い光が "+player.name+" を包む　HPが "+value+" 回復した");
-            audio_heal.play();
+            skill.func(player, player.fth);
             return undefined;
         },
         func_cast: async function(dir) {}
@@ -658,13 +656,12 @@ const ITEM_DATA = [
             return false;
         },
         func_cast: async function(dir) {
+            const skill = getSkillData(0x002);
+            skill.direction = dir;
+            skill.distance = 3;
+
             addMP(player, -7);
-            if(jump(player, dir, 3)) {
-                addLog(player.name+" は跳んだ");
-                audio_jump.play();
-            }
-            else
-                addLog("跳躍に失敗した");
+            skill.func(player);
             return undefined;
         }
     },
@@ -678,7 +675,7 @@ const ITEM_DATA = [
         range: 10,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x701,
@@ -689,7 +686,7 @@ const ITEM_DATA = [
         range: 8,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     {
         id: 0x7f0,
@@ -700,7 +697,7 @@ const ITEM_DATA = [
         range: 2,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_atk: async function() {},
+        func_recalc: async function() {},
     },
     // スタックアイテム 0x8XX
     {
@@ -744,6 +741,7 @@ const ITEM_DATA = [
             log_reserve.pop();
             player.job = this.id;
             backLv();
+            player.def = this.def;
 
             inventory.splice(inventory.indexOf(this), 1);
             return true;
@@ -763,7 +761,7 @@ const ITEM_DATA = [
         int: 1,
         fth: 3,
         atk: 25,
-        def: 10,
+        def: 15,
         hung_rate: 10,
         hp_regen_rate: 10,
         mp_regen_rate: 10,
@@ -774,6 +772,7 @@ const ITEM_DATA = [
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
+                player.def = this.def;
 
                 addItem(0x100);
                 addItem(0x300);
@@ -812,6 +811,7 @@ const ITEM_DATA = [
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
+                player.def = this.def;
 
                 addItem(0x200);
                 for(let i=0; i<4; i++)
@@ -852,6 +852,7 @@ const ITEM_DATA = [
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
+                player.def = this.def;
 
                 addItem(0x600);
                 addItem(0x380);
@@ -1221,6 +1222,26 @@ const SKILL_DATA = [
             return false;
         }
     },
+    {
+        id: 0x300,
+        name: "小回復",
+        func: async function(who, fth = 10) {
+            let value = 30 + fth * 2;
+            addHP(who, value);
+            addLog("淡い光が "+who.name+" を包む　HPが "+value+" 回復した");
+            audio_heal.play();
+        }
+    },
+    {
+        id: 0x400,
+        name: "ソウルの光",
+        func: async function(who, dir, int = 10) {
+            audio_ray.play();
+            addLog(who.name+" はソウルの光を放った");
+            await magic(player, 70 + int * 3, dir);
+            await animShot(who, straightRecursive(who.x, who.y, dir, MAGIC_RANGE), dir, CHAR_MAP.ray);
+        }
+    },
 ];
 
 //==================================================CONDITION==================================================
@@ -1502,14 +1523,14 @@ const SHOP_DATA = [
         func_before: async function() {
             if(INVENTORY_SIZE-inventory.length < 4) {
                 addLog("反応がない");
-                setNotUseShop()
+                setNotUseShop();
             }
         },
         func_buy: async function() {
             shop_group.splice(shop_group.indexOf(this),1);
             await useItem([inventory.length-1]);
             addLog("棺は音もなく消え去った");
-            setNotUseShop()
+            setNotUseShop();
         },
         func_after: async function() {},
     },
@@ -1531,7 +1552,6 @@ const SHOP_DATA = [
         },
         func_buy: async function() {
             this.item.length = 0;
-            shop_cursor = 0;
             setSellList(this.item);
             if(this.item.length <= 0) {
                 setNotUseShop();
@@ -1587,7 +1607,6 @@ const SHOP_DATA = [
         },
         func_buy: async function() {
             this.item.length = 0;
-            shop_cursor = 0;
             setSellList(this.item);
             if(this.item.length <= 0) {
                 setNotUseShop();
