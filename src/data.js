@@ -551,10 +551,10 @@ const ITEM_DATA = [
         type: "ring",
         price: 78,
         func_equip: async function() {
-            player.mp_max_offset += 20;
+            player.mp_max_offset += 10;
         },
         func_unequip: async function() {
-            player.mp_max_offset -= 20;
+            player.mp_max_offset -= 10;
             addMP(player, 0);
         },
         func_recalc: async function() {},
@@ -565,10 +565,10 @@ const ITEM_DATA = [
         type: "ring",
         price: 56,
         func_equip: async function() {
-            player.hung_rate_offset += 5;
+            player.hung_rate_offset += 10;
         },
         func_unequip: async function() {
-            player.hung_rate_offset -= 5;
+            player.hung_rate_offset -= 10;
         },
         func_recalc: async function() {},
     },
@@ -1572,18 +1572,15 @@ const SHOP_DATA = [
             {id: 0x011},
             {id: 0x020},
             {id: 0x030},
+            {id: 0x800},
             {id: 0x100},
-            {id: 0x101},
             {id: 0x200},
             {id: 0x300},
-            {id: 0x301},
             {id: 0x380},
             {id: 0x401},
-            {id: 0x403},
-            {id: 0x500},
+            {id: 0x400},
             {id: 0x600},
-            {id: 0x601},
-            {id: 0x800},
+            {id: 0x602},
         ],
         func_before: async function() {},
         func_buy: async function() {},
