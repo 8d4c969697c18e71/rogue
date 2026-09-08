@@ -64,6 +64,8 @@ async function setCookie() {
     for(let i=0; i<inventory.length; i++) {
         document.cookie = "inventory_" + i + "=" + encodeURIComponent(JSON.stringify(inventory[i])) + "; max-age=31536000";
     }
+    cookie_date = DATE + " " + MONTH + " " + YEAR;
+    document.cookie = "date=" + encodeURIComponent(JSON.stringify(cookie_date)) + "; max-age=31536000";
 }
 
 async function loadCookie() {
@@ -78,7 +80,7 @@ async function loadCookie() {
                 if(val !== "undefined") val = JSON.parse(val);
                 else val = undefined;
             }catch(err) {
-                console.log("error: JSON.parse(val)");
+                console.log("error: JSON.parse: "+val);
                 return false;
             }
             
@@ -93,8 +95,11 @@ async function loadCookie() {
                 inventory[inv_idx] = Object.assign({}, val, ITEM_DATA.find(v=>v.id==val.id));
                 read_flg.inventory = true;
             }
+            else if(key == "date") {
+                cookie_date = val;
+            }
         }
-        if(read_flg.player && read_flg.inventory) return true;
+        if(read_flg.player) return true;
         else return false;
     }
     return false;
@@ -487,7 +492,7 @@ async function sprint(direction, not_diagonal) {
     if(isCrossing(player.x, player.y))
         return;
 
-    await sprint(direction);
+    await sprint(direction, not_diagonal);
 }
 
 // 進行方向調査
@@ -945,7 +950,9 @@ function eventShop() {
 
                 player.gold += -shop_using.item[shop_cursor].price;
                 shop_using.func_buy();
-                if(shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined) shop_cursor--;
+                if(shop_using !== undefined && shop_using.item.length > 0
+                && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
+                    shop_cursor--;
                 audio_coin.play();
                 addLog(item_sell.name+" を売った");
                 return true;

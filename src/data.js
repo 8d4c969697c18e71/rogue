@@ -70,13 +70,14 @@ const audio_coin = new Audio("sound/coin.wav");
 
 // 日付
 const MONTH_LIST = [
-    "Jan.", "Feb", "Mar.", "Apr.", "May", "Jun.",
+    "Jan.", "Feb.", "Mar.", "Apr.", "May.", "Jun.",
     "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec.", 
 ];
 const NOW = new Date();
 const DATE = NOW.getDate();
 const MONTH = MONTH_LIST[NOW.getMonth()];
 const YEAR = NOW.getFullYear();
+let cookie_date;
 
 // 名前入力用
 const HIRAGANA = [
@@ -1222,6 +1223,7 @@ const SKILL_DATA = [
             return false;
         }
     },
+    // fth由来 0x3XX
     {
         id: 0x300,
         name: "小回復",
@@ -1232,6 +1234,7 @@ const SKILL_DATA = [
             audio_heal.play();
         }
     },
+    // int由来 0x4XX
     {
         id: 0x400,
         name: "ソウルの光",
@@ -1476,7 +1479,7 @@ const NPC_DATA = [
         char: "癒",
         loop: false,
         dialogue: [
-            "回復します",
+            "...",
         ],
         dialogue_cnt: 0,
         func_before: async function() {},
@@ -1485,6 +1488,36 @@ const NPC_DATA = [
             addLog(player.name+" は全快した");
             audio_heal.play();
         },
+    },
+    {
+        id: 0x04,
+        name: "記録者",
+        char: "記",
+        loop: true,
+        dialogue: [
+            "アンバサ...",
+        ],
+        dialogue_cnt: 0,
+        func_before: async function() {},
+        func_after: async function() {
+            addLog("石碑に記録されたようだ");
+            setCookie();
+        },
+    },
+    {
+        id: 0x05,
+        name: "",
+        char: "碑",
+        loop: true,
+        dialogue: [
+            "",
+        ],
+        dialogue_cnt: 0,
+        func_before: async function() {
+            if(cookie_date === undefined) this.dialogue[0] = "石碑には何も記されていない";
+            else this.dialogue[0] = "日付が彫られている 「" + cookie_date + "」";
+        },
+        func_after: async function() {},
     },
 ];
 let npc_group = [];
@@ -1723,11 +1756,11 @@ let unique_map = [    // 固有マップ
         ],
         func: async function(x_offset) {
             fullRecovery(player);
-            setCookie();
             setStair(5+x_offset, 2);
             setNPC(0x02, 9+x_offset, 5);
             setNPC(0x03, 7+x_offset, 5);
-            setNPC(0x01, 9+x_offset, 9);
+            setNPC(0x04, 2+x_offset, 12);
+            setNPC(0x05, 2+x_offset, 11);
             setShop(0x02, 2+x_offset, 5);
             setShop(0x03, 1+x_offset, 7);
         }
