@@ -1696,7 +1696,8 @@ async function eventEnemies() {
         
         // speed回行動
         for(let cnt=0; cnt<enemy.speed; cnt++) {
-            await eventEnemy(enemy);
+            if(player.map_sight[enemy.y][enemy.x]) await eventEnemy(enemy);
+            else eventEnemy(enemy);
             drawAll();
         }
         await isDead(player);
