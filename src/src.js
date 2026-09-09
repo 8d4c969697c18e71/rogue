@@ -1717,6 +1717,8 @@ async function eventEnemy(enemy) {
     }
     else
         enemy.chase_count--;
+
+    // 追跡終了
     if(enemy.chase_count < 0) {
         enemy.chase_flag = false;
         enemy.berserk_chase_flag = false;
@@ -1869,7 +1871,7 @@ function astar(start_x, start_y, dst_x, dst_y, distance, escape_flag) {
     let heuristic_cost = Math.max(Math.abs(dst_x-start_x), Math.abs(dst_y-start_y));
     node.push({x:start_x, y:start_y, status:"open", a_cost:actual_cost, h_cost:heuristic_cost, parent:undefined});
     
-    asterRecursive(node, start_x, start_y, dst_x, dst_y, distance, escape_flag);
+    astarRecursive(node, start_x, start_y, dst_x, dst_y, distance, escape_flag);
 
     let dst_node = node[node.length-1];
     let route = [];
@@ -1877,7 +1879,7 @@ function astar(start_x, start_y, dst_x, dst_y, distance, escape_flag) {
     return route;
 }
 
-function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
+function astarRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
     // close
     node.find(v=>(v.x==x && v.y==y)).status = "closed";
 
@@ -1890,7 +1892,8 @@ function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
             return;
         }
         // 探索
-        else if(canMove(x+j, y+i) && canDiagonal(x, y, j, i)
+        else if((canMove(x+j, y+i) || !canMove(x+j, y+i) && isEnemy(x+j, y+i))
+            && (canDiagonal(x, y, j, i))
             && !(node.find(v=>(v.x==x+j && v.y==y+i)))) {
             // 移動コスト
             if(Math.floor(((x+j-dst_x)**2+(y+i-dst_y)**2)/2) < distance)
@@ -1937,7 +1940,7 @@ function asterRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
         return;
     }
     
-    asterRecursive(node, next_node.x, next_node.y, dst_x, dst_y, escape_flag);
+    astarRecursive(node, next_node.x, next_node.y, dst_x, dst_y, escape_flag);
     return;
 }
 
@@ -1950,20 +1953,26 @@ function getRoute(route, node, n) {
 
 // エネミー移動（巡回）
 async function moveEnemyTravel(enemy) {
-    // 新規目的地
-    for(let i=-1; i<=1; i++)
-        for(let j=-1; j<=1; j++)
-            if(enemy.x+j==enemy.travel_x && enemy.y+i==enemy.travel_y) {
-                setNextTravelRoom(enemy);
-                return;
-            }
+    if(enemy.travel_route.length < 1    // ルート未設定
+    || (enemy.x==enemy.travel_x && enemy.y==enemy.travel_y)) {    // 目的地到達
+        setNextTravelRoom(enemy);
+        enemy.travel_route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
+    }
+    let next_xy = enemy.travel_route[enemy.travel_route.length-1];
 
-    let route;
-    route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
+    // ルート閉塞
+    if(!canMove(next_xy.x, next_xy.y)) {
+        setNextTravelRoom(enemy);
+        enemy.travel_route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
+        next_xy = enemy.travel_route[enemy.travel_route.length-1];
+    }
+
     let dir = {
-        x: route[route.length-1].x - enemy.x,
-        y: route[route.length-1].y - enemy.y
+        x: next_xy.x - enemy.x,
+        y: next_xy.y - enemy.y
     };
+    enemy.travel_route.pop();
+
     // debug
     //for(let r of route)
     //    map_draw[r.y][r.x] = "√";
@@ -2019,9 +2028,19 @@ async function moveEnemyRand(enemy) {
 // エネミー追加
 function setEnemy(id, x, y) {
     let enemy = getEnemyData(id);
-    let e = Object.assign({}, enemy,
-        {x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], },
-        OTHER_ENEMY_INFO);
+
+    // 共通
+    const OTHER_ENEMY_INFO = {
+    x: x, y: y, travel_x:x, travel_y:y,
+    map_sight: [], condition: [], travel_route: [],
+    cannot_action_flag: false, cannot_move_flag: false,
+    chase_flag: false, chase_count: 0, chase_limit: 5,
+    berserk_flag: false, berserk_chase_flag: false,
+    hp_max_offset: 0, mp_max_offset: 0, sight_range_offset: 0,
+    atk_offset:0, def_offset:0,
+    next_exp: 10, lvup: {},
+    };
+    let e = Object.assign({}, enemy, OTHER_ENEMY_INFO);
 
     // スキル
     for(let s of e.skill) {

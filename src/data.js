@@ -994,7 +994,7 @@ const ENEMY_DATA = [
         name: "白人",
         char: "白",
         lv:1,
-        hp:100, hp_max:100, 
+        hp:60, hp_max:60, 
         mp:15, mp_max:15,
         atk:40, def:6,
         speed:1,
@@ -1003,13 +1003,7 @@ const ENEMY_DATA = [
         distance:3,
         group_spawn_flag: false,
         exp:7,
-        func_spawn: async function(me) {
-            this.lv = Math.floor(floor_cnt/2);
-            this.hp_max = Math.floor(10*floor_cnt/3);
-            this.hp = this.hp_max;
-            this.mp_max = Math.floor(15*floor_cnt/3);
-            this.mp = this.mp_max;
-        },
+        func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
             {
@@ -1089,16 +1083,7 @@ const ENEMY_DATA = [
         ],
     },
 ];
-const OTHER_ENEMY_INFO = {
-    //x: x, y: y, travel_x:x, travel_y:y, map_sight: [], condition: [], 
-    cannot_action_flag: false, cannot_move_flag: false,
-    chase_flag: false, chase_count: 0, chase_limit: 5,
-    berserk_flag: false, berserk_chase_flag: false,
-    hp_max_offset: 0, mp_max_offset: 0, sight_range_offset: 0,
-    atk_offset:0, def_offset:0,
-    
-    next_exp: 10, lvup: {},
-};
+
 const ENEMY_TABLE = [
     [
         0x000, 0x000, 0x001,
