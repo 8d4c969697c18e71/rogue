@@ -155,7 +155,7 @@ function drawLog() {
 
 function drawLogPhone() {
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
-    log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*2)/(FONT_SIZE+4)-1);
+    log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*3)/(FONT_SIZE+5)-1);
 
     log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
