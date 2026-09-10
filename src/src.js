@@ -1689,7 +1689,7 @@ function getEnemyData(id) {
 async function eventEnemies() {
     for(let enemy of enemy_group) {
         // 死亡判定
-        if(await isDead(enemy)) continue;
+        if(isDead(enemy)) continue;
 
         // 行動不能
         if(enemy.cannot_action_flag) continue;
@@ -1700,7 +1700,7 @@ async function eventEnemies() {
             else eventEnemy(enemy);
             drawAll();
         }
-        await isDead(player);
+        isDead(player);
     }
 }
 
