@@ -32,7 +32,7 @@ const CELL_WIDTH = FONT_SIZE;//FONT_SIZE/2;
 const CELL_HEIGHT = FONT_SIZE;
 
 let log_reserve = [];
-const LOG_RESERVE_SIZE = 10;
+const LOG_RESERVE_SIZE = 15;
 
 const PADDING = 5;
 const MARGIN = 25;

@@ -40,10 +40,6 @@ function setCanvasSize() {
     shop.style.marginTop = MARGIN+"px";
     shop.style.paddingLeft = PADDING+"px";
     shop.style.marginRight = MARGIN+"px";
-
-    const body_padding = document.body.clientHeight-parseInt(window.getComputedStyle(document.body).height)
-    log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*3)/(FONT_SIZE+5)-1);
-    inv_display_num = Math.floor((window.innerHeight-body_padding-288/*FIXME:マジックナンバー*/-arrow_size*3)/(FONT_SIZE+5)-1);
 }
 
 // ウィンドウサイズ（スマホ）
@@ -69,8 +65,6 @@ function setCanvasSizePhone() {
     shop.style.display = "none";
 
     document.body.style.paddingTop = 0+"px";
-    log_display_num = Math.floor((window.innerHeight-canvas.clientHeight-arrow_size*4)/FONT_SIZE-1);
-    inv_display_num = Math.floor((window.innerHeight-inv.clientHeight-arrow_size*4)/FONT_SIZE-1);
 }
 
 // ボタン表示

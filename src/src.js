@@ -35,7 +35,7 @@ window.addEventListener("resize", async () =>{
     if(!isPhone())
         setCanvasSize();
     else{
-        setButton();
+        dispButton();
         setCanvasSizePhone();
     }
     if(input_name_flag) {

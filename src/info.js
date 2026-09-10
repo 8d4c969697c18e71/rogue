@@ -41,6 +41,9 @@ function drawInv() {
     if(ui_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
 
+    const body_padding = document.body.clientHeight-parseInt(window.getComputedStyle(document.body).height);
+    inv_display_num = Math.floor((window.innerHeight-body_padding-info.clientHeight-arrow_size*3)/(FONT_SIZE)-1);
+
     if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
     if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
 
@@ -69,7 +72,7 @@ function drawInv() {
 //=========================SHOP=========================
 
 function drawShop() {
-    if(isPhone() && shop_flag) {
+    if(isPhone()) {
         drawShopPhone();
         return;
     }
@@ -100,13 +103,13 @@ function drawShop() {
 }
 
 function drawShopPhone() {
-    inv.innerHTML = "";
-    inv.style.border = "solid 1px black";
+    if(shop_flag) {   
+        inv.innerHTML = "";
+        inv.style.border = "solid 1px black";
 
-    if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
-    if(shop_cursor >= inv_display_num + shop_start_offset) shop_start_offset = shop_cursor - inv_display_num + 1;
+        if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
+        if(shop_cursor >= inv_display_num + shop_start_offset) shop_start_offset = shop_cursor - inv_display_num + 1;
 
-    if(shop_flag) {
         inv.style.border = "solid 1px white";
         inv.insertAdjacentHTML("beforeend", "SHOP<br>");
         for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_num+shop_start_offset; i++) {
@@ -144,6 +147,9 @@ function drawLog() {
 }
 
 function drawLogPhone() {
+    const body_padding = document.body.clientHeight-parseInt(window.getComputedStyle(document.body).height);
+    log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*3)/(FONT_SIZE+5)-1);
+
     log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
         log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
