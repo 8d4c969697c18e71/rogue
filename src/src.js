@@ -1689,18 +1689,17 @@ function getEnemyData(id) {
 async function eventEnemies() {
     for(let enemy of enemy_group) {
         // 死亡判定
-        if(isDead(enemy)) continue;
+        if(await isDead(enemy)) continue;
 
         // 行動不能
         if(enemy.cannot_action_flag) continue;
         
         // speed回行動
         for(let cnt=0; cnt<enemy.speed; cnt++) {
-            if(player.map_sight[enemy.y][enemy.x]) await eventEnemy(enemy);
-            else eventEnemy(enemy);
+            await eventEnemy(enemy);
             drawAll();
         }
-        isDead(player);
+        if(await isDead(player)) return;
     }
 }
 
