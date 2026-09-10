@@ -45,6 +45,7 @@ let zxc_size = 0;
 let arrow_size = 0;
 let log_display_num = 5;
 let inv_display_num = 15;
+let shop_display_num = 10;
 let inv_start_offset = 0;
 let shop_start_offset = 0;
 

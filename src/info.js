@@ -41,8 +41,8 @@ function drawInv() {
     if(ui_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
 
-    const body_padding = document.body.clientHeight-parseInt(window.getComputedStyle(document.body).height);
-    inv_display_num = Math.floor((window.innerHeight-body_padding-info.clientHeight-arrow_size*3)/(FONT_SIZE)-1);
+    const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
+    inv_display_num = Math.floor((window.innerHeight-body_padding-info.clientHeight-arrow_size*2)/(FONT_SIZE+4)-1);
 
     if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
     if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
@@ -80,9 +80,16 @@ function drawShop() {
     shop.innerHTML = "";
     shop.style.border = "solid 1px black";
     if(shop_flag) {
+        const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
+        const shop_margin =  parseInt(window.getComputedStyle(document.body).marginTop);
+        shop_display_num = Math.floor((window.innerHeight-body_padding-shop_margin-canvas.clientHeight)/(FONT_SIZE+5)-1);
+
+        if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
+        if(shop_cursor >= shop_display_num + shop_start_offset) shop_start_offset = shop_cursor - shop_display_num + 1;
+
         shop.style.border = "solid 1px white";
         shop.insertAdjacentHTML("beforeend", "SHOP<br>");
-        for(let i=0; i<shop_using.item.length; i++) {
+        for(let i=shop_start_offset; i<shop_using.item.length && i<shop_display_num+shop_start_offset; i++) {
             if(i == shop_cursor)
                 shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
             else if(i<9)
@@ -147,8 +154,8 @@ function drawLog() {
 }
 
 function drawLogPhone() {
-    const body_padding = document.body.clientHeight-parseInt(window.getComputedStyle(document.body).height);
-    log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*3)/(FONT_SIZE+5)-1);
+    const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
+    log_display_num = Math.floor((window.innerHeight-body_padding-canvas.clientHeight-arrow_size*2)/(FONT_SIZE+4)-1);
 
     log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
