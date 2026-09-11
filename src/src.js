@@ -179,7 +179,7 @@ document.addEventListener("keyup", e=>{
 });
 
 // ボタン
-btn_z.addEventListener("touchstart", () =>{
+btn_z.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.apply = true;
         setButtonPressed(btn_z);
@@ -190,7 +190,7 @@ btn_z.addEventListener("touchend", () =>{
     key_input.apply = false;
     setButtonNotPressed(btn_z);
 });
-btn_x.addEventListener("touchstart", () =>{
+btn_x.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.cancel = true;
         setButtonPressed(btn_x);
@@ -201,7 +201,7 @@ btn_x.addEventListener("touchend", () =>{
     key_input.cancel = false;
     setButtonNotPressed(btn_x);
 });
-btn_c.addEventListener("touchstart", () =>{
+btn_c.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.sub = true;
         setButtonPressed(btn_c);
@@ -212,7 +212,7 @@ btn_c.addEventListener("touchend", () =>{
     key_input.sub = false;
     setButtonNotPressed(btn_c);
 });
-btn_left.addEventListener("touchstart", () =>{
+btn_left.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.left = true;
         setButtonPressed(btn_left);
@@ -223,7 +223,7 @@ btn_left.addEventListener("touchend", () =>{
     key_input.left = false;
     setButtonNotPressed(btn_left);
 });
-btn_up.addEventListener("touchstart", () =>{
+btn_up.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.up = true;
         setButtonPressed(btn_up);
@@ -234,7 +234,7 @@ btn_up.addEventListener("touchend", () =>{
     key_input.up = false;
     setButtonNotPressed(btn_up);
 });
-btn_down.addEventListener("touchstart", () =>{
+btn_down.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.down = true;
         setButtonPressed(btn_down);
@@ -245,7 +245,7 @@ btn_down.addEventListener("touchend", () =>{
     key_input.down = false;
     setButtonNotPressed(btn_down);
 });
-btn_right.addEventListener("touchstart", () =>{
+btn_right.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.right = true;
         setButtonPressed(btn_right);
@@ -256,7 +256,7 @@ btn_right.addEventListener("touchend", () =>{
     key_input.right = false;
     setButtonNotPressed(btn_right);
 });
-btn_upleft.addEventListener("touchstart", () =>{
+btn_upleft.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.ctrl = true;
         key_input.up_left = true;
@@ -269,7 +269,7 @@ btn_upleft.addEventListener("touchend", () =>{
     key_input.up_left = false;
     setButtonNotPressed(btn_upleft);
 });
-btn_downleft.addEventListener("touchstart", () =>{
+btn_downleft.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.ctrl = true;
         key_input.down_left = true;
@@ -282,7 +282,7 @@ btn_downleft.addEventListener("touchend", () =>{
     key_input.down_left = false;
     setButtonNotPressed(btn_downleft);
 });
-btn_upright.addEventListener("touchstart", () =>{
+btn_upright.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.ctrl = true;
         key_input.up_right = true;
@@ -295,7 +295,7 @@ btn_upright.addEventListener("touchend", () =>{
     key_input.up_right = false;
     setButtonNotPressed(btn_upright);
 });
-btn_downright.addEventListener("touchstart", () =>{
+btn_downright.addEventListener("touchstart", async () =>{
     if(!exeEventsFlg) {
         key_input.ctrl = true;
         key_input.down_right = true;
