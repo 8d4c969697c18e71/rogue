@@ -78,13 +78,8 @@ function dispButton() {
     button.style.top = window.innerHeight-arrow_size*2+"px";
 
     // デザイン
-    const font_color = "white";
-    const back_color = "black";
-    const line_color = "white";
     for(let b of btn) {
-        b.style.backgroundColor = back_color;
-        b.style.border = "solid 1px "+line_color;
-        b.style.color = font_color;
+        setButtonNotPressed(b);
         b.style.width = zxc_size+"px";
         b.style.height = zxc_size+"px";
     }
@@ -120,6 +115,20 @@ function dispButton() {
     btn_downright.style.top = arrow_size+"px";
     btn_downright.style.right = arrow_size*5+"px";
 }
+
+function setButtonNotPressed(button) {
+    button.style.backgroundColor = "black";
+    button.style.border = "solid 1px "+"white";
+    button.style.color = "white";
+}
+
+function setButtonPressed(button) {
+    button.style.backgroundColor = "white";
+    button.style.border = "solid 1px "+"black";
+    button.style.color = "black";
+}
+
+//==================================================DRAW MAP==================================================
 
 // 描画
 function drawAll() {
