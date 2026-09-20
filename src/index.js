@@ -24,17 +24,17 @@ function drawTitle() {
     const nodata_flg = new URLSearchParams(location.search).get("nodata") !== null
     const title_fig = [
         "",
-        "Rogueっぽいやつ",
+        "Ｒｏｇｕｅっぽいやつ",
         "",
         "",
-        "z: New Game 　　　　　　　　　",
-        "x: Continue",
+        "ｚ：はじめから　　　　　　　　　　",
+        "ｘ：つづきから",
         "",
         "",
         "* セーブデータを保存するためにCookieを使用しています",
     ];
-    if(nodata_flg) title_fig[5] += " データがありません";
-    else title_fig[5] += " 　　　　　　　　　";
+    if(nodata_flg) title_fig[5] += "　データがありません";
+    else title_fig[5] += "　　　　　　　　　　";
 
     // 描画
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
@@ -42,6 +42,6 @@ function drawTitle() {
     for(let i=0; i<title_fig.length; i++) {
         if(i == 5 && nodata_flg) ctx.fillStyle = "gray";
         else ctx.fillStyle = "white";
-        ctx.fillText(title_fig[i], canvas.clientWidth/2, CELL_HEIGHT*i);
+        ctx.fillText(title_fig[i], canvas.clientWidth/2, FONT_SIZE*i);
     }
 }

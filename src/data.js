@@ -28,8 +28,6 @@ const FONT = "'MS Gothic'";
 // MAP
 const SIZEX = 64;
 const SIZEY = 64;
-const CELL_WIDTH = FONT_SIZE;//FONT_SIZE/2;
-const CELL_HEIGHT = FONT_SIZE;
 
 let log_reserve = [];
 const LOG_RESERVE_SIZE = 15;

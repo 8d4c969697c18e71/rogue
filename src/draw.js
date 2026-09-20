@@ -55,7 +55,7 @@ function drawMap() {
                             ctx.fillStyle = "yellow";
                 }
             }
-            ctx.fillText(map_draw[player.y+i][player.x+j], CELL_WIDTH*j+canvas.clientWidth/2, CELL_HEIGHT*i+canvas.clientHeight/2);
+            ctx.fillText(map_draw[player.y+i][player.x+j], FONT_SIZE*j+canvas.clientWidth/2, FONT_SIZE*i+canvas.clientHeight/2);
         }
 }
 
@@ -104,7 +104,7 @@ function drawMapAll() {
                             ctx.fillStyle = "yellow";
                 }
             }
-            ctx.fillText(map_draw[i][j], CELL_WIDTH*j, CELL_HEIGHT*i);
+            ctx.fillText(map_draw[i][j], FONT_SIZE*j, FONT_SIZE*i);
         }
     }
 }
@@ -131,20 +131,20 @@ function drawGameover() {
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     for(let i=0; i<gameover_fig.length-1; i++) {
-        ctx.fillText(gameover_fig[i], canvas.clientWidth/2, CELL_HEIGHT*i);
+        ctx.fillText(gameover_fig[i], canvas.clientWidth/2, FONT_SIZE*i);
     }
 
-    ctx.fillText(player.name, canvas.clientWidth/2, CELL_HEIGHT*7);
-    ctx.fillText(DATE+" "+MONTH, canvas.clientWidth/2, CELL_HEIGHT*9);
-    ctx.fillText(YEAR, canvas.clientWidth/2, CELL_HEIGHT*10);
+    ctx.fillText(player.name, canvas.clientWidth/2, FONT_SIZE*7);
+    ctx.fillText(DATE+" "+MONTH, canvas.clientWidth/2, FONT_SIZE*9);
+    ctx.fillText(YEAR, canvas.clientWidth/2, FONT_SIZE*10);
 
     ctx.fillStyle = "green";
-    ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.clientWidth/2, CELL_HEIGHT*(gameover_fig.length-1));
+    ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.clientWidth/2, FONT_SIZE*(gameover_fig.length-1));
 
     //Press Esc Key
     ctx.textAlign = "start";
     ctx.fillStyle = "white";
-    ctx.fillText("Press z/x/c key", canvas.clientWidth/2 + gameover_fig.length/2, CELL_HEIGHT*(gameover_fig.length));
+    ctx.fillText("Press z/x/c key", canvas.clientWidth/2 + gameover_fig.length/2, FONT_SIZE*(gameover_fig.length));
 }
 
 // 描画マップ更新
