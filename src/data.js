@@ -23,7 +23,7 @@ const btn_arrow = document.getElementsByClassName("btn_arrow");
 
 
 
-const FONT_SIZE = 16;
+let FONT_SIZE = 16;
 const FONT = "'MS Gothic'";
 // MAP
 const SIZEX = 64;

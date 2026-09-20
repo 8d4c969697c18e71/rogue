@@ -1,21 +1,14 @@
-window.addEventListener("load", async () => {
+window.addEventListener("load", loadCanvas);
+window.addEventListener("resize", loadCanvas);
+
+async function loadCanvas() {
     if(isPhone()) {
+        note.style.display = "none";
+        info.style.display = "none";
+        inv.style.display = "none";
         setCanvasSizePhone(false);
     }
     await inputName();
-});
-
-window.addEventListener("resize", async () => {
-    await inputName();
-});
-
-window.onload = resizeCanvas;
-window.onresize = resizeCanvas;
-
-function resizeCanvas() {
-    note.style.display = "none";
-    info.style.display = "none";
-    inv.style.display = "none";
 }
 
 async function events() {

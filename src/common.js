@@ -247,6 +247,7 @@ function setCanvasSizePhone(info_disp_flg = true) {
     if(info_disp_flg) canvas_width = window.innerWidth * 2 / 3;
     const canvas_height = canvas_width;
     const canvas_scale = window.devicePixelRatio;
+    FONT_SIZE = 12;
 
     canvas.style.width = canvas_width+"px";
     canvas.style.height = canvas_height+"px";
@@ -257,9 +258,9 @@ function setCanvasSizePhone(info_disp_flg = true) {
     ctx.fillStyle = "white";
     ctx.textBaseline = "top";
     
-    info.style.fontSize = 12+"px";
-    log.style.fontSize = 12+"px";
-    inv.style.fontSize = 12+"px";
+    info.style.fontSize = FONT_SIZE+"px";
+    log.style.fontSize = FONT_SIZE+"px";
+    inv.style.fontSize = FONT_SIZE+"px";
     info.style.width = screen.width-canvas_width-5+"px";
     log.style.width = canvas_width+"px";
     shop.style.display = "none";

@@ -1,9 +1,14 @@
 window.addEventListener("load", async () => {
     // データロード
     const input_name = new URLSearchParams(location.search).get("input_name");
-    if(input_name == null && await loadCookie()) {
-        floor_cnt = -1;
-        await init();
+    if(input_name == null) {
+        if(await loadCookie()) {
+            floor_cnt = -1;
+            await init();
+        }
+        else {
+            window.location.replace("./index.html?nodata=true");
+        }
     }
     else {
         player.name = input_name;

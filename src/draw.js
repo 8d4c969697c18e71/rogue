@@ -110,7 +110,7 @@ function drawMapAll() {
 }
 
 function drawGameover() {
-    let gameover_fig = [
+    const gameover_fig = [
         "       ______       ",
         "     ／      ＼     ",
         "   ／          ＼   ",
@@ -127,24 +127,24 @@ function drawGameover() {
     ];
 
     // 描画
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.clientWidth/2, canvas.clientHeight/2);
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     for(let i=0; i<gameover_fig.length-1; i++) {
-        ctx.fillText(gameover_fig[i], canvas.width/2, FONT_SIZE*i);
+        ctx.fillText(gameover_fig[i], canvas.clientWidth/2, CELL_HEIGHT*i);
     }
 
-    ctx.fillText(player.name, canvas.width/2, FONT_SIZE*7);
-    ctx.fillText(DATE+" "+MONTH, canvas.width/2, FONT_SIZE*9);
-    ctx.fillText(YEAR, canvas.width/2, FONT_SIZE*10);
+    ctx.fillText(player.name, canvas.clientWidth/2, CELL_HEIGHT*7);
+    ctx.fillText(DATE+" "+MONTH, canvas.clientWidth/2, CELL_HEIGHT*9);
+    ctx.fillText(YEAR, canvas.clientWidth/2, CELL_HEIGHT*10);
 
     ctx.fillStyle = "green";
-    ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.width/2, FONT_SIZE*(gameover_fig.length-1));
+    ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.clientWidth/2, CELL_HEIGHT*(gameover_fig.length-1));
 
     //Press Esc Key
     ctx.textAlign = "start";
     ctx.fillStyle = "white";
-    ctx.fillText("Press z/x/c key", canvas.width/2 + gameover_fig.length/2, FONT_SIZE*(gameover_fig.length));
+    ctx.fillText("Press z/x/c key", canvas.clientWidth/2 + gameover_fig.length/2, CELL_HEIGHT*(gameover_fig.length));
 }
 
 // 描画マップ更新
