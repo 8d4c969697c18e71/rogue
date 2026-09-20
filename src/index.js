@@ -21,27 +21,27 @@ async function events() {
 }
 
 function drawTitle() {
-    const nodata_flg = new URLSearchParams(location.search).get("nodata");
+    const nodata_flg = new URLSearchParams(location.search).get("nodata") !== null
     const title_fig = [
         "",
         "Rogueっぽいやつ",
         "",
         "",
-        "z: New Game",
+        "z: New Game 　　　　　　　　　",
         "x: Continue",
         "",
+        "",
+        "* セーブデータを保存するためにCookieを使用しています",
     ];
+    if(nodata_flg) title_fig[5] += " データがありません";
+    else title_fig[5] += " 　　　　　　　　　";
 
     // 描画
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     ctx.textAlign = "center";
-    ctx.fillStyle = "white";
-    for(let i=0; i<title_fig.length-1; i++) {
+    for(let i=0; i<title_fig.length; i++) {
+        if(i == 5 && nodata_flg) ctx.fillStyle = "gray";
+        else ctx.fillStyle = "white";
         ctx.fillText(title_fig[i], canvas.clientWidth/2, CELL_HEIGHT*i);
-    }
-
-    if(nodata_flg !== null) {
-        ctx.fillStyle = "yellow";
-        ctx.fillText("データがありません", canvas.clientWidth/2, CELL_HEIGHT*title_fig.length);
     }
 }
