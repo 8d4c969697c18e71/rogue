@@ -1,3 +1,29 @@
+window.addEventListener("load", async () => {
+    if(isPhone()) {
+        setCanvasSizePhone(false);
+    }
+    await inputName();
+});
+
+window.addEventListener("resize", async () => {
+    await inputName();
+});
+
+window.onload = resizeCanvas;
+window.onresize = resizeCanvas;
+
+function resizeCanvas() {
+    note.style.display = "none";
+    info.style.display = "none";
+    inv.style.display = "none";
+}
+
+async function events() {
+    if(await inputName()) {
+        window.location.replace("./main.html?input_name="+player.name);
+    }
+}
+
 // 名前入力
 async function inputName() {
     ctx.textAlign = "center";
@@ -64,8 +90,7 @@ async function inputName() {
                 ctx.textAlign = "start";
                 input_name_flag = false;
                 audio_apply.play();
-                initFirst();
-                return;
+                return true;
             }
         }
         else {
@@ -97,6 +122,8 @@ async function inputName() {
     
     // 操作説明
     ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.clientWidth/2, FONT_SIZE*2*(syllabary.length+2)+y_offset);
+
+    return false;
 }
 
 // 五十音表示

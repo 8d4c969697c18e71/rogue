@@ -1,59 +1,22 @@
-//==================================================INIT==================================================
-
-window.onload = async function() {
-    document.body.addEventListener("keydown", e=>{e.preventDefault()});
-
-    // 画面サイズ
-    if(!isPhone()) {
-        setCanvasSize();
-    }
-    else{
-        dispButton();
-        setCanvasSizePhone();
-    }
-
+window.addEventListener("load", async () => {
     // データロード
-    if(await loadCookie()) {
-        input_name_flag = false;
+    const input_name = new URLSearchParams(location.search).get("input_name");
+    if(input_name == null && await loadCookie()) {
         floor_cnt = -1;
         await init();
     }
     else {
-        if(!isPhone()) {
-            input_name_flag = true;
-            await inputName();
-        }
-        else {
-            player.name = "あなた";
-            input_name_flag = false;
-            await initFirst();
-        }
+        player.name = input_name;
+        await initFirst();
     }
-}
+});
 
 window.addEventListener("resize", async () =>{
-    if(!isPhone())
-        setCanvasSize();
-    else{
-        dispButton();
-        setCanvasSizePhone();
-    }
-    if(input_name_flag) {
-        await inputName();
-        return;
-    }
     if(!gameover_flag) {
         drawAll();
         drawNote();
     }
 });
-
-// スマホ検出
-function isPhone() {
-    if(navigator.userAgent.match(/iPhone|Android.+Mobile/))
-        return true;
-    return false;
-}
 
 // cookie
 async function setCookie() {
@@ -134,196 +97,13 @@ function initGroups() {
     npc_group = [];
 }
 
-//==================================================KEY==================================================
-
-// 操作、各イベント
-document.addEventListener("keydown", async (e) =>{
-    toggleKeyInput(e);
-    if(!exeEventsFlg) await events();
-});
-
-function toggleKeyInput(e) {
-    if(!exeEventsFlg) {
-        if(e.key==KEY_CODE.left) key_input.left = true;
-        if(e.key==KEY_CODE.right) key_input.right = true;
-        if(e.key==KEY_CODE.up) key_input.up = true;
-        if(e.key==KEY_CODE.down) key_input.down = true;
-        if(key_input.left && key_input.up) key_input.up_left = true;
-        if(key_input.right && key_input.up) key_input.up_right = true;
-        if(key_input.left && key_input.down) key_input.down_left = true;
-        if(key_input.right && key_input.down) key_input.down_right = true;
-        if(e.key==KEY_CODE.apply) key_input.apply = true;
-        if(e.key==KEY_CODE.cancel) key_input.cancel = true;
-        if(e.key==KEY_CODE.sub) key_input.sub = true;
-        if(e.key==KEY_CODE.esc) key_input.esc = true;
-    }
-    if(e.key==KEY_CODE.shift) key_input.shift = true;
-    if(e.key==KEY_CODE.ctrl) key_input.ctrl = true;
-}
-
-document.addEventListener("keyup", e=>{
-    if(e.key==KEY_CODE.left) key_input.left = false;
-    if(e.key==KEY_CODE.right) key_input.right = false;
-    if(e.key==KEY_CODE.up) key_input.up = false;
-    if(e.key==KEY_CODE.down) key_input.down = false;
-    if(!key_input.left || !key_input.up) key_input.up_left = false;
-    if(!key_input.right || !key_input.up) key_input.up_right = false;
-    if(!key_input.left || !key_input.down) key_input.down_left = false;
-    if(!key_input.right || !key_input.down) key_input.down_right = false;
-    if(e.key==KEY_CODE.shift) key_input.shift = false;
-    if(e.key==KEY_CODE.ctrl) key_input.ctrl = false;
-    if(e.key==KEY_CODE.apply) key_input.apply = false;
-    if(e.key==KEY_CODE.cancel) key_input.cancel = false;
-    if(e.key==KEY_CODE.sub) key_input.sub = false;
-    if(e.key==KEY_CODE.esc) key_input.esc = false;
-});
-
-// ボタン
-btn_z.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.apply = true;
-        setButtonPressed(btn_z);
-        await events();
-    }
-});
-btn_z.addEventListener("touchend", () =>{
-    key_input.apply = false;
-    setButtonNotPressed(btn_z);
-});
-btn_x.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.cancel = true;
-        setButtonPressed(btn_x);
-        await events();
-    }
-});
-btn_x.addEventListener("touchend", () =>{
-    key_input.cancel = false;
-    setButtonNotPressed(btn_x);
-});
-btn_c.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.sub = true;
-        setButtonPressed(btn_c);
-        await events();
-    }
-});
-btn_c.addEventListener("touchend", () =>{
-    key_input.sub = false;
-    setButtonNotPressed(btn_c);
-});
-btn_left.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.left = true;
-        setButtonPressed(btn_left);
-        await events();
-    }
-});
-btn_left.addEventListener("touchend", () =>{
-    key_input.left = false;
-    setButtonNotPressed(btn_left);
-});
-btn_up.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.up = true;
-        setButtonPressed(btn_up);
-        await events();
-    }
-});
-btn_up.addEventListener("touchend", () =>{
-    key_input.up = false;
-    setButtonNotPressed(btn_up);
-});
-btn_down.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.down = true;
-        setButtonPressed(btn_down);
-        await events();
-    }
-});
-btn_down.addEventListener("touchend", () =>{
-    key_input.down = false;
-    setButtonNotPressed(btn_down);
-});
-btn_right.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.right = true;
-        setButtonPressed(btn_right);
-        await events();
-    }
-});
-btn_right.addEventListener("touchend", () =>{
-    key_input.right = false;
-    setButtonNotPressed(btn_right);
-});
-btn_upleft.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.up_left = true;
-        setButtonPressed(btn_upleft);
-        await events();
-    }
-});
-btn_upleft.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.up_left = false;
-    setButtonNotPressed(btn_upleft);
-});
-btn_downleft.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.down_left = true;
-        setButtonPressed(btn_downleft);
-        await events();
-    }
-});
-btn_downleft.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.down_left = false;
-    setButtonNotPressed(btn_downleft);
-});
-btn_upright.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.up_right = true;
-        setButtonPressed(btn_upright);
-        await events();
-    }
-});
-btn_upright.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.up_right = false;
-    setButtonNotPressed(btn_upright);
-});
-btn_downright.addEventListener("touchstart", async () =>{
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.down_right = true;
-        setButtonPressed(btn_downright);
-        await events();
-    }
-});
-btn_downright.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.down_right = false;
-    setButtonNotPressed(btn_downright);
-});
-
-const wait = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 //==================================================EVENT==================================================
 
 // イベント
 async function events() {
     exeEventsFlg = true;
-    // 名前入力
-    if(input_name_flag) {
-        await inputName();
-        exeEventsFlg = false;
-        return;
-    }
     // ゲームオーバー
-    else if(gameover_flag) {
+    if(gameover_flag) {
         await gameoverEvent();
         turn_flag = false;
         drawGameover();
@@ -1172,7 +952,10 @@ function initStatus() {
     player.ring2 = undefined;
     inventory = [];
 
-    backLv();
+    const log_tmp = log_reserve;
+    addItem(player.job);
+    useItem(0);
+    log_reserve = log_tmp;
 }
 
 // 状態異常追加

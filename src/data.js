@@ -99,7 +99,6 @@ const KATAKANA = [
 ];
 let input_name_pos = {x:0, y:0};
 let name_max_length = 12;
-let input_name_flag = true;
 let syllabary = HIRAGANA;
 
 // キー
