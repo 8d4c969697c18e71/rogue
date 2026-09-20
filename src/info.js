@@ -42,7 +42,8 @@ function drawInv() {
     else inv.style.border = "solid 1px black";
 
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
-    inv_display_num = Math.floor((window.innerHeight-body_padding-info.clientHeight-arrow_size*2)/(FONT_SIZE+4)-1);
+    const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
+    inv_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
 
     if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
     if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
@@ -82,7 +83,7 @@ function drawShop() {
     if(shop_flag) {
         const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
         const shop_margin =  parseInt(window.getComputedStyle(document.body).marginTop);
-        shop_display_num = Math.floor((window.innerHeight-body_padding-shop_margin-canvas.clientHeight)/(FONT_SIZE+5)-1);
+        shop_display_num = Math.floor((window.innerHeight-body_padding-shop_margin-canvas.clientHeight)/(FONT_SIZE+4)) - 1;
 
         if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
         if(shop_cursor >= shop_display_num + shop_start_offset) shop_start_offset = shop_cursor - shop_display_num + 1;
@@ -116,6 +117,9 @@ function drawShopPhone() {
 
         if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
         if(shop_cursor >= inv_display_num + shop_start_offset) shop_start_offset = shop_cursor - inv_display_num + 1;
+        const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
+        const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
+        inv_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
 
         inv.style.border = "solid 1px white";
         inv.insertAdjacentHTML("beforeend", "SHOP<br>");

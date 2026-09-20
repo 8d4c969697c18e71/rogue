@@ -1,6 +1,4 @@
-// 操作、各イベント
 document.body.addEventListener("keydown", e=>{e.preventDefault()});
-
 document.addEventListener("keydown", async (e) =>{
     toggleKeyInput(e);
     if(!exeEventsFlg) await events();
@@ -270,8 +268,7 @@ function setCanvasSizePhone(info_disp_flg = true) {
 
 // ボタン表示
 function dispButton() {
-    zxc_size = screen.width/6;
-    arrow_size = zxc_size;
+    arrow_size = screen.width/6;
     
     // 全体
     button.style.visibility = "visible";
@@ -281,8 +278,8 @@ function dispButton() {
     // デザイン
     for(let b of btn) {
         setButtonNotPressed(b);
-        b.style.width = zxc_size+"px";
-        b.style.height = zxc_size+"px";
+        b.style.width = arrow_size+"px";
+        b.style.height = arrow_size+"px";
     }
     for(let ab of btn_arrow) {
         ab.style.width = arrow_size+"px";
