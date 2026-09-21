@@ -1224,8 +1224,8 @@ const SKILL_DATA = [
         func: async function(who, dir, int = 10) {
             audio_ray.play();
             addLog(who.name+" はソウルの光を放った");
-            await magic(player, 70 + int * 3, dir);
             await animShot(who, straightRecursive(who.x, who.y, dir, MAGIC_RANGE), dir, CHAR_MAP.ray);
+            return await magic(player, 70 + int * 3, dir);
         }
     },
 ];
