@@ -1365,7 +1365,7 @@ async function nextFloor() {
     clairvoyance_flag = false;
 
     // TODO: テスト用
-    generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+    //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
     if(um = unique_map.find(v=>v.id==floor_cnt)) { // 固有マップ
         generateUniqueMap(um);
