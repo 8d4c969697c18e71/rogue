@@ -42,8 +42,10 @@ function drawMap() {
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.ammo
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.unique)
                     ctx.fillStyle = "yellow";
-                else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.ray)
+                else if(map_draw[player.y+i][player.x+j]=="魂")
                     ctx.fillStyle = "skyblue";
+                else if(map_draw[player.y+i][player.x+j]=="火")
+                    ctx.fillStyle = "orange";
                 else{
                     ctx.fillStyle = "red";
 

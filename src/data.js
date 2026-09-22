@@ -202,7 +202,6 @@ const CHAR_MAP = {
     staff: "／",
     ammo: "”",
     unique: "＆",
-    ray: "＊",
 };
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let stair_pos = {x:undefined, y:undefined};
@@ -616,9 +615,9 @@ const ITEM_DATA = [
         },
         func_cast: async function(dir) {
             addMP(player, -8);
-            
             const skill = getSkillData(0x400);
-            return skill.func(player, dir, player.int);
+            const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
+            return skill.func(player, target);
         }
     },
     {
@@ -634,7 +633,7 @@ const ITEM_DATA = [
             const skill = getSkillData(0x300);
 
             addMP(player, -8);
-            skill.func(player, player.fth);
+            skill.func(player, player, player.fth);
             return undefined;
         },
         func_cast: async function(dir) {}
@@ -672,9 +671,7 @@ const ITEM_DATA = [
         price: 1,
         dmg: 20,
         range: 10,
-        func_equip: async function() {},
-        func_unequip: async function() {},
-        func_recalc: async function() {},
+        func_attack: async function(to) {},
     },
     {
         id: 0x701,
@@ -683,9 +680,7 @@ const ITEM_DATA = [
         price: 2,
         dmg: 30,
         range: 8,
-        func_equip: async function() {},
-        func_unequip: async function() {},
-        func_recalc: async function() {},
+        func_attack: async function(to) {},
     },
     {
         id: 0x7f0,
@@ -694,9 +689,7 @@ const ITEM_DATA = [
         price: 1,
         dmg: 10,
         range: 2,
-        func_equip: async function() {},
-        func_unequip: async function() {},
-        func_recalc: async function() {},
+        func_attack: async function(to) {},
     },
     // スタックアイテム 0x8XX
     {
@@ -937,6 +930,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
+        berserk_flag: true,
         exp:3,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -955,6 +949,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: true,
+        berserk_flag: false,
         exp:2,
         func_spawn: async function(me) {
             await setConditionTurn(me, 0x03, 1000);
@@ -973,7 +968,7 @@ const ENEMY_DATA = [
         id: 0x002,
         name: "亡者兵士",
         char: "兵",
-        lv:2,
+        lv:1,
         hp:150, hp_max:150,
         mp:0, mp_max:0,
         atk:50, def:15,
@@ -982,6 +977,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
+        berserk_flag: false,
         exp:5,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -1000,6 +996,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance:3,
         group_spawn_flag: false,
+        berserk_flag: false,
         exp:7,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -1015,7 +1012,7 @@ const ENEMY_DATA = [
         id: 0x004,
         name: "スケルトン",
         char: "骨",
-        lv:3,
+        lv:1,
         hp:150, hp_max:150,
         mp:5, mp_max:5,
         atk:60, def:5,
@@ -1024,6 +1021,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
+        berserk_flag: false,
         exp:7,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -1036,9 +1034,9 @@ const ENEMY_DATA = [
     },
     {
         id: 0x005,
-        name: "ネズミ",
-        char: "鼠",
-        lv:3,
+        name: "腐犬",
+        char: "犬",
+        lv:1,
         hp:110, hp_max:110,
         mp:3, mp_max:3,
         atk:20, def:5,
@@ -1047,6 +1045,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: true,
+        berserk_flag: false,
         exp:5,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -1061,7 +1060,7 @@ const ENEMY_DATA = [
         id: 0x006,
         name: "車輪骸骨",
         char: "車",
-        lv:4,
+        lv:1,
         hp:200, hp_max:200,
         mp:5, mp_max:5,
         atk:40, def:10,
@@ -1070,6 +1069,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
+        berserk_flag: false,
         exp:8,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -1103,6 +1103,7 @@ const ENEMY_TABLE = [
     ],
 ];
 let enemy_group = [];
+let killed_group = [];
 
 //==================================================SKILL==================================================
 
@@ -1210,22 +1211,28 @@ const SKILL_DATA = [
     {
         id: 0x300,
         name: "小回復",
-        func: async function(who, fth = 10) {
+        func: async function(from, to) {
+            let fth = from.fth;
+            if(fth == undefined) fth = 10;
             let value = 30 + fth * 2;
-            addHP(who, value);
-            addLog("淡い光が "+who.name+" を包む　HPが "+value+" 回復した");
+            addHP(from, value);
+            addLog("淡い光が "+to.name+" を包む　HPが "+value+" 回復した");
             audio_heal.play();
+            return true;
         }
     },
     // int由来 0x4XX
     {
         id: 0x400,
         name: "ソウルの光",
-        func: async function(who, dir, int = 10) {
+        func: async function(from, to) {
+            let int = from.int;
+            if(int == undefined) int = 10;
             audio_ray.play();
-            addLog(who.name+" はソウルの光を放った");
-            await animShot(who, straightRecursive(who.x, who.y, dir, MAGIC_RANGE), dir, CHAR_MAP.ray);
-            return await magic(player, 70 + int * 3, dir);
+            addLog(from.name+" はソウルの光を放った");
+            await animShot(from, to, getDirection(from, to), "魂");
+            await magic(from, 70 + int * 3, getDirection(from, to));
+            return true;
         }
     },
 ];
@@ -1687,7 +1694,8 @@ let unique_map = [    // 固有マップ
             setShop(0x06, 10+x_offset, 1);
             setTrap(0x00, 1+x_offset, 5);
             setTrap(0x02, 2+x_offset, 5);
-            //setEnemy(0x006, 11+x_offset, 3);
+            setEnemy(0x000, 11+x_offset, 3);
+            clairvoyance();
         }
     },
     {
