@@ -1381,7 +1381,7 @@ async function nextFloor() {
     clairvoyance_flag = false;
 
     // TODO: テスト用
-    await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+    //await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
     if(um = unique_map.find(v=>v.id==floor_cnt)) { // 固有マップ
         await generateUniqueMap(um);
