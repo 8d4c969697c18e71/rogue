@@ -1332,14 +1332,12 @@ const SKILL_DATA = [
         id: 0x500,
         name: "火球",
         func: async function(from, to) {
-            let int = from.int;
-            let fth = from.fth;
-            if(int == undefined) int = 10;
-            if(fth == undefined) fth = 10;
-
             audio_fire.play();
             addLog(from.name+" は火球を投げた");
             await animShot(from, to, getDirection(from, to), "火");
+
+            let int = from.int ? from.int : 10;
+            let fth = from.fth ? from.fth : 10;
             await magic(from, 20 + int * 2 + fth * 2, getDirection(from, to));
             return true;
         }
@@ -1348,16 +1346,14 @@ const SKILL_DATA = [
         id: 0x501,
         name: "大火球",
         func: async function(from, to) {
-            let int = from.int;
-            let fth = from.fth;
-            if(int == undefined) int = 10;
-            if(fth == undefined) fth = 10;
-            let dmg = 20 + int * 2.5 + fth * 2.5;
-
             audio_fire.play();
             addLog(from.name+" は大きな火球を投げた");
             await animShot(from, to, getDirection(from, to), "火");
             await animSpread(to.x, to.y, 1, "火");
+
+            let int = from.int ? from.int : 10;
+            let fth = from.fth ? from.fth : 10;
+            let dmg = 20 + int * 2.5 + fth * 2.5;
             //await magic(from, dmg, getDirection(from, to));
             await doAOE(to.x, to.y, 1, from, dmg);
             return true;
@@ -1632,8 +1628,8 @@ const NPC_DATA = [
         ],
         dialogue_cnt: 0,
         func_before: async function() {
-            if(cookie_date === undefined) this.dialogue[0] = "石碑には何も記されていない";
-            else this.dialogue[0] = "日付が彫られている 「" + cookie_date + "」";
+            if(cookie_date) this.dialogue[0] = "日付が彫られている 「" + cookie_date + "」";
+            else this.dialogue[0] = "石碑には何も記されていない";
         },
         func_after: async function() {},
     },
