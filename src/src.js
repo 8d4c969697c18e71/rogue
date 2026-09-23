@@ -679,7 +679,7 @@ function getDirection(from, to) {
 async function doAOE(x, y, radius, func, ...args) {
     for(let i=-radius; i<=radius; i++) {
         if(y+i < 0 || y+i >= SIZEY) continue;
-        for (let j=-radius; j<=radius; j++) {
+        for(let j=-radius; j<=radius; j++) {
             if(x+j < 0 || x+j >= SIZEX) continue;
             func(args);
         }
@@ -1464,7 +1464,7 @@ function setNPC(id, x, y) {
 }
 
 function isNPC(x, y) {
-    for(let npc in npc_group)
+    for(let npc of npc_group)
         if(npc.x == x && npc.y == y)
             return true;
     return false;
