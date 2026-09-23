@@ -47,24 +47,6 @@ async function animShot(from, dst, direction, char = CHAR_MAP.ammo, fps = 60) {
     drawMap();
 }
 
-// 投擲
-async function animThrow(from, dst, direction, item, fps = 100) {
-    // 描画文字取得
-    let char;
-    if(item.type == "consume") char = CHAR_MAP.consume;
-    else if(item.type == "food") char = CHAR_MAP.food;
-    else if(item.type == "weapon") char = CHAR_MAP.weapon;
-    else if(item.type == "armor") char = CHAR_MAP.armor;
-    else if(item.type == "ring") char = CHAR_MAP.ring;
-    else if(item.type == "scroll") char = CHAR_MAP.scroll;
-    else if(item.type == "staff") char = CHAR_MAP.staff;
-    else if(item.type == "unique") char = CHAR_MAP.unique;
-    else char = CHAR_MAP.ammo;
-
-    // 描画
-    await animShot(from, dst, direction, char, fps);
-}
-
 // 伝播
 async function animSpread(x, y, radius, char, fps = 60) {
     for(let k=0; k<=radius; k++) {

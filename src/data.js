@@ -65,6 +65,7 @@ const audio_lvup = new Audio("sound/lvup.wav");
 const audio_death = new Audio("sound/death.wav");
 const audio_coin = new Audio("sound/coin.wav");
 const audio_force = new Audio("sound/force.wav");
+const audio_explosion = new Audio("sound/explosion.wav");
 
 //====================================================================================================
 
@@ -1282,11 +1283,11 @@ const SKILL_DATA = [
         id: 0x300,
         name: "ソウルの光",
         func: async function(from, to) {
-            let int = from.int;
-            if(int == undefined) int = 10;
             audio_ray.play();
             addLog(from.name+" はソウルの光を放った");
             await animShot(from, to, getDirection(from, to), "魂");
+
+            let int = from.int ? from.int : 10;
             await magic(from, 50 + int * 3, getDirection(from, to));
             return true;
         }
@@ -1296,12 +1297,11 @@ const SKILL_DATA = [
         id: 0x400,
         name: "小回復",
         func: async function(from, to) {
-            let fth = from.fth;
-            if(fth == undefined) fth = 10;
-            let value = 30 + fth * 2;
-            addHP(from, value);
-            addLog("淡い光が "+to.name+" を包む　HPが "+value+" 回復した");
             audio_heal.play();
+            addLog("淡い光が "+to.name+" を包む　HPが "+value+" 回復した");
+
+            let fth = from.fth ? from.fth : 10;
+            addHP(from, 30 + fth * 2);
             return true;
         }
     },
@@ -1309,18 +1309,16 @@ const SKILL_DATA = [
         id: 0x480,
         name: "フォース",
         func: async function(from, to) {
-            addLog(from.name+" から衝撃波が迸る");
             audio_force.play();
+            addLog(from.name+" から衝撃波が迸る");
             await animSpread(from.x, from.y, 1, "光");
+            
             for(let i=-1; i<=1; i++){
                 if(from.y+i < 0 || from.y+i >= SIZEY) continue;
                 for(let j=-1; j<=1; j++) {
                     if(from.x+j < 0 || from.x+j >= SIZEX) continue;
-                    for(let en of enemy_group) {
-                        if(en.x != from.x+j || en.y != from.y+i) continue;
-                        jump(en, {x:j, y:i}, 1);
-                        break;
-                    }
+                    let enemy = getEnemy(from.x+j, from.y+i);
+                    if(enemy) jump(enemy, {x:j, y:i}, 1);
                 }
             }
             updateMap();
@@ -1338,6 +1336,7 @@ const SKILL_DATA = [
             let fth = from.fth;
             if(int == undefined) int = 10;
             if(fth == undefined) fth = 10;
+
             audio_fire.play();
             addLog(from.name+" は火球を投げた");
             await animShot(from, to, getDirection(from, to), "火");
@@ -1353,14 +1352,14 @@ const SKILL_DATA = [
             let fth = from.fth;
             if(int == undefined) int = 10;
             if(fth == undefined) fth = 10;
-            let dmg = 30 + int * 2.5 + fth * 2.5;
+            let dmg = 20 + int * 2.5 + fth * 2.5;
 
             audio_fire.play();
             addLog(from.name+" は大きな火球を投げた");
             await animShot(from, to, getDirection(from, to), "火");
             await animSpread(to.x, to.y, 1, "火");
-            await magic(from, dmg, getDirection(from, to));
-            await doAOE(to.x, to.y, 1, dealDmg, from, to, dmg/2);
+            //await magic(from, dmg, getDirection(from, to));
+            await doAOE(to.x, to.y, 1, from, dmg);
             return true;
         }
     },
@@ -1610,7 +1609,7 @@ const NPC_DATA = [
     },
     {
         id: 0x04,
-        name: "記録者",
+        name: "記録者カレル",
         char: "記",
         loop: true,
         dialogue: [
@@ -1823,18 +1822,13 @@ let unique_map = [    // 固有マップ
             setShop(0x06, 10+x_offset, 1);
             setTrap(0x00, 1+x_offset, 5);
             setTrap(0x02, 2+x_offset, 5);
-            setEnemy(0x000, 11+x_offset, 3);
+            //await setEnemy(0x000, 11+x_offset, 3);
             addItem(0x603);
             addItem(0x604);
             addItem(0x605);
-            //setEnemy(0x000, 2+x_offset, 2);
-            //setEnemy(0x000, 3+x_offset, 2);
-            //setEnemy(0x000, 4+x_offset, 2);
-            //setEnemy(0x000, 2+x_offset, 3);
-            //setEnemy(0x000, 4+x_offset, 3);
-            //setEnemy(0x000, 2+x_offset, 4);
-            //setEnemy(0x000, 3+x_offset, 4);
-            //setEnemy(0x000, 4+x_offset, 4);
+            await setEnemy(0x001, 11+x_offset, 2);
+            await setEnemy(0x001, 11+x_offset, 3);
+            await setEnemy(0x001, 11+x_offset, 4);
             clairvoyance();
         }
     },

@@ -170,7 +170,7 @@ async function eventPlayer() {
         if(key_input[k]) {
             let x = player.x + kd[k].x;
             let y = player.y + kd[k].y;
-            if(isEnemy(x, y) && canDiagonal(player.x, player.y, kd[k].x, kd[k].y)) {
+            if(getEnemy(x, y) && canDiagonal(player.x, player.y, kd[k].x, kd[k].y)) {
                 let enemy = enemy_group.find(v=>(v.x==x && v.y==y));
                 await attack(player, enemy);
                 checkKill(player);
@@ -329,7 +329,7 @@ function isFrontObj(who, direction) {
 }
 
 function isAnyObj(x, y) {
-    if(isItem(x, y) || isEnemy(x, y) || isNPC(x, y) || isShop(x, y))
+    if(isItem(x, y) || getEnemy(x, y) || isNPC(x, y) || isShop(x, y))
         return true;
     return false;
 }
@@ -420,7 +420,7 @@ async function shot(who, ammo, direction) {
     audio_shot.play();
     await animShot(who, dst, direction);
 
-    if(isEnemy(dst.x+direction.x, dst.y+direction.y)) {
+    if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
         await shotDmg(who, enemy, ammo);
         if("weapon" in who && who.weapon) await getItemData(who.weapon).func_attack(enemy);
@@ -512,9 +512,21 @@ async function throwing(who, item, direction) {
 
     addLog(who.name+" は "+item.name+" を投擲した");
     audio_shot.play();
-    await animThrow(who, dst, direction, item);
+    
+    // 描画文字取得
+    let char;
+    if(item.type == "consume") char = CHAR_MAP.consume;
+    else if(item.type == "food") char = CHAR_MAP.food;
+    else if(item.type == "weapon") char = CHAR_MAP.weapon;
+    else if(item.type == "armor") char = CHAR_MAP.armor;
+    else if(item.type == "ring") char = CHAR_MAP.ring;
+    else if(item.type == "scroll") char = CHAR_MAP.scroll;
+    else if(item.type == "staff") char = CHAR_MAP.staff;
+    else if(item.type == "unique") char = CHAR_MAP.unique;
+    else char = CHAR_MAP.ammo;
+    await animShot(who, dst, direction, char, 100);
 
-    if(isEnemy(dst.x+direction.x, dst.y+direction.y)) {
+    if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
         await throwDmg(who, enemy, item);
         return enemy;
@@ -537,6 +549,9 @@ async function throwing(who, item, direction) {
                         }
         }
     }
+    
+    // 投擲後の固有処理(あれば)
+    if(item.func_throw) item.func_throw();
 }
 
 async function throwDmg(from, to, item) {
@@ -585,7 +600,7 @@ async function eventMagic() {
 // 魔法
 async function magic(who, value, direction) {
     let dst = straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
-    if(isEnemy(dst.x+direction.x, dst.y+direction.y)) {
+    if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
         await magicDmg(who, enemy, value);
         return enemy;
@@ -610,10 +625,11 @@ async function magicDmg(from, to, value) {
 
 // ダメージ
 async function dealDmg(from, to, dmg) {
-    if(from == undefined || to == undefined) return;
+    if(!from || !to) return;
+    dmg = Math.round(dmg);
 
     addHP(to, -dmg);
-    addLogSameLine(to.name+" に "+dmg+" のダメージ");
+    addLog(to.name+" に "+dmg+" のダメージ");
     audio_hit.play();
     await animBlink(to);
 
@@ -636,13 +652,25 @@ async function dealDmg(from, to, dmg) {
     drawInfo();
 
     // TODO: fromへの処理
-    if(from === undefined) return;
+    if(!from) return;
 
     // 標的更新(敵)
     if(to != player) setTarget(to, from);
 
     // 死亡判定
     await isDead(to);
+}
+
+// 範囲攻撃
+async function doAOE(x, y, radius, who, dmg) {
+    for(let i=-radius; i<=radius; i++) {
+        if(y+i < 0 || y+i >= SIZEY) continue;
+        for(let j=-radius; j<=radius; j++) {
+            if(x+j < 0 || x+j >= SIZEX) continue;
+            await dealDmg(who, getEnemy(x+j, y+i), dmg);
+            await checkKill(who);
+        }
+    }
 }
 
 function straightRecursive(x, y, direction, range) {
@@ -674,16 +702,6 @@ function getDirection(from, to) {
     if(dir_x != 0) dir_x = dir_x / Math.abs(dir_x);
     if(dir_y != 0) dir_y = dir_y / Math.abs(dir_y);
     return {x:dir_x, y:dir_y};
-}
-
-async function doAOE(x, y, radius, func, ...args) {
-    for(let i=-radius; i<=radius; i++) {
-        if(y+i < 0 || y+i >= SIZEY) continue;
-        for(let j=-radius; j<=radius; j++) {
-            if(x+j < 0 || x+j >= SIZEX) continue;
-            func(args);
-        }
-    }
 }
 
 // UIイベント
@@ -781,7 +799,7 @@ function eventShop() {
 
                 player.gold += -shop_using.item[shop_cursor].price;
                 shop_using.func_buy();
-                if(shop_using !== undefined && shop_using.item.length > 0
+                if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
                 audio_coin.play();
@@ -916,7 +934,7 @@ async function recalcStatus(who) {
     const EQ_TYPE = [...EQUIP_TYPE, ...["ring1", "ring2"]];
     for(let idx in EQ_TYPE) {
         const eq_id = who[EQ_TYPE[idx]];
-        if(eq_id !== undefined && getItemData(eq_id).func_recalc !== undefined) getItemData(eq_id).func_recalc();
+        if(eq_id && getItemData(eq_id).func_recalc) getItemData(eq_id).func_recalc();
     }
 }
 
@@ -1061,7 +1079,7 @@ async function isDead(who) {
 
 async function checkKill(who) {
     for(let en of killed_group) {
-        if(en.exp != undefined) {
+        if(en.exp) {
             addExp(who, en.exp);
         }
     }
@@ -1117,8 +1135,8 @@ async function equip(index) {
         else
             player[equip_item.type] = equip_item.id;
         
-        if(equip_item.func_recalc !== undefined) await equip_item.func_recalc();
-        if(equip_item.func_equip !== undefined) await equip_item.func_equip(player);
+        if(equip_item.func_recalc) await equip_item.func_recalc();
+        if(equip_item.func_equip) await equip_item.func_equip(player);
 
         addLog(equip_item.name+" を装備した");
 
@@ -1138,7 +1156,7 @@ async function equip(index) {
             player[equip_item.type] = undefined;
         
         await recalcStatus(player);
-        if(equip_item.func_unequip !== undefined) await equip_item.func_unequip(player);
+        if(equip_item.func_unequip) await equip_item.func_unequip(player);
 
         addLog(equip_item.name+" を外した");
         return true;
@@ -1181,7 +1199,7 @@ function addItem(id) {
     // スタック可能アイテム
     if(STACK_TYPE.includes(item.type)) {
         let index = getStackIndex(item);
-        if(!(index===undefined)) {
+        if(index) {
             inventory[index].stack_num++;
             addLog(item.name+" を入手");
             return true;
@@ -1246,7 +1264,7 @@ function setRandomXY() {
         || map[y][x] != ID_MAP.room
         || isItem(x, y)
         || isTrap(x, y)
-        || isEnemy(x, y))
+        || getEnemy(x, y))
         return setRandomXY();
     return [x, y];
 }
@@ -1364,16 +1382,16 @@ async function nextFloor() {
     clairvoyance_flag = false;
 
     // TODO: テスト用
-    //generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+    await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
     if(um = unique_map.find(v=>v.id==floor_cnt)) { // 固有マップ
-        generateUniqueMap(um);
+        await generateUniqueMap(um);
         
         if(um.safe_flag) safe_flag = true;
         else safe_flag = false;
     }
     else if(floor_cnt%10 == 0) {    // 帰還ポータル階
-        generateUniqueMap(unique_map.find(v=>v.id=="return"));
+        await generateUniqueMap(unique_map.find(v=>v.id=="return"));
         safe_flag = true;
     }
     else{
@@ -1451,7 +1469,7 @@ function isShop(x, y) {
 
 function setSellList(item_list) {
     for(let item of inventory) {
-        if(item_list.length == 0 || item_list.find(v=>v.id==item.id) === undefined) {
+        if(item_list.length == 0 || !item_list.find(v=>v.id==item.id)) {
             item_list.push(Object.assign({}, item, {price: -(item.price)}));
         }
     }
@@ -1551,7 +1569,7 @@ async function eventEnemy(enemy) {
 
     // 標的の最新情報取得 同IDのやつを追う
     let target = undefined;
-    if(enemy.chase_target != undefined) {
+    if(enemy.chase_target) {
         if(enemy.chase_target == "player") {
             target = player;
         }
@@ -1566,7 +1584,7 @@ async function eventEnemy(enemy) {
     }
 
     // 発見済み
-    if(target != undefined) {
+    if(target) {
         // スキル
         for(let skill of enemy.skill) {
             if(!(Math.floor(Math.random()+skill.chance))) continue;
@@ -1618,7 +1636,7 @@ async function eventEnemy(enemy) {
 // 標的情報更新
 function updateTarget(enemy) {
     // 追跡終了
-    if(enemy.chase_target != undefined) enemy.chase_count--;
+    if(enemy.chase_target) enemy.chase_count--;
     if(enemy.chase_count < 0) {
         enemy.chase_target = undefined;
     }
@@ -1626,7 +1644,7 @@ function updateTarget(enemy) {
     // 発見
     initMap(enemy.map_sight, false);
     getSight(enemy);
-    if(enemy.chase_target == undefined) {
+    if(!enemy.chase_target) {
         if(enemy.map_sight[player.y][player.x])
             setTarget(enemy, player);
         else if(enemy.berserk_flag) {
@@ -1723,7 +1741,7 @@ function astarRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
             return;
         }
         // 探索
-        else if((canMove(x+j, y+i) || !canMove(x+j, y+i) && isEnemy(x+j, y+i))
+        else if((canMove(x+j, y+i) || !canMove(x+j, y+i) && getEnemy(x+j, y+i))
             && (canDiagonal(x, y, j, i))
             && !(node.find(v=>(v.x==x+j && v.y==y+i)))) {
             // 移動コスト
@@ -1765,7 +1783,7 @@ function astarRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
         }
     }
         
-    if(next_node.x === undefined || next_node.y === undefined) {
+    if(!next_node.x || !next_node.y) {
         // debug
         //console.log("aster: cannot reach");
         return;
@@ -1776,7 +1794,7 @@ function astarRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
 }
 
 function getRoute(route, node, n) {
-    if(n.parent === undefined)
+    if(!n.parent)
         return route;
     route.push(n);
     route = getRoute(route, node, node.find(v=>(v.x==n.parent.x && v.y==n.parent.y)));
@@ -1857,7 +1875,7 @@ async function moveEnemyRand(enemy) {
 }
 
 // エネミー追加
-function setEnemy(id, x, y) {
+async function setEnemy(id, x, y) {
     let enemy = getEnemyData(id);
 
     // 共通
@@ -1883,13 +1901,14 @@ function setEnemy(id, x, y) {
 
         // プロパティチェック
         for(let key in s)
-            if(s[key] === undefined) {
+            if(!s[key] === undefined) {
                 console.warn("setEnemy: undefined property. ("+s.name+")");
                 e.skill.splice(e.skill.indexOf(s), 1);
                 break;
             }
     }
     enemy_group.push(e);
+    await e.func_spawn(e);
 }
 
 // エネミーグループ
@@ -1915,9 +1934,8 @@ async function setEnemyGroup() {
             // 位置
             const [x, y] = setSpawnXY(0, enemy.group_spawn_flag, enemy.id);
             // 設置
-            setEnemy(enemy_id, x, y);
+            await setEnemy(enemy_id, x, y);
             let e = enemy_group[enemy_group.length-1];
-            await e.func_spawn(e);
         }
     }
 }
@@ -1953,11 +1971,11 @@ function setSpawnXY(priority, group_spawn_flag, id) {
 }
 
 // エネミーがいるか
-function isEnemy(x, y) {
+function getEnemy(x, y) {
     for(let enemy of enemy_group)
         if(enemy.x == x && enemy.y == y)
-            return true;
-    return false;
+            return enemy;
+    return undefined;
 }
 
 // エネミーの死亡判定
@@ -2089,7 +2107,7 @@ function genPath(path_anchor) {
 }
 
 // 固有マップ生成
-function generateUniqueMap(um) {
+async function generateUniqueMap(um) {
     let x_offset = Math.floor(SIZEX/2-um.map[0].length/2);
     for(let i=0; i<um.map.length; i++) {
         let s = um.map[i].split("");
@@ -2098,7 +2116,7 @@ function generateUniqueMap(um) {
     }
 
     setPlayerPosManual(um.pl_x+x_offset, um.pl_y);
-    um.func(x_offset);
+    await um.func(x_offset);
 }
 
 function initMaps() {
@@ -2221,7 +2239,7 @@ function getRoomXY(x, y, map) {
 function canMove(x, y) {
     if(!isInMap(x,y) 
         || map[y][x] == ID_MAP.none
-        || isEnemy(x,y)
+        || getEnemy(x,y)
         || isShop(x,y)
         || isNPC(x,y)
         || (x==player.x && y==player.y)
