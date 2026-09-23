@@ -53,6 +53,7 @@ async function animSpread(x, y, radius, char, fps = 60) {
         updateMap();
         for(let i=-k; i<=k; i++) {
             for(let j=-k; j<=k; j++) {
+                if(map[y+i][x+j] == ID_MAP.none) continue;
                 map_draw[y+i][x+j] = char;
             }
         }

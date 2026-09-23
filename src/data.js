@@ -172,7 +172,7 @@ let map_draw = [];    // 描画用
 //    trap: "^",
 //    // item
 //    gold: "$",
-//    consume: "!",
+//    potion: "!",
 //    food: ":",
 //    weapon: ")",
 //    armor: "[",
@@ -195,8 +195,9 @@ const CHAR_MAP = {
     trap: "＾",
     // item
     gold: "＄",
-    consume: "！",
+    potion: "！",
     food: "：",
+    consume: "。",
     weapon: "）",
     armor: "［",
     ring: "＝",
@@ -285,16 +286,17 @@ let player = {
 //==================================================ITEM==================================================
 
 const ITEM_DATA = [
-    // 消費アイテム
+    // 消費アイテム 0x0XX
     {
         id: 0x000,
         name: "金貨",
         type: "gold"
     },
+    // 回復 0x01X~
     {
         id: 0x010,
         name: "三日月草",
-        type: "consume",
+        type: "potion",
         price: 5,
         func: async function() {
             let value = 50;
@@ -309,7 +311,7 @@ const ITEM_DATA = [
     {
         id: 0x011,
         name: "半月草",
-        type: "consume",
+        type: "potion",
         price: 10,
         func: async function() {
             let value = 100;
@@ -324,7 +326,7 @@ const ITEM_DATA = [
     {
         id: 0x012,
         name: "後月草",
-        type: "consume",
+        type: "potion",
         price: 20,
         func: async function() {
             let value = 200;
@@ -339,7 +341,7 @@ const ITEM_DATA = [
     {
         id: 0x013,
         name: "満月草",
-        type: "consume",
+        type: "potion",
         price: 35,
         func: async function() {
             let value = 300;
@@ -354,7 +356,7 @@ const ITEM_DATA = [
     {
         id: 0x014,
         name: "新月草",
-        type: "consume",
+        type: "potion",
         price: 50,
         func: async function() {
             let value = player.hp_max;
@@ -369,7 +371,7 @@ const ITEM_DATA = [
     {
         id: 0x020,
         name: "香料",
-        type: "consume",
+        type: "potion",
         price: 10,
         func: async function() {
             let value = 15;
@@ -383,7 +385,7 @@ const ITEM_DATA = [
     {
         id: 0x021,
         name: "芳しい香料",
-        type: "consume",
+        type: "potion",
         price: 30,
         func: async function() {
             let value = 30;
@@ -397,7 +399,7 @@ const ITEM_DATA = [
     {
         id: 0x022,
         name: "祝福された香料",
-        type: "consume",
+        type: "potion",
         price: 60,
         func: async function() {
             let value = player.mp_max;
@@ -419,6 +421,25 @@ const ITEM_DATA = [
             addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
             audio_heal.play();
             inventory.splice(inventory.indexOf(this), 1);
+            return true;
+        },
+    },
+    // 攻撃用 0x08X~
+    {
+        id: 0x080,
+        name: "火炎瓶",
+        type: "consume",
+        price: 7,
+        remove_after_throw: true,
+        func: async function() {
+            addLog("投擲用のようだ")
+            return false;
+        },
+        func_throw: async function(who, dst) {
+            audio_fire.play();
+            await animSpread(dst.x, dst.y, 1, "火");
+            
+            await doAOE(dst.x, dst.y, 1, who, 25);
             return true;
         },
     },
@@ -1327,7 +1348,7 @@ const SKILL_DATA = [
             return true;
         }
     },
-    // int, fth両方 0x5xx
+    // int, fth両方 0x5XX
     {
         id: 0x500,
         name: "火球",

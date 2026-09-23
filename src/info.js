@@ -221,11 +221,11 @@ function drawNote() {
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.stair+"&nbsp;", "blue")+": 階段<br>");;
+        colorUI("&nbsp;"+CHAR_MAP.stair+"&nbsp;", "green")+": 階段<br>");;
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.portal+"&nbsp;", "blue")+": 帰還ゲート<br>");
+        colorUI("&nbsp;"+CHAR_MAP.portal+"&nbsp;", "green")+": 帰還ゲート<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.trap+"&nbsp;", "blue")+": 罠<br>");
+        colorUI("&nbsp;"+CHAR_MAP.trap+"&nbsp;", "green")+": 罠<br>");
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;"+CHAR_MAP.gold+"&nbsp;", "yellow")+": 金貨<br>");
     note.insertAdjacentHTML("beforeend", 
@@ -235,9 +235,11 @@ function drawNote() {
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;"+CHAR_MAP.ring+"&nbsp;", "yellow")+": 指輪<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.consume+"&nbsp;", "yellow")+": 消耗品<br>");
+        colorUI("&nbsp;"+CHAR_MAP.potion+"&nbsp;", "yellow")+": 回復<br>");
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;"+CHAR_MAP.food+"&nbsp;", "yellow")+": 食料<br>");
+    note.insertAdjacentHTML("beforeend", 
+        colorUI("&nbsp;"+CHAR_MAP.consume+"&nbsp;", "yellow")+": 消耗品<br>");
     note.insertAdjacentHTML("beforeend", 
         colorUI("&nbsp;"+CHAR_MAP.scroll+"&nbsp;", "yellow")+": 巻物<br>");
     note.insertAdjacentHTML("beforeend", 

@@ -509,49 +509,46 @@ async function eventThrowing() {
 // 投擲
 async function throwing(who, item, direction) {
     let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
+    let dst_for_func = dst;
+    let hit = undefined;
 
-    addLog(who.name+" は "+item.name+" を投擲した");
     audio_shot.play();
-    
-    // 描画文字取得
-    let char;
-    if(item.type == "consume") char = CHAR_MAP.consume;
-    else if(item.type == "food") char = CHAR_MAP.food;
-    else if(item.type == "weapon") char = CHAR_MAP.weapon;
-    else if(item.type == "armor") char = CHAR_MAP.armor;
-    else if(item.type == "ring") char = CHAR_MAP.ring;
-    else if(item.type == "scroll") char = CHAR_MAP.scroll;
-    else if(item.type == "staff") char = CHAR_MAP.staff;
-    else if(item.type == "unique") char = CHAR_MAP.unique;
-    else char = CHAR_MAP.ammo;
+    addLog(who.name+" は "+item.name+" を投擲した");
+    let char = CHAR_MAP[item.type] ? CHAR_MAP[item.type] : CHAR_MAP.ammo;
     await animShot(who, dst, direction, char, 100);
 
     if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
         await throwDmg(who, enemy, item);
-        return enemy;
+        dst_for_func.x = dst.x+direction.x;
+        dst_for_func.y = dst.y+direction.y;
+        hit = enemy;
     }
     else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
         await throwDmg(who, player, item);
-        return player;
+        dst_for_func.x = dst.x+direction.x;
+        dst_for_func.y = dst.y+direction.y;
+        hit = player;
     }
-    else{    // アイテム化
+    // アイテム化
+    else if(!item.remove_after_throw) {
         if(!isItem(dst.x, dst.y))
             setItem(item.id, dst.x, dst.y);
         else{
-            for(let s=1; s<SIZEX; s++)
-                for(let i=-s; i<=s; i++)
-                    for(let j=-s; j<=s; j++)
+            let placed_flg = false;
+            for(let s=1; s<SIZEX && !placed_flg; s++)
+                for(let i=-s; i<=s && !placed_flg; i++)
+                    for(let j=-s; j<=s && !placed_flg; j++)
                         if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)) {
                             setItem(item.id, dst.x+j, dst.y+i);
-                            addLog(item.name+" は床に落ちた");
-                            return undefined;
+                            placed_flg = true;
                         }
         }
     }
     
     // 投擲後の固有処理(あれば)
-    if(item.func_throw) item.func_throw();
+    if(item.func_throw) item.func_throw(who, dst_for_func);
+    return hit;
 }
 
 async function throwDmg(from, to, item) {
@@ -666,9 +663,11 @@ async function doAOE(x, y, radius, who, dmg) {
     for(let i=-radius; i<=radius; i++) {
         if(y+i < 0 || y+i >= SIZEY) continue;
         for(let j=-radius; j<=radius; j++) {
-            if(x+j < 0 || x+j >= SIZEX) continue;
+            if(x+j < 0 || x+j >= SIZEX || map[y+i][x+j] == ID_MAP.none) continue;
             await dealDmg(who, getEnemy(x+j, y+i), dmg);
             await checkKill(who);
+            updateMap();
+            drawMap();
         }
     }
 }
@@ -1382,7 +1381,7 @@ async function nextFloor() {
     clairvoyance_flag = false;
 
     // TODO: テスト用
-    //await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
+    await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
     if(um = unique_map.find(v=>v.id==floor_cnt)) { // 固有マップ
         await generateUniqueMap(um);

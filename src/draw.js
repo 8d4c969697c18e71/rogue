@@ -29,11 +29,12 @@ function drawMap() {
                 else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.stair
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.portal
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.trap)
-                    ctx.fillStyle = "blue";
+                    ctx.fillStyle = "green";
                 else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.player
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.gold
-                    || map_draw[player.y+i][player.x+j]==CHAR_MAP.consume
+                    || map_draw[player.y+i][player.x+j]==CHAR_MAP.potion
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.food
+                    || map_draw[player.y+i][player.x+j]==CHAR_MAP.consume
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.weapon
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.armor
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.ring
@@ -88,7 +89,7 @@ function drawMapAll() {
                     ctx.fillStyle = "blue";
                 else if(map_draw[i][j]==CHAR_MAP.player
                     || map_draw[i][j]==CHAR_MAP.gold
-                    || map_draw[i][j]==CHAR_MAP.consume
+                    || map_draw[i][j]==CHAR_MAP.potion
                     || map_draw[i][j]==CHAR_MAP.food
                     || map_draw[i][j]==CHAR_MAP.weapon
                     || map_draw[i][j]==CHAR_MAP.armor
