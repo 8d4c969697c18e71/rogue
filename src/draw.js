@@ -46,6 +46,9 @@ function drawMap() {
                     ctx.fillStyle = "skyblue";
                 else if(map_draw[player.y+i][player.x+j]=="火")
                     ctx.fillStyle = "orange";
+                else if(map_draw[player.y+i][player.x+j]=="光"
+                    || map_draw[player.y+i][player.x+j]=="雷")
+                    ctx.fillStyle = "#ffffaa";
                 else{
                     ctx.fillStyle = "red";
 
@@ -129,7 +132,7 @@ function drawGameover() {
     ];
 
     // 描画
-    ctx.clearRect(0, 0, canvas.clientWidth/2, canvas.clientHeight/2);
+    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     for(let i=0; i<gameover_fig.length-1; i++) {

@@ -64,6 +64,7 @@ const audio_stair = new Audio("sound/stair.wav");
 const audio_lvup = new Audio("sound/lvup.wav");
 const audio_death = new Audio("sound/death.wav");
 const audio_coin = new Audio("sound/coin.wav");
+const audio_force = new Audio("sound/force.wav");
 
 //====================================================================================================
 
@@ -604,7 +605,7 @@ const ITEM_DATA = [
         type: "staff",
         price: 129,
         func: async function() {
-            if(player.mp < 8) {
+            if(player.mp < 5) {
                 addLog("MP が足りない");
                 return false;
             }
@@ -614,10 +615,10 @@ const ITEM_DATA = [
             return false;
         },
         func_cast: async function(dir) {
-            addMP(player, -8);
-            const skill = getSkillData(0x400);
+            addMP(player, -5);
+            const skill = getSkillData(0x300);
             const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
-            return skill.func(player, target);
+            return await skill.func(player, target);
         }
     },
     {
@@ -630,11 +631,11 @@ const ITEM_DATA = [
                 addLog("MP が足りない");
                 return false;
             }
-            const skill = getSkillData(0x300);
+            const skill = getSkillData(0x400);
 
             addMP(player, -8);
-            skill.func(player, player, player.fth);
-            return undefined;
+            await skill.func(player, player);
+            return true;
         },
         func_cast: async function(dir) {}
     },
@@ -659,8 +660,70 @@ const ITEM_DATA = [
             skill.distance = 3;
 
             addMP(player, -7);
-            skill.func(player);
-            return undefined;
+            await skill.func(player, undefined);
+            return true;
+        }
+    },
+    {
+        id: 0x603,
+        name: "フォースの聖印",
+        type: "staff",
+        price: 80,
+        func: async function() {
+            if(player.mp < 4) {
+                addLog("MP が足りない");
+                return false;
+            }
+            const skill = getSkillData(0x480);
+
+            addMP(player, -4);
+            await skill.func(player, undefined);
+            return true;
+        },
+        func_cast: async function(dir) {}
+    },
+    {
+        id: 0x604,
+        name: "火球の種火",
+        type: "staff",
+        price: 110,
+        func: async function() {
+            if(player.mp < 5) {
+                addLog("MP が足りない");
+                return false;
+            }
+            addLog(player.name+" は "+this.name+" を構えた");
+            magic_flag = true;
+            player.magic_using = this.id;
+            return false;
+        },
+        func_cast: async function(dir) {
+            addMP(player, -5);
+            const skill = getSkillData(0x500);
+            const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
+            return await skill.func(player, target);
+        }
+    },
+    {
+        id: 0x605,
+        name: "大火球の種火",
+        type: "staff",
+        price: 140,
+        func: async function() {
+            if(player.mp < 8) {
+                addLog("MP が足りない");
+                return false;
+            }
+            addLog(player.name+" は "+this.name+" を構えた");
+            magic_flag = true;
+            player.magic_using = this.id;
+            return false;
+        },
+        func_cast: async function(dir) {
+            addMP(player, -8);
+            const skill = getSkillData(0x501);
+            const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
+            return await skill.func(player, target);
         }
     },
     // 弾薬 0x7XX
@@ -930,7 +993,7 @@ const ENEMY_DATA = [
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
-        berserk_flag: true,
+        berserk_flag: false,
         exp:3,
         func_spawn: async function(me) {},
         func_died: async function() {},
@@ -1146,7 +1209,12 @@ const SKILL_DATA = [
         direction: undefined,
         distance: undefined,
         func: async function(from, to) {
-            return jump(from, this.direction, this.distance);
+            if(jump(from, this.direction, this.distance)) {
+                addLog(who.name+" は跳び退いた");
+                audio_jump.play();
+                return true;
+            }
+            return false;
         }
     },
     {
@@ -1188,6 +1256,7 @@ const SKILL_DATA = [
                     while(await move(from, KEY_DIRECTION[d])) {
                         updateMap();
                         drawMap();
+                        await wait(50);
                     }
                     return true;
                 }
@@ -1200,6 +1269,7 @@ const SKILL_DATA = [
                     while(await move(from, KEY_DIRECTION_DIAGONAL[d])) {
                         updateMap();
                         drawMap();
+                        await wait(50);
                     }
                     return true;
                 }
@@ -1207,9 +1277,23 @@ const SKILL_DATA = [
             return false;
         }
     },
-    // fth由来 0x3XX
+    // int由来 0x3XX
     {
         id: 0x300,
+        name: "ソウルの光",
+        func: async function(from, to) {
+            let int = from.int;
+            if(int == undefined) int = 10;
+            audio_ray.play();
+            addLog(from.name+" はソウルの光を放った");
+            await animShot(from, to, getDirection(from, to), "魂");
+            await magic(from, 50 + int * 3, getDirection(from, to));
+            return true;
+        }
+    },
+    // fth由来 0x4XX
+    {
+        id: 0x400,
         name: "小回復",
         func: async function(from, to) {
             let fth = from.fth;
@@ -1221,17 +1305,62 @@ const SKILL_DATA = [
             return true;
         }
     },
-    // int由来 0x4XX
     {
-        id: 0x400,
-        name: "ソウルの光",
+        id: 0x480,
+        name: "フォース",
+        func: async function(from, to) {
+            addLog(from.name+" から衝撃波が迸る");
+            audio_force.play();
+            await animSpread(from.x, from.y, 1, "光");
+            for(let i=-1; i<=1; i++){
+                if(from.y+i < 0 || from.y+i >= SIZEY) continue;
+                for(let j=-1; j<=1; j++) {
+                    if(from.x+j < 0 || from.x+j >= SIZEX) continue;
+                    for(let en of enemy_group) {
+                        if(en.x != from.x+j || en.y != from.y+i) continue;
+                        jump(en, {x:j, y:i}, 1);
+                        break;
+                    }
+                }
+            }
+            updateMap();
+            drawMap();
+            await wait(200);
+            return true;
+        }
+    },
+    // int, fth両方 0x5xx
+    {
+        id: 0x500,
+        name: "火球",
         func: async function(from, to) {
             let int = from.int;
+            let fth = from.fth;
             if(int == undefined) int = 10;
-            audio_ray.play();
-            addLog(from.name+" はソウルの光を放った");
-            await animShot(from, to, getDirection(from, to), "魂");
-            await magic(from, 70 + int * 3, getDirection(from, to));
+            if(fth == undefined) fth = 10;
+            audio_fire.play();
+            addLog(from.name+" は火球を投げた");
+            await animShot(from, to, getDirection(from, to), "火");
+            await magic(from, 20 + int * 2 + fth * 2, getDirection(from, to));
+            return true;
+        }
+    },
+    {
+        id: 0x501,
+        name: "大火球",
+        func: async function(from, to) {
+            let int = from.int;
+            let fth = from.fth;
+            if(int == undefined) int = 10;
+            if(fth == undefined) fth = 10;
+            let dmg = 30 + int * 2.5 + fth * 2.5;
+
+            audio_fire.play();
+            addLog(from.name+" は大きな火球を投げた");
+            await animShot(from, to, getDirection(from, to), "火");
+            await animSpread(to.x, to.y, 1, "火");
+            await magic(from, dmg, getDirection(from, to));
+            await doAOE(to.x, to.y, 1, dealDmg, from, to, dmg/2);
             return true;
         }
     },
@@ -1695,6 +1824,17 @@ let unique_map = [    // 固有マップ
             setTrap(0x00, 1+x_offset, 5);
             setTrap(0x02, 2+x_offset, 5);
             setEnemy(0x000, 11+x_offset, 3);
+            addItem(0x603);
+            addItem(0x604);
+            addItem(0x605);
+            //setEnemy(0x000, 2+x_offset, 2);
+            //setEnemy(0x000, 3+x_offset, 2);
+            //setEnemy(0x000, 4+x_offset, 2);
+            //setEnemy(0x000, 2+x_offset, 3);
+            //setEnemy(0x000, 4+x_offset, 3);
+            //setEnemy(0x000, 2+x_offset, 4);
+            //setEnemy(0x000, 3+x_offset, 4);
+            //setEnemy(0x000, 4+x_offset, 4);
             clairvoyance();
         }
     },

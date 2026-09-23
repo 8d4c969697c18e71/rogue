@@ -26,7 +26,7 @@ async function animBlink(obj, ms = 200, fps = 60) {
     return true;
 }
 
-// 射撃物描画
+// 射撃
 async function animShot(from, dst, direction, char = CHAR_MAP.ammo, fps = 60) {
     // 描画座標を先に取得
     let draw_pos_list = [];
@@ -47,7 +47,7 @@ async function animShot(from, dst, direction, char = CHAR_MAP.ammo, fps = 60) {
     drawMap();
 }
 
-// 投射物描画
+// 投擲
 async function animThrow(from, dst, direction, item, fps = 100) {
     // 描画文字取得
     let char;
@@ -63,4 +63,20 @@ async function animThrow(from, dst, direction, item, fps = 100) {
 
     // 描画
     await animShot(from, dst, direction, char, fps);
+}
+
+// 伝播
+async function animSpread(x, y, radius, char, fps = 60) {
+    for(let k=0; k<=radius; k++) {
+        updateMap();
+        for(let i=-k; i<=k; i++) {
+            for(let j=-k; j<=k; j++) {
+                map_draw[y+i][x+j] = char;
+            }
+        }
+        drawMap();
+        await wait(fps);
+    }
+    updateMap();
+    drawMap();
 }

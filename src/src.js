@@ -350,9 +350,6 @@ function jump(who, direction, distance) {
         return false;
     who.x = who.x+direction.x*distance;
     who.y = who.y+direction.y*distance;
-    
-    addLog(who.name+" は跳び退いた");
-    audio_jump.play();
     return true;
 }
 
@@ -429,7 +426,6 @@ async function shot(who, ammo, direction) {
         if("weapon" in who && who.weapon) await getItemData(who.weapon).func_attack(enemy);
         if("ammo" in who && who.ammo) await getItemData(who.ammo).func_attack(enemy);
         if("armor" in enemy && enemy.armor) await getItemData(enemy.armor).func_attacked(who);
-        if(who == player) findPl(enemy);
         return enemy;
     }
     else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
@@ -521,7 +517,6 @@ async function throwing(who, item, direction) {
     if(isEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
         await throwDmg(who, enemy, item);
-        if(who == player) findPl(enemy);
         return enemy;
     }
     else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
@@ -593,7 +588,6 @@ async function magic(who, value, direction) {
     if(isEnemy(dst.x+direction.x, dst.y+direction.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
         await magicDmg(who, enemy, value);
-        if(who == player) findPl(enemy);
         return enemy;
     }
     else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
@@ -616,6 +610,8 @@ async function magicDmg(from, to, value) {
 
 // ダメージ
 async function dealDmg(from, to, dmg) {
+    if(from == undefined || to == undefined) return;
+
     addHP(to, -dmg);
     addLogSameLine(to.name+" に "+dmg+" のダメージ");
     audio_hit.play();
@@ -641,6 +637,9 @@ async function dealDmg(from, to, dmg) {
 
     // TODO: fromへの処理
     if(from === undefined) return;
+
+    // 標的更新(敵)
+    if(to != player) setTarget(to, from);
 
     // 死亡判定
     await isDead(to);
@@ -677,12 +676,12 @@ function getDirection(from, to) {
     return {x:dir_x, y:dir_y};
 }
 
-async function doAOE(who, radius, func, ...args) {
-    for(let i=-radius; i<radius; i++) {
-        if(who.y+i < 0 || who.y+i >= SIZEY) continue;
-        for (let j=-radius; j<radius; j++) {
-            if(who.x+j < 0 || who.x+j >= SIZEX) continue;
-            func(who, args);
+async function doAOE(x, y, radius, func, ...args) {
+    for(let i=-radius; i<=radius; i++) {
+        if(y+i < 0 || y+i >= SIZEY) continue;
+        for (let j=-radius; j<=radius; j++) {
+            if(x+j < 0 || x+j >= SIZEX) continue;
+            func(args);
         }
     }
 }
@@ -1061,9 +1060,9 @@ async function isDead(who) {
 }
 
 async function checkKill(who) {
-    for(let idx in killed_group) {
-        if(killed_group[idx].exp != undefined) {
-            addExp(who, killed_group[idx].exp);
+    for(let en of killed_group) {
+        if(en.exp != undefined) {
+            addExp(who, en.exp);
         }
     }
     killed_group = [];
@@ -1254,8 +1253,8 @@ function setRandomXY() {
 
 // アイテムの有無
 function isItem(x, y) {
-    for(let i in item_group)
-        if(x==item_group[i].x && y==item_group[i].y)
+    for(let item of item_group)
+        if(x==item.x && y==item.y)
             return true;
     return false;
 }
@@ -1444,18 +1443,16 @@ function setShop(id, x, y) {
 }
 
 function isShop(x, y) {
-    for(let s in shop_group)
-        if(shop_group[s].x == x && shop_group[s].y == y)
+    for(let shop of shop_group)
+        if(shop.x == x && shop.y == y)
             return true;
-
     return false;
 }
 
 function setSellList(item_list) {
-    for(let idx in inventory) {
-        if(item_list.length == 0 || item_list.find(v=>v.id==inventory[idx].id) === undefined) {
-            let item = inventory[idx];
-            item_list.push(Object.assign({}, item, {price: -(inventory[idx].price)}));
+    for(let item of inventory) {
+        if(item_list.length == 0 || item_list.find(v=>v.id==item.id) === undefined) {
+            item_list.push(Object.assign({}, item, {price: -(item.price)}));
         }
     }
 }
@@ -1467,10 +1464,9 @@ function setNPC(id, x, y) {
 }
 
 function isNPC(x, y) {
-    for(let n in npc_group)
-        if(npc_group[n].x == x && npc_group[n].y == y)
+    for(let npc in npc_group)
+        if(npc.x == x && npc.y == y)
             return true;
-
     return false;
 }
 
@@ -1561,7 +1557,7 @@ async function eventEnemy(enemy) {
         }
         else {
             for(let en of enemy_group) {
-                if(enemy.map_sight[en.y][en.x] && enemy.id == enemy.chase_target) {
+                if(en != enemy && enemy.map_sight[en.y][en.x] && enemy.id == enemy.chase_target) {
                     target = en;
                     break;
                 }
@@ -1632,16 +1628,23 @@ function updateTarget(enemy) {
     getSight(enemy);
     if(enemy.chase_target == undefined) {
         if(enemy.map_sight[player.y][player.x])
-            findPl(enemy);
+            setTarget(enemy, player);
         else if(enemy.berserk_flag) {
             for(let en of enemy_group) {
                 if(en != enemy && enemy.map_sight[en.y][en.x]) {
-                    findBerserk(enemy, en);
+                    setTarget(enemy, en);
                     return;
                 }
             }
         }
     }
+}
+
+// 標的設定
+function setTarget(who, target) {
+    if(target == player) who.chase_target = "player";
+    else who.chase_target = target.id;
+    who.chase_count = who.chase_limit;
 }
 
 // 視界取得
@@ -1673,16 +1676,6 @@ function getSightPath(x, y, sight_range, map_sight) {
             getSightPath(x+j, y+i, sight_range-1, map_sight);
         }
     }
-}
-
-function findPl(who) {
-    who.chase_target = "player";
-    who.chase_count = who.chase_limit;
-}
-
-function findBerserk(who, target) {
-    who.chase_target = target.id;
-    who.chase_count = who.chase_limit;
 }
 
 // エネミー移動（追跡）
@@ -1961,8 +1954,8 @@ function setSpawnXY(priority, group_spawn_flag, id) {
 
 // エネミーがいるか
 function isEnemy(x, y) {
-    for(let e in enemy_group)
-        if(enemy_group[e].x == x && enemy_group[e].y == y)
+    for(let enemy of enemy_group)
+        if(enemy.x == x && enemy.y == y)
             return true;
     return false;
 }
