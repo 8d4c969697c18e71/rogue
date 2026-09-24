@@ -17,7 +17,7 @@ function drawMap() {
                 ctx.fillStyle = "gray";
             }
             else if(map_shotrange[player.y+i][player.x+j]) {
-                ctx.fillStyle = "green";
+                ctx.fillStyle = "blue";
             }
             else{
                 if(map_draw[player.y+i][player.x+j]==CHAR_MAP[ID_MAP.path]

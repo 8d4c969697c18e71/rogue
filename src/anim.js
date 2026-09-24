@@ -28,11 +28,15 @@ async function animBlink(obj, ms = 200, fps = 60) {
 
 // 射撃
 async function animShot(from, dst, direction, char = CHAR_MAP.ammo, fps = 60) {
+    if(from.x == dst.x && from.y == dst.y) return;
+    
     // 描画座標を先に取得
     let draw_pos_list = [];
     for(let i=1; i<SIZEX && i<SIZEY; i++) {
         let tmp_dst = straightRecursive(from.x, from.y, direction, i);
-        if(!player.map_sight[tmp_dst.y][tmp_dst.x] || (tmp_dst.x == dst.x && tmp_dst.y == dst.y)) break;
+        if(!player.map_sight[tmp_dst.y][tmp_dst.x]
+        || (tmp_dst.x == dst.x && tmp_dst.y == dst.y))
+            break;
         draw_pos_list.push(tmp_dst);
     }
 

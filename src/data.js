@@ -429,7 +429,7 @@ const ITEM_DATA = [
         id: 0x080,
         name: "火炎瓶",
         type: "consume",
-        price: 7,
+        price: 8,
         remove_after_throw: true,
         func: async function() {
             addLog("投擲用のようだ")
@@ -475,6 +475,50 @@ const ITEM_DATA = [
             calcAtkFromStatus("dex", 1.25, this.base_dmg);
         },
     },
+    {
+        id: 0x102,
+        name: "ダガー",
+        type: "weapon",
+        base_dmg: 15,
+        price: 20,
+        func_equip: async function() {},
+        func_unequip: async function() {},
+        func_attack: async function(to) {},
+        func_recalc: async function() {
+            player.atk += this.base_dmg;
+            calcAtkFromStatus("str", 1.0, this.base_dmg);
+            calcAtkFromStatus("dex", 1.1, this.base_dmg);
+        },
+    },
+    {
+        id: 0x103,
+        name: "ハンドアクス",
+        type: "weapon",
+        base_dmg: 20,
+        price: 25,
+        func_equip: async function() {},
+        func_unequip: async function() {},
+        func_attack: async function(to) {},
+        func_recalc: async function() {
+            player.atk += this.base_dmg;
+            calcAtkFromStatus("str", 1.1, this.base_dmg);
+            calcAtkFromStatus("dex", 1.0, this.base_dmg);
+        },
+    },
+    {
+        id: 0x104,
+        name: "メイス",
+        type: "weapon",
+        base_dmg: 30,
+        price: 30,
+        func_equip: async function() {},
+        func_unequip: async function() {},
+        func_attack: async function(to) {},
+        func_recalc: async function() {
+            player.atk += this.base_dmg;
+            calcAtkFromStatus("str", 1.35, this.base_dmg);
+        },
+    },
     // 射撃武器 0x2XX
     {
         id: 0x200,
@@ -501,10 +545,10 @@ const ITEM_DATA = [
         type: "armor",
         price: 40,
         func_equip: async function() {
-            player.def += 10;
+            player.def_offset += 10;
         },
         func_unequip: async function() {
-            player.def -= 10;
+            player.def_offset -= 10;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -515,10 +559,10 @@ const ITEM_DATA = [
         type: "armor",
         price: 56,
         func_equip: async function() {
-            player.def += 12;
+            player.def_offset += 12;
         },
         func_unequip: async function() {
-            player.def -= 12;
+            player.def_offset -= 12;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -529,10 +573,10 @@ const ITEM_DATA = [
         type: "armor",
         price: 64,
         func_equip: async function() {
-            player.def += 14;
+            player.def_offset += 14;
         },
         func_unequip: async function() {
-            player.def -= 14;
+            player.def_offset -= 14;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -547,6 +591,38 @@ const ITEM_DATA = [
         },
         func_unequip: async function() {
             player.mp_max_offset -= 3;
+        },
+        func_attacked: async function(from) {},
+        func_recalc: async function() {},
+    },
+    {
+        id: 0x381,
+        name: "古竜院のローブ",
+        type: "armor",
+        price: 45,
+        func_equip: async function() {
+            player.hp_regen_rate_offset += 1;
+            player.mp_max_offset += 2;
+        },
+        func_unequip: async function() {
+            player.hp_regen_rate_offset -= 1;
+            player.mp_max_offset -= 2;
+        },
+        func_attacked: async function(from) {},
+        func_recalc: async function() {},
+    },
+    {
+        id: 0x382,
+        name: "大沼の装衣",
+        type: "armor",
+        price: 42,
+        func_equip: async function() {
+            player.def_offset += 3;
+            player.mp_max_offset += 2;
+        },
+        func_unequip: async function() {
+            player.def_offset -= 3;
+            player.mp_max_offset -= 2;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -799,26 +875,27 @@ const ITEM_DATA = [
         name: "持たざる者の追憶",
         type: "unique",
         price: 0,
-        hp: 100,
-        hp_max: 100,
-        mp: 10,
-        mp_max: 10,
-        str: 2,
-        dex: 2,
-        int: 2,
-        fth: 4,
-        atk: 25,
-        def: 5,
-        hung_rate: 30,
-        hp_regen_rate: 10,
-        mp_regen_rate: 10,
-        sight_range: 5,
-        lvup: {hp_max: 30, mp_max: 3, str: 2, dex: 2, fth: 3},
+        st: {
+            hp: 100,
+            hp_max: 100,
+            mp: 10,
+            mp_max: 10,
+            str: 2,
+            dex: 2,
+            int: 2,
+            fth: 4,
+            atk: 25,
+            def: 5,
+            hung_rate: 30,
+            hp_regen_rate: 10,
+            mp_regen_rate: 10,
+            sight_range: 5,
+            lvup: {hp_max: 30, mp_max: 3, str: 2, dex: 2, fth: 3},
+        },
         func: async function() {
             log_reserve.pop();
             player.job = this.id;
             backLv();
-            player.def = this.def;
 
             inventory.splice(inventory.indexOf(this), 1);
             return true;
@@ -829,27 +906,28 @@ const ITEM_DATA = [
         name: "戦士の追憶",
         type: "unique",
         price: 0,
-        hp: 200,
-        hp_max: 200,
-        mp: 0,
-        mp_max: 0,
-        str: 4,
-        dex: 2,
-        int: 1,
-        fth: 3,
-        atk: 25,
-        def: 15,
-        hung_rate: 10,
-        hp_regen_rate: 10,
-        mp_regen_rate: 10,
-        sight_range: 3,
-        lvup: {hp_max: 40, mp_max: 1, str: 3, dex: 2},
+        st: {
+            hp: 175,
+            hp_max: 175,
+            mp: 0,
+            mp_max: 0,
+            str: 4,
+            dex: 2,
+            int: 1,
+            fth: 3,
+            atk: 25,
+            def: 15,
+            hung_rate: 10,
+            hp_regen_rate: 10,
+            mp_regen_rate: 10,
+            sight_range: 3,
+            lvup: {hp_max: 40, mp_max: 1, str: 3, dex: 2},
+        },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
-                player.def = this.def;
 
                 addItem(0x100);
                 addItem(0x300);
@@ -868,27 +946,28 @@ const ITEM_DATA = [
         name: "弓兵の追憶",
         type: "unique",
         price: 0,
-        hp: 150,
-        hp_max: 150,
-        mp: 10,
-        mp_max: 10,
-        str: 2,
-        dex: 4,
-        int: 3,
-        fth: 1,
-        atk: 20,
-        def: 7,
-        hung_rate: 10,
-        hp_regen_rate: 10,
-        mp_regen_rate: 10,
-        sight_range: 9,
-        lvup: {hp_max: 25, mp_max: 2, dex: 4, int: 1},
+        st: {
+            hp: 130,
+            hp_max: 130,
+            mp: 10,
+            mp_max: 10,
+            str: 2,
+            dex: 4,
+            int: 3,
+            fth: 1,
+            atk: 20,
+            def: 10,
+            hung_rate: 10,
+            hp_regen_rate: 10,
+            mp_regen_rate: 10,
+            sight_range: 9,
+            lvup: {hp_max: 25, mp_max: 2, dex: 4, int: 1},
+        },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 5) {
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
-                player.def = this.def;
 
                 addItem(0x200);
                 for(let i=0; i<8; i++)
@@ -909,30 +988,114 @@ const ITEM_DATA = [
         name: "魔術師の追憶",
         type: "unique",
         price: 0,
-        hp: 100,
-        hp_max: 100,
-        mp: 20,
-        mp_max: 20,
-        str: 1,
-        dex: 2,
-        int: 6,
-        fth: 1,
-        atk: 15,
-        def: 2,
-        hung_rate: 10,
-        hp_regen_rate: 10,
-        mp_regen_rate: 7,
-        sight_range: 7,
-        lvup: {hp_max: 10, mp_max: 4, int: 4, fth: 1},
+        st: {
+            hp: 110,
+            hp_max: 110,
+            mp: 20,
+            mp_max: 20,
+            str: 1,
+            dex: 2,
+            int: 6,
+            fth: 1,
+            atk: 15,
+            def: 2,
+            hung_rate: 10,
+            hp_regen_rate: 10,
+            mp_regen_rate: 7,
+            sight_range: 7,
+            lvup: {hp_max: 15, mp_max: 4, int: 4, fth: 1},
+        },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
                 log_reserve.pop();
                 player.job = this.id;
                 backLv();
-                player.def = this.def;
 
+                addItem(0x102);
                 addItem(0x600);
                 addItem(0x380);
+                addItem(0x020);
+                inventory.splice(inventory.indexOf(this), 1);
+                return true;
+            }
+            else{
+                addLog("持ちきれない");
+                return false;
+            }
+        },
+    },
+    {
+        id: 0xf04,
+        name: "聖職者の追憶",
+        type: "unique",
+        price: 0,
+        st: {
+            hp: 140,
+            hp_max: 140,
+            mp: 17,
+            mp_max: 17,
+            str: 3,
+            dex: 2,
+            int: 1,
+            fth: 4,
+            atk: 17,
+            def: 7,
+            hung_rate: 10,
+            hp_regen_rate: 10,
+            mp_regen_rate: 9,
+            sight_range: 6,
+            lvup: {hp_max: 20, mp_max: 3, str: 2, fth: 3},
+        },
+        func: async function() {
+            if(INVENTORY_SIZE-inventory.length >= 3) {
+                log_reserve.pop();
+                player.job = this.id;
+                backLv();
+
+                addItem(0x104);
+                addItem(0x601);
+                addItem(0x381);
+                addItem(0x020);
+                inventory.splice(inventory.indexOf(this), 1);
+                return true;
+            }
+            else{
+                addLog("持ちきれない");
+                return false;
+            }
+        },
+    },
+    {
+        id: 0xf05,
+        name: "呪術師の追憶",
+        type: "unique",
+        price: 0,
+        st: {
+            hp: 120,
+            hp_max: 120,
+            mp: 17,
+            mp_max: 17,
+            str: 1,
+            dex: 1,
+            int: 4,
+            fth: 4,
+            atk: 15,
+            def: 5,
+            hung_rate: 10,
+            hp_regen_rate: 10,
+            mp_regen_rate: 7,
+            sight_range: 7,
+            lvup: {hp_max: 15, mp_max: 3, int: 3, fth: 3},
+        },
+        func: async function() {
+            if(INVENTORY_SIZE-inventory.length >= 3) {
+                log_reserve.pop();
+                player.job = this.id;
+                backLv();
+
+                addItem(0x103);
+                addItem(0x604);
+                addItem(0x382);
                 addItem(0x020);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
@@ -956,45 +1119,66 @@ const ITEM_TABLE = [
     [
         0x000, 0x000, 0x000,
         0x010, 0x020, 0x030,
+        0x080,
         0x800,
     ],
     [
         0x000, 0x000, 0x000,
         0x010, 0x020, 0x030,
-        0x500, 0x800,
+        0x080,
+        0x800,
     ],
     [
-        0x000, 0x000, 0x000,
-        0x010, 0x020, 0x030,
-        0x500, 0x800,
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x080, 0x080,
+        0x400, 
+        0x500,
+        0x800, 0x800,
     ],
     [
-        0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
-        0x011, 0x011,
-        0x100, 0x300, 0x400, 
-        0x500, 0x800, 0x800,
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x080, 0x080,
+        0x400, 0x401, 0x402,
+        0x500,
+        0x800, 0x800, 0x801,
     ],
     [
-        0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
-        0x011, 0x011,
-        0x100, 0x300, 0x400, 
-        0x500, 0x800, 0x800,
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x080, 0x080,
+        0x400, 0x401, 0x402,
+        0x500,
+        0x603,
+        0x800, 0x800, 0x801,
     ],
     [
-        0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
-        0x011, 0x011,
-        0x100, 0x300, 0x400, 
-        0x500, 0x800, 0x800,
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x012, 0x012,
+        0x080, 0x080,
+        0x101, 0x301,
+        0x400, 0x401, 0x402, 0x403,
+        0x500,
+        0x603,
+        0x800, 0x800, 0x801, 0x801,
     ],
     [
-        0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030, 
-        0x011, 0x011,
-        0x100, 0x101, 0x300, 0x301, 0x400, 
-        0x500, 0x800, 0x800,
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x012, 0x012,
+        0x080, 0x080,
+        0x101, 0x301, 0x302,
+        0x400, 0x401, 0x402, 0x403,
+        0x500,
+        0x603, 0x605,
+        0x800, 0x800, 0x801, 0x801,
     ],
 ];
 let item_group = [];
@@ -1007,7 +1191,7 @@ const ENEMY_DATA = [
         name: "亡者",
         char: "亡",
         lv:1,
-        hp:120, hp_max:120, 
+        hp:80, hp_max:80, 
         mp:0, mp_max:0, 
         atk:30, def:10,
         speed:1,
@@ -1054,7 +1238,7 @@ const ENEMY_DATA = [
         name: "亡者兵士",
         char: "兵",
         lv:1,
-        hp:150, hp_max:150,
+        hp:120, hp_max:120,
         mp:0, mp_max:0,
         atk:50, def:15,
         speed:1,
@@ -1073,7 +1257,7 @@ const ENEMY_DATA = [
         name: "白人",
         char: "白",
         lv:1,
-        hp:60, hp_max:60, 
+        hp:70, hp_max:70, 
         mp:15, mp_max:15,
         atk:40, def:6,
         speed:1,
@@ -1098,7 +1282,7 @@ const ENEMY_DATA = [
         name: "スケルトン",
         char: "骨",
         lv:1,
-        hp:150, hp_max:150,
+        hp:120, hp_max:120,
         mp:5, mp_max:5,
         atk:60, def:5,
         speed:1,
@@ -1146,7 +1330,7 @@ const ENEMY_DATA = [
         name: "車輪骸骨",
         char: "車",
         lv:1,
-        hp:200, hp_max:200,
+        hp:150, hp_max:150,
         mp:5, mp_max:5,
         atk:40, def:10,
         speed:1,
@@ -1164,6 +1348,27 @@ const ENEMY_DATA = [
                 chance: 1,
             }
         ],
+    },
+    {
+        id: 0xfff,
+        name: "人形兵",
+        char: "練",
+        lv:1,
+        hp:0xffff, hp_max:0xffff,
+        mp:0, mp_max:0,
+        atk:0, def:10,
+        speed:0,
+        sight_range:0,
+        escape_flag: false,
+        distance: 0,
+        group_spawn_flag: false,
+        berserk_flag: false,
+        exp:0,
+        func_spawn: async function(me) {},
+        func_died: async function() {
+            await setEnemy(0xfff, this.x, this.y);
+        },
+        skill: [],
     },
 ];
 
@@ -1201,7 +1406,7 @@ const SKILL_DATA = [
             for(let d in KEY_DIRECTION) {
                 let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
                 let xy = straightRecursive(from.x, from.y, KEY_DIRECTION[d], ammo.range-1);
-                if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && from.map_sight[to.y][to.x]) {
+                if(xy.x == to.x && xy.y == to.y && from.map_sight[to.y][to.x]) {
                     await shot(from, ammo, KEY_DIRECTION[d]);
                     return true;
                 }
@@ -1209,7 +1414,7 @@ const SKILL_DATA = [
             for(let d in KEY_DIRECTION_DIAGONAL) {
                 let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
                 let xy = straightRecursive(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], ammo.range-1);
-                if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && from.map_sight[to.y][to.x]) {
+                if(xy.x == to.x && xy.y == to.y && from.map_sight[to.y][to.x]) {
                     await shot(from, ammo, KEY_DIRECTION_DIAGONAL[d]);
                     return true;
                 }
@@ -1274,12 +1479,12 @@ const SKILL_DATA = [
                 let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION[d], SIZEX+SIZEY);
                 if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y) && from.map_sight[to.y][to.x]) {
                     addLog(from.name+" は "+to.name+" に突撃した");
-                    await attack(from, to);
                     while(await move(from, KEY_DIRECTION[d])) {
                         updateMap();
                         drawMap();
                         await wait(50);
                     }
+                    await attack(from, to);
                     return true;
                 }
             }
@@ -1287,12 +1492,12 @@ const SKILL_DATA = [
                 let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], SIZEX+SIZEY);
                 if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y) && from.map_sight[to.y][to.x]) {
                     addLog(from.name+" は "+to.name+" に突撃した");
-                    await attack(from, to);
                     while(await move(from, KEY_DIRECTION_DIAGONAL[d])) {
                         updateMap();
                         drawMap();
                         await wait(50);
                     }
+                    await attack(from, to);
                     return true;
                 }
             }
@@ -1319,10 +1524,11 @@ const SKILL_DATA = [
         name: "小回復",
         func: async function(from, to) {
             audio_heal.play();
-            addLog("淡い光が "+to.name+" を包む　HPが "+value+" 回復した");
 
             let fth = from.fth ? from.fth : 10;
-            addHP(from, 30 + fth * 2);
+            let value = 30 + fth * 2;
+            addHP(from, value);
+            addLog("淡い光が "+to.name+" を包む　HPが "+value+" 回復した");
             return true;
         }
     },
@@ -1585,24 +1791,32 @@ const NPC_DATA = [
         dialogue: [
             "助言するよ",
             // ダンジョン
+            "武器の攻撃力は能力によって変動するよ",
+            "指輪は2つ装備できるよ",
             "射撃で届く距離は弾によって変わるよ",
             "投擲は5歩先まで投げられるよ",
             "4階以降は罠があるよ",
             "待機すると周りにある罠を看破できるよ",
             "怪物は君が見えなくなってしばらくすると追跡を諦めるよ",
+            "広範囲の攻撃は壁を貫通することがあるよ",
+            "ダンジョンで倒れるとゴールドだけ持ち帰れるよ",
             // 職業
-            "戦士は耐久力が高いよ",
-            "弓兵は視界が広いよ",
-            "魔術師は魔力の自然回復が速いよ",
             "職業毎に能力の成長率が違うよ",
-            "指輪は2つ装備できるよ",
-            //"弓を装備すると、一番上の矢が自動的に装備されるよ",
-            //"基本的に杖の威力は最大MP依存だよ",
+            "戦士は耐久力が高く、筋技がバランス良く伸びるよ",
+            "弓兵は視界が広く、技量が良く伸びるよ",
+            "魔術師は知力が良く伸びるよ",
+            "聖職者は信仰が良く伸び、筋力にも少し適性があるよ",
+            "呪術師は近接がからっきしだけど、術に長けてるよ",
             "職業で装備できるものに差はないよ",
+            "術師は魔力の回復が早いよ",
             // 拠点
             "10階層毎にここに戻れるよ",
             "戻ってくると位階は元に戻るよ",
+            "カレは初期装備を売ってくれるよ",
             "メレンは物を買ってくれるよ",
+            "リーシュは君のこれまでの功績を記録してくれるよ",
+            "石碑には記録した日時が記されるよ",
+            "ポータル部屋にいるガヴァは物を買ってくれるよ",
         ],
         dialogue_cnt: 0,
         func_before: async function() {},
@@ -1626,7 +1840,7 @@ const NPC_DATA = [
     },
     {
         id: 0x04,
-        name: "記録者カレル",
+        name: "記録者リーシュ",
         char: "記",
         loop: true,
         dialogue: [
@@ -1687,6 +1901,8 @@ const SHOP_DATA = [
             {id: 0xf01},
             {id: 0xf02},
             {id: 0xf03},
+            {id: 0xf04},
+            {id: 0xf05},
         ],
         func_before: async function() {
             if(INVENTORY_SIZE-inventory.length < 4) {
@@ -1740,15 +1956,21 @@ const SHOP_DATA = [
             {id: 0x011},
             {id: 0x020},
             {id: 0x030},
+            {id: 0x080},
             {id: 0x800},
             {id: 0x100},
+            {id: 0x102},
+            {id: 0x103},
+            {id: 0x104},
             {id: 0x200},
             {id: 0x300},
             {id: 0x380},
-            {id: 0x401},
-            {id: 0x400},
+            {id: 0x381},
+            {id: 0x382},
             {id: 0x600},
+            {id: 0x601},
             {id: 0x602},
+            {id: 0x604},
         ],
         func_before: async function() {},
         func_buy: async function() {},
@@ -1880,31 +2102,35 @@ let unique_map = [    // 固有マップ
         pl_x: 5, pl_y: 11,
         safe_flag: true,
         map: [
-        "00000000000",
-        "00001110000",
-        "00001110000",
-        "00001110000",
-        "00000200000",
-        "01101111110",
-        "01101111110",
-        "01121111110",
-        "01101111110",
-        "01101111110",
-        "00001111110",
-        "01111111110",
-        "01111111110",
-        "01111111110",
-        "00000000000",
+        "00000000000000000",
+        "00001110000000000",
+        "00001110000000000",
+        "00001110000000000",
+        "00000200000000000",
+        "01101111110111110",
+        "01101111110111110",
+        "01121111110111110",
+        "01101111110111110",
+        "01101111110111110",
+        "00001111110111110",
+        "01111111110111110",
+        "01111111112111110",
+        "01111111110111110",
+        "00000000000000000",
         ],
         func: async function(x_offset) {
             fullRecovery(player);
             setStair(5+x_offset, 2);
             setNPC(0x02, 9+x_offset, 5);
-            setNPC(0x03, 7+x_offset, 5);
             setNPC(0x04, 2+x_offset, 12);
             setNPC(0x05, 2+x_offset, 11);
             setShop(0x02, 2+x_offset, 5);
             setShop(0x03, 1+x_offset, 7);
+            // 右の部屋
+            setNPC(0x03, 15+x_offset, 12);
+            setEnemy(0xfff, 12+x_offset, 6);
+            setEnemy(0xfff, 13+x_offset, 6);
+            setEnemy(0xfff, 14+x_offset, 6);
         }
     },
     {

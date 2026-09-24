@@ -420,15 +420,15 @@ async function shot(who, ammo, direction) {
     audio_shot.play();
     await animShot(who, dst, direction);
 
-    if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
-        let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
+    if(getEnemy(dst.x, dst.y)) {
+        let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await shotDmg(who, enemy, ammo);
         if("weapon" in who && who.weapon) await getItemData(who.weapon).func_attack(enemy);
         if("ammo" in who && who.ammo) await getItemData(who.ammo).func_attack(enemy);
         if("armor" in enemy && enemy.armor) await getItemData(enemy.armor).func_attacked(who);
         return enemy;
     }
-    else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
+    else if(dst.x == player.x && dst.y == player.y) {
         await shotDmg(who, player, ammo);
         if("weapon" in who && who.weapon) await getItemData(who.weapon).func_attack(player);
         if("ammo" in who && who.ammo) await getItemData(who.ammo).func_attack(player);
@@ -437,18 +437,20 @@ async function shot(who, ammo, direction) {
     }
     else{// 外した
         if(who == player) {
-            if(!isItem(dst.x, dst.y))
-                setItem(ammo.id, dst.x, dst.y);
-            else{
-                for(let s=1; s<SIZEX; s++)
-                    for(let i=-s; i<=s; i++)
-                        for(let j=-s; j<=s; j++)
-                            if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)) {
-                                setItem(ammo.id, dst.x+j, dst.y+i);
-                                addLog(ammo.name+" は床に落ちた");
-                                return undefined;
-                            }
-            }
+            for(let s=0; s<SIZEX; s++)
+                for(let k=0; k<=s; k++) {
+                    const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
+                    const unique_arr = Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
+                    for(let elm of unique_arr) {
+                        const px = dst.x+elm[0];
+                        const py = dst.y+elm[1];
+                        if(canMove(px, py) && !isItem(px, py)) {
+                            setItem(ammo.id, px, py);
+                            //addLog(ammo.name+" は床に落ちた");
+                            return undefined;
+                        }
+                    }
+                }
         }
     }
 }
@@ -509,7 +511,6 @@ async function eventThrowing() {
 // 投擲
 async function throwing(who, item, direction) {
     let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
-    let dst_for_func = dst;
     let hit = undefined;
 
     audio_shot.play();
@@ -517,37 +518,36 @@ async function throwing(who, item, direction) {
     let char = CHAR_MAP[item.type] ? CHAR_MAP[item.type] : CHAR_MAP.ammo;
     await animShot(who, dst, direction, char, 100);
 
-    if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
-        let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
+    if(getEnemy(dst.x, dst.y)) {
+        let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await throwDmg(who, enemy, item);
-        dst_for_func.x = dst.x+direction.x;
-        dst_for_func.y = dst.y+direction.y;
         hit = enemy;
     }
-    else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
+    else if(dst.x == player.x && dst.y == player.y) {
         await throwDmg(who, player, item);
-        dst_for_func.x = dst.x+direction.x;
-        dst_for_func.y = dst.y+direction.y;
         hit = player;
     }
     // アイテム化
     else if(!item.remove_after_throw) {
-        if(!isItem(dst.x, dst.y))
-            setItem(item.id, dst.x, dst.y);
-        else{
-            let placed_flg = false;
-            for(let s=1; s<SIZEX && !placed_flg; s++)
-                for(let i=-s; i<=s && !placed_flg; i++)
-                    for(let j=-s; j<=s && !placed_flg; j++)
-                        if(canMove(dst.x+j, dst.y+i) && !isItem(dst.x+j, dst.y+i)) {
-                            setItem(item.id, dst.x+j, dst.y+i);
-                            placed_flg = true;
-                        }
-        }
+        let placed_flg = false;
+        for(let s=0; s<SIZEX && !placed_flg; s++)
+            for(let k=0; k<=s && !placed_flg; k++) {
+                const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
+                const unique_arr = Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
+                for(let elm of unique_arr) {
+                    const px = dst.x+elm[0];
+                    const py = dst.y+elm[1];
+                    if(canMove(px, py) && !isItem(px, py)) {
+                        setItem(item.id, px, py);
+                        placed_flg = true;
+                        break;
+                    }
+                }
+            }
     }
     
     // 投擲後の固有処理(あれば)
-    if(item.func_throw) item.func_throw(who, dst_for_func);
+    if(item.func_throw) item.func_throw(who, dst);
     return hit;
 }
 
@@ -597,12 +597,12 @@ async function eventMagic() {
 // 魔法
 async function magic(who, value, direction) {
     let dst = straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
-    if(getEnemy(dst.x+direction.x, dst.y+direction.y)) {
-        let enemy = enemy_group.find(v=>(v.x==dst.x+direction.x && v.y==dst.y+direction.y));
+    if(getEnemy(dst.x, dst.y)) {
+        let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await magicDmg(who, enemy, value);
         return enemy;
     }
-    else if(dst.x+direction.x == player.x && dst.y+direction.y == player.y) {
+    else if(dst.x == player.x && dst.y == player.y) {
         await magicDmg(who, player, value);
         return player;
     }
@@ -659,12 +659,14 @@ async function dealDmg(from, to, dmg) {
 }
 
 // 範囲攻撃
-async function doAOE(x, y, radius, who, dmg) {
+async function doAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
     for(let i=-radius; i<=radius; i++) {
         if(y+i < 0 || y+i >= SIZEY) continue;
         for(let j=-radius; j<=radius; j++) {
             if(x+j < 0 || x+j >= SIZEX || map[y+i][x+j] == ID_MAP.none) continue;
-            await dealDmg(who, getEnemy(x+j, y+i), dmg);
+            if(!self_dmg_flg && x+j == who.x && y+i == who.y) continue;
+            const target = x+j == player.x && y+i == player.y ? player : getEnemy(x+j, y+i);
+            await dealDmg(who, target, dmg);
             await checkKill(who);
             updateMap();
             drawMap();
@@ -674,24 +676,27 @@ async function doAOE(x, y, radius, who, dmg) {
 
 function straightRecursive(x, y, direction, range) {
     if(!canMove(x+direction.x, y+direction.y)
-        || range <= 0
-        || isDoor(x+direction.x, y+direction.y))
-        return {x:x, y:y};
+    || range <= 0
+    || isDoor(x+direction.x, y+direction.y)) {
+        return {x:x+direction.x, y:y+direction.y};
+    }
     return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
 
 function straightRecursiveDiagonal(x, y, direction, range) {
     if(!canMove(x+direction.x, y+direction.y)
-        || !canDiagonal(x, y, direction.x, direction.y)
-        || range <= 0
-        || isDoor(x+direction.x, y+direction.y))
-        return {x:x, y:y};
+    || !canDiagonal(x, y, direction.x, direction.y)
+    || range <= 0
+    || isDoor(x+direction.x, y+direction.y)) {
+        return {x:x+direction.x, y:y+direction.y};
+    }
     return straightRecursive(x+direction.x, y+direction.y, direction, --range);
 }
 
 function straightRecursiveAllMap(x, y, direction) {
-    if(!canMove(x+direction.x, y+direction.y))
-        return {x:x, y:y};
+    if(!canMove(x+direction.x, y+direction.y)) {
+        return {x:x+direction.x, y:y+direction.y};
+    }
     return straightRecursiveAllMap(x+direction.x, y+direction.y, direction);
 }
 
@@ -836,7 +841,14 @@ async function gameoverEvent() {
         turn_cnt = 1;
         floor_cnt = -1;
         gameover_flag = false;
+
+        // ステ初期化
         initStatus();
+        const log_tmp = log_reserve;
+        addItem(player.job);
+        useItem(0);
+        log_reserve = log_tmp;
+
         await nextFloor();
     }
 }
@@ -929,7 +941,7 @@ async function calcAtkFromStatus(status, rate, offset = 0) {
 
 // atk再計算
 async function recalcStatus(who) {
-    who.atk = getItemData(who.job).atk;
+    who.atk = getItemData(who.job).st.atk;
     const EQ_TYPE = [...EQUIP_TYPE, ...["ring1", "ring2"]];
     for(let idx in EQ_TYPE) {
         const eq_id = who[EQ_TYPE[idx]];
@@ -940,23 +952,9 @@ async function recalcStatus(who) {
 // lv1に戻す
 function backLv() {
     let job = getItemData(player.job);
-
-    player.hp = job.hp;
-    player.hp_max = job.hp_max;
-    player.mp = job.mp;
-    player.mp_max = job.mp_max;
-    player.str = job.str;
-    player.dex = job.dex;
-    player.int = job.int;
-    player.fth = job.fth;
-    player.atk = job.atk;
-    //player.def = job.def;
-    player.hung_rate = job.hung_rate;
-    player.hp_regen_rate = job.hp_regen_rate;
-    player.mp_regen_rate = job.mp_regen_rate;
-    player.sight_range = job.sight_range;
+    for(let st_name in job.st)
+        player[st_name] = job.st[st_name];
     player.job_name = job.name.substring(0, job.name.length-3);
-    player.lvup = job.lvup;
 
     player.lv = 1;
     player.exp = 0;
@@ -967,10 +965,20 @@ function backLv() {
     recalcStatus(player);
 }
 
-// 全ステ初期化
+// ステ初期化(初期開始時)
 function initStatusAll() {
+    initStatus();
+    player.gold = 15;
+    player.job = 0xf00;
+    backLv();
+}
+
+// ステ初期化
+function initStatus() {
     player.hp_max_offset = 0;
     player.mp_max_offset = 0;
+    player.atk_offset = 0;
+    player.def_offset = 0;
     player.hung_max_offset = 0;
     player.hung_rate_offset = 0;
     player.hp_regen_rate_offset = 0;
@@ -983,28 +991,6 @@ function initStatusAll() {
     player.ring1 = undefined;
     player.ring2 = undefined;
     inventory = [];
-    player.gold = 15;
-
-    player.job = 0xf00;
-    backLv();
-    
-    player.def = getItemData(player.job).def;
-}
-
-// 初期化（死亡時用）
-function initStatus() {
-    player.condition = [];
-    player.weapon = undefined;
-    player.ammo = undefined;
-    player.armor = undefined;
-    player.ring1 = undefined;
-    player.ring2 = undefined;
-    inventory = [];
-
-    const log_tmp = log_reserve;
-    addItem(player.job);
-    useItem(0);
-    log_reserve = log_tmp;
 }
 
 // 状態異常追加
@@ -1293,9 +1279,9 @@ function getSkillData(id) {
 // 環境イベント
 async function eventEnv() {
     // 自然回復
-    if(turn_cnt % (player.hp_regen_rate + player.hp_regen_rate_offset) == 0)
+    if(turn_cnt % (player.hp_regen_rate - player.hp_regen_rate_offset) == 0)
         addHP(player, 10);
-    if(turn_cnt % (player.mp_regen_rate + player.mp_regen_rate_offset) == 0)
+    if(turn_cnt % (player.mp_regen_rate - player.mp_regen_rate_offset) == 0)
         addMP(player, 2);
 
     // 空腹度
