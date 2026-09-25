@@ -1897,7 +1897,7 @@ async function setEnemy(id, x, y) {
 }
 
 // エネミーグループ
-// 5階層毎にテーブル変更
+// 3階層毎にテーブル変更
 async function setEnemyGroup() {
     let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
     let table = [];
