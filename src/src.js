@@ -259,7 +259,10 @@ async function eventPlayer() {
     }
     // sub
     if(key_input.sub) {
-        if(!player.ammo) addLog("弾薬を装備していない");
+        if(!player.ammo) {
+            addLog("弾薬を装備していない");
+            play_audio(audio_cancel);
+        }
         else if(bow_flag) {
             addLog(player.name+" は "+getItemData(player.weapon).name+" を構えた");
             play_audio(audio_apply);
@@ -762,7 +765,10 @@ async function eventUI() {
                 play_audio(audio_apply);
                 throwing_flag = true;
             }
-            else addLog(inventory[inv_cursor].name+" は投擲できない");
+            else {
+                play_audio(audio_cancel);
+                addLog(inventory[inv_cursor].name+" は投擲できない");
+            }
         }
         return false;
     }
@@ -795,6 +801,23 @@ async function eventShop() {
             play_audio(audio_cancel);
             return false;
         }
+        // アップグレード
+        else if(upgrade_flag) {
+            const cursor = getInvCursorFromShopCursor(shop_cursor);
+            if(player.gold < shop_using.item[shop_cursor].upgrade_cost) {
+                addLog("金貨が足りない");
+            }
+            else if(await upgradeWeapon(cursor)) {
+                shop_using.func_buy();
+                if(shop_using && shop_using.item.length > 0
+                && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
+                    shop_cursor--;
+                play_audio(audio_apply);
+                return false;
+            }
+            play_audio(audio_cancel);
+            return false;
+        }
         // 保管庫
         else if(storage_flag) {
             if(fromStorage(shop_cursor)) {
@@ -803,7 +826,9 @@ async function eventShop() {
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
                 play_audio(audio_apply);
+                return false;
             }
+            play_audio(audio_cancel);
             return false;
         }
         // buy
@@ -816,8 +841,10 @@ async function eventShop() {
                     return true;
                 }
             }
-            else
+            else {
+                play_audio(audio_cancel);
                 addLog("金貨が足りない");
+            }
             return false;
         }
         // sell
@@ -825,6 +852,7 @@ async function eventShop() {
             if(getItemInventory(shop_using.item[shop_cursor].id)) {
                 let item_sell = getItemInventory(shop_using.item[shop_cursor].id);
                 if(item_sell.equip_flag) {
+                    play_audio(audio_cancel);
                     addLog("装備中だ");
                     return false;
                 }
@@ -845,8 +873,10 @@ async function eventShop() {
                 addLog(item_sell.name+" を売った");
                 return true;
             }
-            else
+            else {
+                play_audio(audio_cancel);
                 addLog("持っていない");
+            }
             return false;
         }
     }
@@ -930,6 +960,62 @@ function setSellList(item_list) {
             item_list.push(Object.assign({}, item, {price: -(item.price)}));
         }
     }
+}
+
+// アップグレード
+function getInvCursorFromShopCursor(shop_cursor) {
+    let inv_weapon_list = [];
+    for(let inv_idx in inventory) {
+        if(UPGRADE_TYPE.includes(inventory[inv_idx].type)) {
+            inv_weapon_list.push(inv_idx);
+        }
+    }
+    return inv_weapon_list[shop_cursor];
+}
+
+function setUpgradeList(item_list) {
+    item_list.length = 0;
+    for(let inv_idx in inventory) {
+        item = inventory[inv_idx];
+        if(UPGRADE_TYPE.includes(item.type) && item.level < 10) {
+            const cost = Math.floor(item.price * 1.5 ** (item.level + 1));
+            item_list.push(Object.assign({}, item, {upgrade_cost: cost}));
+        }
+    }
+}
+
+async function upgradeWeapon(inv_index) {
+    const item = inventory[inv_index];
+    const equip_flg = isEquiped(inv_index);
+
+    if(!UPGRADE_TYPE.includes(item.type)) {
+        addLog("武器以外は強化できない");
+        return false;
+    }
+    if(item.level >= 10) {
+        addLog("これ以上強化できない");
+        return false;
+    }
+
+    // 装備中
+    if(equip_flg) {
+        const log_tmp = log_reserve;
+        equip(inv_index);
+        log_reserve = log_tmp;
+    }
+
+    addLog(item.name+" を鍛えた");
+    item.level++;
+    item.base_dmg = Math.floor(item.base_dmg + getItemData(item.id).base_dmg * 0.25);
+    item.name = getItemData(item.id).name+"+"+item.level;
+
+    // 再装備
+    if(equip_flg) {
+        const log_tmp = log_reserve;
+        equip(inv_index);
+        log_reserve = log_tmp;
+    }
+    return true;
 }
 
 // 保管庫

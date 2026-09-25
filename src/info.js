@@ -89,8 +89,9 @@ function drawShop() {
         if(shop_cursor >= shop_display_num + shop_start_offset) shop_start_offset = shop_cursor - shop_display_num + 1;
 
         if(!storage_IO_flag) shop.style.border = "solid 1px white";
-        if(!storage_flag) shop.insertAdjacentHTML("beforeend", "SHOP<br>");
-        else shop.insertAdjacentHTML("beforeend", "STORAGE<br>");
+        if(storage_flag) shop.insertAdjacentHTML("beforeend", "STORAGE<br>");
+        else if(upgrade_flag) shop.insertAdjacentHTML("beforeend", "UPGRADE<br>");
+        else shop.insertAdjacentHTML("beforeend", "SHOP<br>");
         for(let i=shop_start_offset; i<shop_using.item.length && i<shop_display_num+shop_start_offset; i++) {
             if(i == shop_cursor)
                 shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
@@ -98,7 +99,11 @@ function drawShop() {
                 shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
             else
                 shop.insertAdjacentHTML("beforeend", (i+1)+": ");
-            if(storage_flag) {
+            if(upgrade_flag) {
+                shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+                shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].upgrade_cost+"G");
+            }
+            else if(storage_flag) {
                 shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
                 if(shop_using.item[i].stack_num > 0)
                     shop.insertAdjacentHTML("beforeend", "×"+shop_using.item[i].stack_num);

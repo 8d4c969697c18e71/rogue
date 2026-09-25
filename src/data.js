@@ -221,6 +221,7 @@ let exeEventsFlg = false;
 let gameover_flag = false;
 let ui_flag = false;
 let shop_flag = false;
+let upgrade_flag = false;
 let shot_flag = false;
 let throwing_flag = false;
 let magic_flag = false;
@@ -451,6 +452,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 25,
         price: 30,
+        level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
@@ -466,6 +468,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 40,
         price: 46,
+        level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
@@ -481,6 +484,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 15,
         price: 20,
+        level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
@@ -496,6 +500,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 20,
         price: 25,
+        level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
@@ -511,6 +516,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 30,
         price: 30,
+        level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
         func_attack: async function(to) {},
@@ -526,6 +532,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 25,
         price: 36,
+        level: 0,
         func_equip: async function() {
             bow_flag = true;
         },
@@ -544,6 +551,7 @@ const ITEM_DATA = [
         type: "weapon",
         base_dmg: 35,
         price: 45,
+        level: 0,
         func_equip: async function() {
             bow_flag = true;
         },
@@ -1200,6 +1208,7 @@ const ITEM_DATA = [
 const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
 const STACK_TYPE = ["ammo"];
 const STACK_MAX = 32;
+const UPGRADE_TYPE = ["weapon"];
 const INVENTORY_SIZE = 20;
 let inventory = [];
 let inv_cursor = 0;
@@ -1914,8 +1923,8 @@ const NPC_DATA = [
         char: "案",
         loop: true,
         dialogue: [
-            "左が商店、右が職安、正面がダンジョンだ",
-            "ダンジョンの入り口には治癒士もいるぞ",
+            "左が商店、右が職安、正面が迷宮だ",
+            "迷宮の入り口には治癒士もいるぞ",
         ],
         dialogue_cnt: 0,
         func_before: async function() {},
@@ -1951,7 +1960,7 @@ const NPC_DATA = [
             "待機すると周りにある罠を看破できるよ",
             "怪物は君が見えなくなってしばらくすると追跡を諦めるよ",
             "広範囲の攻撃は壁を貫通することがあるよ",
-            "ダンジョンで倒れるとゴールドだけ持ち帰れるよ",
+            "迷宮で倒れると金貨だけ持ち帰れるよ",
             // 職業
             "職業毎に能力の成長率が違うよ",
             "戦士は耐久力が高く、筋技がバランス良く伸びるよ",
@@ -2186,12 +2195,30 @@ const SHOP_DATA = [
             setStorageList(this.item);
         },
         func_buy: async function() {
-            this.item.length = 0;
             setStorageList(this.item);
         },
         func_after: async function() {
             storage_flag = false;
             storage_IO_flag = false;
+        },
+    },
+    {
+        id: 0x08,
+        name: "鍛冶師アンドレ",
+        char: "鍛",
+        dialogue_intro: "よう　どれを鍛えるんだ？",
+        dialogue_outro: "じゃあな　ウワッハッハ",
+        random_flag: false,
+        item_table: [],
+        func_before: async function() {
+            upgrade_flag = true;
+            setUpgradeList(this.item);
+        },
+        func_buy: async function() {
+            setUpgradeList(this.item);
+        },
+        func_after: async function() {
+            upgrade_flag = false;
         },
     },
 ];
@@ -2302,6 +2329,7 @@ let unique_map = [    // 固有マップ
             setShop(0x02, 2+x_offset, 5);
             setShop(0x03, 1+x_offset, 7);
             setShop(0x07, 1+x_offset, 8);
+            setShop(0x08, 9+x_offset, 8);
             // 右の部屋
             setNPC(0x03, 15+x_offset, 12);
             setEnemy(0xfff, 12+x_offset, 6);
