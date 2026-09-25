@@ -462,7 +462,7 @@ const ITEM_DATA = [
     },
     {
         id: 0x101,
-        name: "ブロードソード",
+        name: "ロングソード",
         type: "weapon",
         base_dmg: 40,
         price: 46,
@@ -536,6 +536,25 @@ const ITEM_DATA = [
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("dex", 1.1, this.base_dmg);
+        },
+    },
+    {
+        id: 0x201,
+        name: "ロングボウ",
+        type: "weapon",
+        base_dmg: 35,
+        price: 45,
+        func_equip: async function() {
+            bow_flag = true;
+        },
+        func_unequip: async function() {
+            bow_flag = false;
+        },
+        func_attack: async function(to) {},
+        func_recalc: async function() {
+            player.atk += this.base_dmg;
+            calcAtkFromStatus("str", 1.0, this.base_dmg);
+            calcAtkFromStatus("dex", 1.2, this.base_dmg);
         },
     },
     // 鎧 0x3XX
@@ -721,7 +740,7 @@ const ITEM_DATA = [
     },
     {
         id: 0x601,
-        name: "回復の聖鈴",
+        name: "小回復の聖鈴",
         type: "staff",
         price: 96,
         func: async function() {
@@ -823,6 +842,78 @@ const ITEM_DATA = [
             const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
             return await skill.func(player, target);
         }
+    },
+    {
+        id: 0x606,
+        name: "回復の聖鈴",
+        type: "staff",
+        price: 124,
+        func: async function() {
+            if(player.mp < 16) {
+                addLog("MP が足りない");
+                return false;
+            }
+            const skill = getSkillData(0x401);
+
+            addMP(player, -16);
+            await skill.func(player, player);
+            return true;
+        },
+        func_cast: async function(dir) {}
+    },
+    {
+        id: 0x607,
+        name: "大回復の聖鈴",
+        type: "staff",
+        price: 141,
+        func: async function() {
+            if(player.mp < 30) {
+                addLog("MP が足りない");
+                return false;
+            }
+            const skill = getSkillData(0x402);
+
+            addMP(player, -30);
+            await skill.func(player, player);
+            return true;
+        },
+        func_cast: async function(dir) {}
+    },
+    {
+        id: 0x608,
+        name: "王たる聖鈴",
+        type: "staff",
+        price: 187,
+        func: async function() {
+            if(player.mp < 45) {
+                addLog("MP が足りない");
+                return false;
+            }
+            const skill = getSkillData(0x403);
+
+            addMP(player, -45);
+            await skill.func(player, player);
+            return true;
+        },
+        func_cast: async function(dir) {}
+    },
+    {
+        id: 0x609,
+        name: "恵みの聖鈴",
+        type: "staff",
+        price: 103,
+        func: async function() {
+            if(player.mp < 13) {
+                addLog("MP が足りない");
+                return false;
+            }
+            const skill = getSkillData(0x404);
+
+            addMP(player, -13);
+            await skill.func(player, player);
+            return true;
+        },
+        func_cast: async function(dir) {}
     },
     // 弾薬 0x7XX
     {
@@ -973,7 +1064,6 @@ const ITEM_DATA = [
                 for(let i=0; i<8; i++)
                     addItem(0x800);
                 addItem(0x010);
-                addItem(0x602);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1135,6 +1225,7 @@ const ITEM_TABLE = [
         0x080, 0x080,
         0x400, 
         0x500,
+        0x609,
         0x800, 0x800,
     ],
     [
@@ -1144,6 +1235,7 @@ const ITEM_TABLE = [
         0x080, 0x080,
         0x400, 0x401, 0x402,
         0x500,
+        0x609,
         0x800, 0x800, 0x801,
     ],
     [
@@ -1153,7 +1245,7 @@ const ITEM_TABLE = [
         0x080, 0x080,
         0x400, 0x401, 0x402,
         0x500,
-        0x603,
+        0x603, 0x609,
         0x800, 0x800, 0x801,
     ],
     [
@@ -1162,10 +1254,10 @@ const ITEM_TABLE = [
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080,
-        0x101, 0x301,
+        0x101, 0x201, 0x301,
         0x400, 0x401, 0x402, 0x403,
         0x500,
-        0x603,
+        0x603, 0x606, 0x609,
         0x800, 0x800, 0x801, 0x801,
     ],
     [
@@ -1174,10 +1266,10 @@ const ITEM_TABLE = [
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080,
-        0x101, 0x301, 0x302,
+        0x101, 0x201, 0x301, 0x302,
         0x400, 0x401, 0x402, 0x403,
         0x500,
-        0x603, 0x605,
+        0x602, 0x603, 0x605, 0x606, 0x609,
         0x800, 0x800, 0x801, 0x801,
     ],
 ];
@@ -1254,8 +1346,8 @@ const ENEMY_DATA = [
     },
     {
         id: 0x003,
-        name: "白人",
-        char: "白",
+        name: "亡者弓兵",
+        char: "弓",
         lv:1,
         hp:70, hp_max:70, 
         mp:15, mp_max:15,
@@ -1351,7 +1443,7 @@ const ENEMY_DATA = [
     },
     {
         id: 0xfff,
-        name: "人形兵",
+        name: "練習用人形兵",
         char: "練",
         lv:1,
         hp:0xffff, hp_max:0xffff,
@@ -1533,6 +1625,55 @@ const SKILL_DATA = [
         }
     },
     {
+        id: 0x401,
+        name: "回復",
+        func: async function(from, to) {
+            play_audio(audio_heal);
+
+            let fth = from.fth ? from.fth : 10;
+            let value = 40 + fth * 3;
+            addHP(from, value);
+            addLog("光が "+to.name+" を包む　HPが "+value+" 回復した");
+            return true;
+        }
+    },
+    {
+        id: 0x402,
+        name: "大回復",
+        func: async function(from, to) {
+            play_audio(audio_heal);
+
+            let fth = from.fth ? from.fth : 10;
+            let value = 60 + fth * 4;
+            addHP(from, value);
+            addLog("眩い光が "+to.name+" を包む　HPが "+value+" 回復した");
+            return true;
+        }
+    },
+    {
+        id: 0x403,
+        name: "王たる回復",
+        func: async function(from, to) {
+            play_audio(audio_heal);
+
+            let fth = from.fth ? from.fth : 10;
+            let value = 80 + fth * 5;
+            addHP(from, value);
+            addLog("大いなる光が "+to.name+" を包む　HPが "+value+" 回復した");
+            return true;
+        }
+    },
+    {
+        id: 0x404,
+        name: "恵みの祝福",
+        func: async function(from, to) {
+            play_audio(audio_heal);
+
+            setCondition(from, 0x81);
+            return true;
+        }
+    },
+    {
         id: 0x480,
         name: "フォース",
         func: async function(from, to) {
@@ -1596,17 +1737,15 @@ const CONDITION_DATA = [
         id: 0x00,
         name: "毒",
         turn: 10,
+        value: 5,
         func_be: async function(who) {
             addLog(who.name+" は毒に侵された");
         },
         func_during: async function(who) {
-            let dmg = 5;
-            addHP(who, -dmg);
-            addLog("毒が "+who.name+" の体を蝕む　"+dmg+" のダメージ");
+            addHP(who, -this.value);
+            addLog("毒が "+who.name+" の体を蝕む　"+this.value+" のダメージ");
         },
-        func_recovery: async function(who) {
-            addLog(who.name+" の毒は取り除かれた");
-        },
+        func_recovery: async function(who) {},
     },
     {
         id: 0x01,
@@ -1630,13 +1769,12 @@ const CONDITION_DATA = [
         name: "盲",
         turn: 10,
         func_be: async function(who) {
-            addLog(who.name+" は前が見えない");
+            addLog(who.name+" の目は霞んでいる");
             who.sight_range_offset = -who.sight_range;
         },
         func_during: async function(who) {
         },
         func_recovery: async function(who) {
-            addLog(who.name+" の視力は回復した");
             who.sight_range_offset = 0;
         },
     },
@@ -1673,6 +1811,20 @@ const CONDITION_DATA = [
             addLog(who.name+" は受け流しの構えを解いた");
             who.cannot_action_flag = false;
         },
+    },
+    {
+        id: 0x81,
+        name: "癒",
+        turn: 20,
+        value: 5,
+        func_be: async function(who) {
+            addLog("温かい光が "+who.name+" の体を包む");
+        },
+        func_during: async function(who) {
+            addLog(who.name+" の体力が "+this.value+" 回復した");
+            addHP(who, this.value);
+        },
+        func_recovery: async function(who) {},
     },
 ];
 
@@ -1968,7 +2120,6 @@ const SHOP_DATA = [
             {id: 0x382},
             {id: 0x600},
             {id: 0x601},
-            {id: 0x602},
             {id: 0x604},
         ],
         func_before: async function() {},
