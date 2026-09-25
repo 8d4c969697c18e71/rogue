@@ -38,7 +38,7 @@ function drawInfo() {
 
 function drawInv() {
     inv.innerHTML = "";
-    if(ui_flag) inv.style.border = "solid 1px white";
+    if(ui_flag || storage_IO_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
 
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
@@ -83,13 +83,14 @@ function drawShop() {
     if(shop_flag) {
         const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
         const shop_margin =  parseInt(window.getComputedStyle(document.body).marginTop);
-        shop_display_num = Math.floor((window.innerHeight-body_padding-shop_margin-canvas.clientHeight)/(FONT_SIZE+4)) - 1;
+        shop_display_num = Math.floor((window.innerHeight-body_padding*2-shop_margin-canvas.clientHeight)/(FONT_SIZE+4)) - 1;
 
         if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
         if(shop_cursor >= shop_display_num + shop_start_offset) shop_start_offset = shop_cursor - shop_display_num + 1;
 
-        shop.style.border = "solid 1px white";
-        shop.insertAdjacentHTML("beforeend", "SHOP<br>");
+        if(!storage_IO_flag) shop.style.border = "solid 1px white";
+        if(!storage_flag) shop.insertAdjacentHTML("beforeend", "SHOP<br>");
+        else shop.insertAdjacentHTML("beforeend", "STORAGE<br>");
         for(let i=shop_start_offset; i<shop_using.item.length && i<shop_display_num+shop_start_offset; i++) {
             if(i == shop_cursor)
                 shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
@@ -97,7 +98,12 @@ function drawShop() {
                 shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
             else
                 shop.insertAdjacentHTML("beforeend", (i+1)+": ");
-            if(shop_using.item[i].price>=0) {
+            if(storage_flag) {
+                shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+                if(shop_using.item[i].stack_num > 0)
+                    shop.insertAdjacentHTML("beforeend", "×"+shop_using.item[i].stack_num);
+            }
+            else if(shop_using.item[i].price>=0) {
                 shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
                 shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
             }
@@ -120,8 +126,9 @@ function drawShopPhone() {
         log_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
 
         log.innerHTML = "";
-        log.style.border = "solid 1px white";
-        log.insertAdjacentHTML("beforeend", "SHOP<br>");
+        if(!storage_IO_flag) log.style.border = "solid 1px white";
+        if(!storage_flag) log.insertAdjacentHTML("beforeend", "SHOP<br>");
+        else log.insertAdjacentHTML("beforeend", "STORAGE<br>");
         for(let i=shop_start_offset; i<shop_using.item.length && i<log_display_num+shop_start_offset; i++) {
             if(i == shop_cursor)
                 log.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");

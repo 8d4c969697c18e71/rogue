@@ -25,12 +25,22 @@ window.addEventListener("resize", async () =>{
 
 // cookie
 async function setCookie() {
+    // 全削除
+    for(let cookie of document.cookie.split(";")) {
+        const name = cookie.substring(0, cookie.indexOf("="));
+        document.cookie = name+"=;max-age=0";
+    }
+
+    // セット
     for(let key in player) {
         if(key != "map_sight")
-            document.cookie = "player_" + key + "=" + encodeURIComponent(JSON.stringify(player[key])) + "; max-age=31536000";
+            document.cookie = "player_"+key+"="+encodeURIComponent(JSON.stringify(player[key]))+"; max-age=31536000";
     }
     for(let i=0; i<inventory.length; i++) {
-        document.cookie = "inventory_" + i + "=" + encodeURIComponent(JSON.stringify(inventory[i])) + "; max-age=31536000";
+        document.cookie = "inventory_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+"; max-age=31536000";
+    }
+    for(let i=0; i<storage.length; i++) {
+        document.cookie = "storage_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+"; max-age=31536000";
     }
     cookie_date = DATE + " " + MONTH + " " + YEAR;
     document.cookie = "date=" + encodeURIComponent(JSON.stringify(cookie_date)) + "; max-age=31536000";
@@ -40,7 +50,7 @@ async function loadCookie() {
     const cookie = document.cookie;
     if(cookie.match(/player_.+=/)) {
         const data = decodeURIComponent(cookie).split("; ");
-        let read_flg = {player: false, inventory: false};
+        let read_flg = {player: false, inventory: false, storage: false, date: false};
         for(let idx in data) {
             let [key, val] = data[idx].split("=");
 
@@ -59,12 +69,16 @@ async function loadCookie() {
                 read_flg.player = true;
             }
             else if(key.match(/inventory_([0-9]*)/)) {
-                let inv_idx = key.match(/inventory_([0-9]*)/)[1];
-                inventory[inv_idx] = Object.assign({}, val, ITEM_DATA.find(v=>v.id==val.id));
+                inventory.push(Object.assign({}, getItemData(val.id), val));
                 read_flg.inventory = true;
+            }
+            else if(key.match(/storage_([0-9]*)/)) {
+                storage.push(Object.assign({}, getItemData(val.id). val));
+                read_flg.storage = true;
             }
             else if(key == "date") {
                 cookie_date = val;
+                read_flg.date = true;
             }
         }
         if(read_flg.player) return true;
@@ -136,7 +150,7 @@ async function events() {
     }
     // ショップ
     else if(shop_flag) {
-        turn_flag = eventShop();
+        turn_flag = await eventShop();
     }
     // マップ
     else{
@@ -183,7 +197,7 @@ async function eventPlayer() {
                     if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
                     else addLog(dialog);
                 }
-                audio_play(audio_apply);
+                play_audio(audio_apply);
                 shop_cursor = 0;
                 shop_flag = true;
                 shop_using.func_before();
@@ -197,7 +211,7 @@ async function eventPlayer() {
                     if(npc.name != "") addLog(npc.name+"「"+dialog+"」");
                     else addLog(dialog);
                 }
-                audio_play(audio_apply);
+                play_audio(audio_apply);
                 if(npc.dialogue_cnt<npc.dialogue.length-1)
                     npc.dialogue_cnt++;
                 else if(npc.loop && npc.dialogue_cnt>=npc.dialogue.length-1)
@@ -218,11 +232,11 @@ async function eventPlayer() {
     // apply
     if(key_input.apply) {
         if(isStair(player.x, player.y)) {
-            audio_play(audio_stair);
+            play_audio(audio_stair);
             await nextFloor();
         }
         else if(isPortal(player.x, player.y)) {
-            audio_play(audio_portal);
+            play_audio(audio_portal);
             floor_cnt = -1;
             backLv();
             await nextFloor();
@@ -232,13 +246,13 @@ async function eventPlayer() {
                 addLog("罠を発見した");
             else
                 addLog("待機した");
-            audio_play(audio_apply);
+            play_audio(audio_apply);
             return true;
         }
     }
     // cancel
     if(key_input.cancel) {
-        audio_play(audio_apply);
+        play_audio(audio_apply);
         //inv_cursor = 0;
         ui_flag = true;
         return false;
@@ -248,12 +262,12 @@ async function eventPlayer() {
         if(!player.ammo) addLog("弾薬を装備していない");
         else if(bow_flag) {
             addLog(player.name+" は "+getItemData(player.weapon).name+" を構えた");
-            audio_play(audio_apply);
+            play_audio(audio_apply);
             shot_flag = true;
         }
         else{
             addLog(player.name+" は "+getItemData(player.ammo).name+" を振り被った")
-            audio_play(audio_apply);
+            play_audio(audio_apply);
             throwing_flag = true;
         }
         return false;
@@ -406,7 +420,7 @@ async function eventShot() {
     // cancel
     if(key_input.cancel) {
         addLog("構えを解いた");
-        audio_play(audio_cancel);
+        play_audio(audio_cancel);
         shot_flag = false;
         return false;
     }
@@ -417,7 +431,7 @@ async function shot(who, ammo, direction) {
     let dst = straightRecursive(who.x, who.y, direction, ammo.range);
 
     addLog(who.name+" は "+ammo.name+" を放った");
-    audio_play(audio_shot);
+    play_audio(audio_shot);
     await animShot(who, dst, direction);
 
     if(getEnemy(dst.x, dst.y)) {
@@ -485,7 +499,8 @@ async function eventThrowing() {
             if(STACK_TYPE.includes(item.type)) {
                 if(item.stack_num > 0) item.stack_num--;
                 if(item.stack_num <= 0) {
-                    if(isEquiped(item)) equip(inventory.findIndex(v=>v.id==player.ammo && v.equip_flag));
+                    if(isEquiped(inventory.indexOf(item)))
+                        equip(inventory.findIndex(v=>v.id==player.ammo && v.equip_flag));
                     inventory.splice(inv_cursor, 1);
                 }
             }
@@ -500,7 +515,7 @@ async function eventThrowing() {
     // cancel
     if(key_input.cancel) {
         addLog("投擲をやめた");
-        audio_play(audio_cancel);
+        play_audio(audio_cancel);
         //inv_cursor = -1;
         throwing_flag = false;
         ui_flag = false;
@@ -513,7 +528,7 @@ async function throwing(who, item, direction) {
     let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
     let hit = undefined;
 
-    audio_play(audio_shot);
+    play_audio(audio_shot);
     addLog(who.name+" は "+item.name+" を投擲した");
     let char = CHAR_MAP[item.type] ? CHAR_MAP[item.type] : CHAR_MAP.ammo;
     await animShot(who, dst, direction, char, 100);
@@ -585,7 +600,7 @@ async function eventMagic() {
     // cancel
     if(key_input.cancel) {
         addLog("構えを解いた");
-        audio_play(audio_cancel);
+        play_audio(audio_cancel);
         magic_flag = false;
         player.magic_using = undefined;
         //inv_cursor = -1;
@@ -627,7 +642,7 @@ async function dealDmg(from, to, dmg) {
 
     addHP(to, -dmg);
     addLog(to.name+" に "+dmg+" のダメージ");
-    audio_play(audio_hit);
+    play_audio(audio_hit);
     await animBlink(to);
 
     // 状態異常
@@ -728,7 +743,7 @@ async function eventUI() {
     // apply
     if(key_input.apply)
         if(inv_cursor<inventory.length && await useItem(inv_cursor)) {
-            audio_play(audio_apply);
+            play_audio(audio_apply);
             //inv_cursor = -1;
             ui_flag = false;
             return true;
@@ -742,9 +757,9 @@ async function eventUI() {
     // sub
     if(key_input.sub) {
         if(inv_cursor<inventory.length) {
-            if(!isEquiped(inventory[inv_cursor])) {
+            if(!isEquiped(inv_cursor)) {
                 addLog(player.name+" は "+inventory[inv_cursor].name+" を振り被った");
-                audio_play(audio_apply);
+                play_audio(audio_apply);
                 throwing_flag = true;
             }
             else addLog(inventory[inv_cursor].name+" は投擲できない");
@@ -754,16 +769,19 @@ async function eventUI() {
 }
 
 // ショップイベント
-function eventShop() {
+async function eventShop() {
+    // 保管庫(入)用サブイベント
+    if(storage_flag && storage_IO_flag) return await subEventStorageInput();
+
     // 上下
-    if(key_input.up ) {
+    if(key_input.up) {
         if(shop_cursor > 0)
             shop_cursor--;
         else
             shop_cursor = shop_using.item.length - 1;
         return false;
     }
-    if(key_input.down ) {
+    if(key_input.down) {
         if(shop_cursor < shop_using.item.length - 1)
             shop_cursor++;
         else
@@ -772,17 +790,34 @@ function eventShop() {
     }
     // apply
     if(key_input.apply) {
+        // 品物なし
+        if(shop_using.item.length <= 0) {
+            play_audio(audio_cancel);
+            return false;
+        }
+        // 保管庫
+        else if(storage_flag) {
+            if(fromStorage(shop_cursor)) {
+                shop_using.func_buy();
+                if(shop_using && shop_using.item.length > 0
+                && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
+                    shop_cursor--;
+                play_audio(audio_apply);
+            }
+            return false;
+        }
         // buy
-        if(shop_using.item[shop_cursor].price >= 0) {
+        else if(shop_using.item[shop_cursor].price >= 0) {
             if(player.gold >= shop_using.item[shop_cursor].price) {
                 if(addItem(shop_using.item[shop_cursor].id)) {
                     player.gold -= shop_using.item[shop_cursor].price;
                     shop_using.func_buy();
-                    audio_play(audio_coin);
+                    play_audio(audio_coin);
                     return true;
                 }
             }
-            else addLog("金貨が足りない");
+            else
+                addLog("金貨が足りない");
             return false;
         }
         // sell
@@ -806,7 +841,7 @@ function eventShop() {
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
-                audio_play(audio_coin);
+                play_audio(audio_coin);
                 addLog(item_sell.name+" を売った");
                 return true;
             }
@@ -827,12 +862,107 @@ function eventShop() {
         
         return false;
     }
+    // sub
+    if(key_input.sub) {
+        // 保管庫用
+        if(storage_flag) {
+            play_audio(audio_apply);
+            storage_IO_flag = true;
+            return false;
+        }
+    }
+}
+
+async function subEventStorageInput() {
+    // 上下
+    if(key_input.up) {
+        if(inv_cursor > 0)
+            inv_cursor--;
+        else
+            inv_cursor = INVENTORY_SIZE - 1;
+        return false;
+    }
+    if(key_input.down) {
+        if(inv_cursor < INVENTORY_SIZE - 1)
+            inv_cursor++;
+        else
+            inv_cursor = 0;
+        return false;
+    }
+    // apply
+    if(key_input.apply) {
+        if(inv_cursor<inventory.length && toStorage(inv_cursor)) {
+            shop_using.func_buy();
+            play_audio(audio_apply);
+            return false;
+        }
+        play_audio(audio_cancel);
+        return false;
+    }
+    // cancel
+    if(key_input.cancel) {
+        let dialog = shop_using.dialogue_outro;
+        if(dialog != "") {
+            if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
+            else addLog(dialog);
+        }
+        shop_using.func_after();
+        setNotUseShop();
+        
+        return false;
+    }
+    // sub
+    if(key_input.sub) {
+        storage_IO_flag = false;
+        return false;
+    }
 }
 
 function setNotUseShop() {
     shop_using = undefined;
     shop_cursor = -1;
     shop_flag = false;
+}
+
+function setSellList(item_list) {
+    for(let item of inventory) {
+        if(item_list.length == 0 || !item_list.find(v=>v.id==item.id)) {
+            item_list.push(Object.assign({}, item, {price: -(item.price)}));
+        }
+    }
+}
+
+// 保管庫
+function fromStorage(shop_cursor) {
+    if(inventory.length < INVENTORY_SIZE) {
+        inventory.push(shop_using.item[shop_cursor]);
+        storage.splice(shop_cursor, 1);
+        return true;
+    }
+    addLog("持ちきれない");
+    return false;
+}
+
+function toStorage(inv_cursor) {
+    if(isEquiped(inv_cursor)) {
+        addLog(inventory[inv_cursor].name+" は装備している");
+        return false;
+    }
+    else if(0) { // TODO: 保管庫上限
+        addLog("保管庫が満杯だ");
+        return false;
+    }
+    storage.push(inventory[inv_cursor]);
+    inventory.splice(inv_cursor, 1);
+    return true;
+    
+}
+
+function setStorageList(item_list) {
+    item_list.length = 0;
+    for(let item of storage) {
+        item_list.push(Object.assign({}, item, {price: 0}));
+    }
 }
 
 // ゲームオーバー
@@ -856,7 +986,7 @@ async function gameoverEvent() {
 function gameover() {
     log_reserve = [];
     addLog("ゲームオーバー");
-    audio_play(audio_death);
+    play_audio(audio_death);
     drawGameover();
     drawInfo();
     drawInv();
@@ -924,7 +1054,7 @@ function lvUp(who) {
         if(who != player) addHP(who, who.hp_max);
 
         addLog(who.name+" はレベルが上がった");
-        audio_play(audio_lvup);
+        play_audio(audio_lvup);
         lvUp(who);
 
         drawInfo();
@@ -1263,8 +1393,8 @@ function isItem(x, y) {
 }
 
 // 装備中
-function isEquiped(item) {
-    if(item.equip_flag) {
+function isEquiped(inv_cursor) {
+    if(inventory[inv_cursor].equip_flag) {
         return true;
     }
     return false;
@@ -1288,7 +1418,7 @@ async function eventEnv() {
     if(player.hung <= 0) {
         addLog("飢えが "+player.name+" を蝕む");
         await dealDmg(undefined, player, -15);
-        audio_play(audio_hit);
+        play_audio(audio_hit);
     }
     if(!safe_flag && turn_cnt % player.hung_rate == 0) {
         if(player.hung > 0) {
@@ -1339,12 +1469,12 @@ async function eventEnv() {
         if(i.x == player.x && i.y == player.y) {
             if(i.id==0x000) {
                 player.gold += 5;
-                audio_play(audio_apply);
+                play_audio(audio_apply);
                 addLog("金貨5枚 を入手");
                 item_group.splice(item_group.indexOf(i), 1);
             }
             else if(addItem(i.id)) {
-                audio_play(audio_apply);
+                play_audio(audio_apply);
                 item_group.splice(item_group.indexOf(i), 1);
             }
         }
@@ -1450,14 +1580,6 @@ function isShop(x, y) {
         if(shop.x == x && shop.y == y)
             return true;
     return false;
-}
-
-function setSellList(item_list) {
-    for(let item of inventory) {
-        if(item_list.length == 0 || !item_list.find(v=>v.id==item.id)) {
-            item_list.push(Object.assign({}, item, {price: -(item.price)}));
-        }
-    }
 }
 
 // NPC配置

@@ -303,7 +303,7 @@ const ITEM_DATA = [
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -318,7 +318,7 @@ const ITEM_DATA = [
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -333,7 +333,7 @@ const ITEM_DATA = [
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -348,7 +348,7 @@ const ITEM_DATA = [
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -363,7 +363,7 @@ const ITEM_DATA = [
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -377,7 +377,7 @@ const ITEM_DATA = [
             let value = 15;
             addMP(player, value);
             addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -391,7 +391,7 @@ const ITEM_DATA = [
             let value = 30;
             addMP(player, value);
             addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -405,7 +405,7 @@ const ITEM_DATA = [
             let value = player.mp_max;
             addMP(player, value);
             addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -419,7 +419,7 @@ const ITEM_DATA = [
             let value = 30;
             addHung(value);
             addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -436,7 +436,7 @@ const ITEM_DATA = [
             return false;
         },
         func_throw: async function(who, dst) {
-            audio_play(audio_fire);
+            play_audio(audio_fire);
             await animSpread(dst.x, dst.y, 1, "火");
             
             await doAOE(dst.x, dst.y, 1, who, 25);
@@ -1438,7 +1438,7 @@ const SKILL_DATA = [
         func: async function(from, to) {
             if(jump(from, this.direction, this.distance)) {
                 addLog(who.name+" は跳び退いた");
-                audio_play(audio_jump);
+                play_audio(audio_jump);
                 return true;
             }
             return false;
@@ -1509,7 +1509,7 @@ const SKILL_DATA = [
         id: 0x300,
         name: "ソウルの光",
         func: async function(from, to) {
-            audio_play(audio_ray);
+            play_audio(audio_ray);
             addLog(from.name+" はソウルの光を放った");
             await animShot(from, to, getDirection(from, to), "魂");
 
@@ -1523,7 +1523,7 @@ const SKILL_DATA = [
         id: 0x400,
         name: "小回復",
         func: async function(from, to) {
-            audio_play(audio_heal);
+            play_audio(audio_heal);
 
             let fth = from.fth ? from.fth : 10;
             let value = 30 + fth * 2;
@@ -1536,7 +1536,7 @@ const SKILL_DATA = [
         id: 0x480,
         name: "フォース",
         func: async function(from, to) {
-            audio_play(audio_force);
+            play_audio(audio_force);
             addLog(from.name+" から衝撃波が迸る");
             await animSpread(from.x, from.y, 1, "光");
             
@@ -1559,7 +1559,7 @@ const SKILL_DATA = [
         id: 0x500,
         name: "火球",
         func: async function(from, to) {
-            audio_play(audio_fire);
+            play_audio(audio_fire);
             addLog(from.name+" は火球を投げた");
             await animShot(from, to, getDirection(from, to), "火");
 
@@ -1573,7 +1573,7 @@ const SKILL_DATA = [
         id: 0x501,
         name: "大火球",
         func: async function(from, to) {
-            audio_play(audio_fire);
+            play_audio(audio_fire);
             addLog(from.name+" は大きな火球を投げた");
             await animShot(from, to, getDirection(from, to), "火");
             await animSpread(to.x, to.y, 1, "火");
@@ -1685,7 +1685,7 @@ const TRAP_DATA = [
         func: async function(who) {
             await setCondition(who, 0x00);
             addLog(who.name+" は毒の床を踏んだ");
-            audio_play(audio_poison);
+            play_audio(audio_poison);
         },
     },
     {
@@ -1694,7 +1694,7 @@ const TRAP_DATA = [
         func: async function(who) {
             await setCondition(who, 0x01);
             addLog(who.name+" は睡眠ガスに包まれた");
-            audio_play(audio_poison);
+            play_audio(audio_poison);
         },
     },
     {
@@ -1703,7 +1703,7 @@ const TRAP_DATA = [
         func: async function(who) {
             await setCondition(who, 0x02);
             addLog(who.name+" の周囲が黒い霧に包まれた");
-            audio_play(audio_poison);
+            play_audio(audio_poison);
         },
     },
     {
@@ -1712,7 +1712,7 @@ const TRAP_DATA = [
         func: async function(who) {
             await setCondition(who, 0x03);
             addLog(who.name+" はトラばさみにかかった");
-            audio_play(audio_hit);
+            play_audio(audio_hit);
         },
     },
     {
@@ -1728,7 +1728,7 @@ const TRAP_DATA = [
             who.x = x;
             who.y = y;
             addLog(who.name+" は転送罠にかかった");
-            audio_play(audio_portal);
+            play_audio(audio_portal);
         },
     },
 ];
@@ -1835,7 +1835,7 @@ const NPC_DATA = [
         func_after: async function() {
             fullRecovery(player);
             addLog(player.name+" は全快した");
-            audio_play(audio_heal);
+            play_audio(audio_heal);
         },
     },
     {
@@ -1925,8 +1925,7 @@ const SHOP_DATA = [
         dialogue_intro: "売っておくれ...　何か売っておくれよ...",
         dialogue_outro: "すまないねぇ...　ヒヒヒッ... ",
         random_flag: false,
-        item_table: [
-        ],
+        item_table: [],
         func_before: async function() {
             setSellList(this.item);
             if(this.item.length <= 0) {
@@ -1983,8 +1982,7 @@ const SHOP_DATA = [
         dialogue_intro: "オマエ　ガヴァ　ショウダイ？　...ショウバイ！",
         dialogue_outro: "マイダ...　マイドアリ！",
         random_flag: false,
-        item_table: [
-        ],
+        item_table: [],
         func_before: async function() {
             setSellList(this.item);
             if(this.item.length <= 0) {
@@ -2023,10 +2021,35 @@ const SHOP_DATA = [
         func_buy: async function() {},
         func_after: async function() {},
     },
+    {
+        id: 0x07,
+        name: "",
+        char: "庫",
+        dialogue_intro: "保管庫を開いた（ｃで出入切替）",
+        dialogue_outro: "保管庫を閉じた",
+        random_flag: false,
+        item_table: [],
+        func_before: async function() {
+            storage_flag = true;
+            storage_IO_flag = false;
+            setStorageList(this.item);
+        },
+        func_buy: async function() {
+            this.item.length = 0;
+            setStorageList(this.item);
+        },
+        func_after: async function() {
+            storage_flag = false;
+            storage_IO_flag = false;
+        },
+    },
 ];
 let shop_group = [];
 let shop_cursor = -1;
 let shop_using = undefined; // 利用中のショップ
+let storage = [];
+let storage_flag = false;
+let storage_IO_flag = false; // out: false, in: true
 
 // 
 //==================================================UNIQUE MAP==================================================
@@ -2107,12 +2130,12 @@ let unique_map = [    // 固有マップ
         "00001110000000000",
         "00001110000000000",
         "00000200000000000",
-        "01101111110111110",
-        "01101111110111110",
-        "01121111110111110",
-        "01101111110111110",
-        "01101111110111110",
+        "01110111110111110",
+        "01112111110111110",
+        "01111111110111110",
+        "01111111110111110",
         "00001111110111110",
+        "01111111110111110",
         "01111111110111110",
         "01111111112111110",
         "01111111110111110",
@@ -2121,11 +2144,12 @@ let unique_map = [    // 固有マップ
         func: async function(x_offset) {
             fullRecovery(player);
             setStair(5+x_offset, 2);
-            setNPC(0x02, 9+x_offset, 5);
-            setNPC(0x04, 2+x_offset, 12);
-            setNPC(0x05, 2+x_offset, 11);
+            setNPC(0x02, 7+x_offset, 5);
+            setNPC(0x04, 3+x_offset, 10);
+            setNPC(0x05, 2+x_offset, 10);
             setShop(0x02, 2+x_offset, 5);
             setShop(0x03, 1+x_offset, 7);
+            setShop(0x07, 1+x_offset, 8);
             // 右の部屋
             setNPC(0x03, 15+x_offset, 12);
             setEnemy(0xfff, 12+x_offset, 6);

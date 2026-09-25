@@ -176,7 +176,7 @@ const wait = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // SE再生
 prevent_audio_flg = false;
-function audio_play(audio) {
+function play_audio(audio) {
     if(prevent_audio_flg) return;
     audio.play();
 }
