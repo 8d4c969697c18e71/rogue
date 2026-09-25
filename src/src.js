@@ -948,7 +948,7 @@ function toStorage(inv_cursor) {
         addLog(inventory[inv_cursor].name+" は装備している");
         return false;
     }
-    else if(0) { // TODO: 保管庫上限
+    else if(storage.length >= STORAGE_SIZE) {
         addLog("保管庫が満杯だ");
         return false;
     }

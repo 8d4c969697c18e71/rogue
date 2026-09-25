@@ -2047,6 +2047,7 @@ const SHOP_DATA = [
 let shop_group = [];
 let shop_cursor = -1;
 let shop_using = undefined; // 利用中のショップ
+const STORAGE_SIZE = 60;
 let storage = [];
 let storage_flag = false;
 let storage_IO_flag = false; // out: false, in: true
