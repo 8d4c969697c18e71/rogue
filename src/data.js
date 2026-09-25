@@ -760,7 +760,7 @@ const ITEM_DATA = [
         id: 0x602,
         name: "跳躍の杖",
         type: "staff",
-        price: 112,
+        price: 254,
         func: async function() {
             if(player.mp < 7) {
                 addLog("MP が足りない");
