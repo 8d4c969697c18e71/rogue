@@ -183,7 +183,7 @@ async function eventPlayer() {
                     if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
                     else addLog(dialog);
                 }
-                audio_apply.play();
+                audio_play(audio_apply);
                 shop_cursor = 0;
                 shop_flag = true;
                 shop_using.func_before();
@@ -197,7 +197,7 @@ async function eventPlayer() {
                     if(npc.name != "") addLog(npc.name+"「"+dialog+"」");
                     else addLog(dialog);
                 }
-                audio_apply.play();
+                audio_play(audio_apply);
                 if(npc.dialogue_cnt<npc.dialogue.length-1)
                     npc.dialogue_cnt++;
                 else if(npc.loop && npc.dialogue_cnt>=npc.dialogue.length-1)
@@ -218,11 +218,11 @@ async function eventPlayer() {
     // apply
     if(key_input.apply) {
         if(isStair(player.x, player.y)) {
-            audio_stair.play();
+            audio_play(audio_stair);
             await nextFloor();
         }
         else if(isPortal(player.x, player.y)) {
-            audio_portal.play();
+            audio_play(audio_portal);
             floor_cnt = -1;
             backLv();
             await nextFloor();
@@ -232,13 +232,13 @@ async function eventPlayer() {
                 addLog("罠を発見した");
             else
                 addLog("待機した");
-            audio_apply.play();
+            audio_play(audio_apply);
             return true;
         }
     }
     // cancel
     if(key_input.cancel) {
-        audio_apply.play();
+        audio_play(audio_apply);
         //inv_cursor = 0;
         ui_flag = true;
         return false;
@@ -248,12 +248,12 @@ async function eventPlayer() {
         if(!player.ammo) addLog("弾薬を装備していない");
         else if(bow_flag) {
             addLog(player.name+" は "+getItemData(player.weapon).name+" を構えた");
-            audio_apply.play();
+            audio_play(audio_apply);
             shot_flag = true;
         }
         else{
             addLog(player.name+" は "+getItemData(player.ammo).name+" を振り被った")
-            audio_apply.play();
+            audio_play(audio_apply);
             throwing_flag = true;
         }
         return false;
@@ -406,7 +406,7 @@ async function eventShot() {
     // cancel
     if(key_input.cancel) {
         addLog("構えを解いた");
-        audio_cancel.play();
+        audio_play(audio_cancel);
         shot_flag = false;
         return false;
     }
@@ -417,7 +417,7 @@ async function shot(who, ammo, direction) {
     let dst = straightRecursive(who.x, who.y, direction, ammo.range);
 
     addLog(who.name+" は "+ammo.name+" を放った");
-    audio_shot.play();
+    audio_play(audio_shot);
     await animShot(who, dst, direction);
 
     if(getEnemy(dst.x, dst.y)) {
@@ -500,7 +500,7 @@ async function eventThrowing() {
     // cancel
     if(key_input.cancel) {
         addLog("投擲をやめた");
-        audio_cancel.play();
+        audio_play(audio_cancel);
         //inv_cursor = -1;
         throwing_flag = false;
         ui_flag = false;
@@ -513,7 +513,7 @@ async function throwing(who, item, direction) {
     let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
     let hit = undefined;
 
-    audio_shot.play();
+    audio_play(audio_shot);
     addLog(who.name+" は "+item.name+" を投擲した");
     let char = CHAR_MAP[item.type] ? CHAR_MAP[item.type] : CHAR_MAP.ammo;
     await animShot(who, dst, direction, char, 100);
@@ -585,7 +585,7 @@ async function eventMagic() {
     // cancel
     if(key_input.cancel) {
         addLog("構えを解いた");
-        audio_cancel.play();
+        audio_play(audio_cancel);
         magic_flag = false;
         player.magic_using = undefined;
         //inv_cursor = -1;
@@ -627,7 +627,7 @@ async function dealDmg(from, to, dmg) {
 
     addHP(to, -dmg);
     addLog(to.name+" に "+dmg+" のダメージ");
-    audio_hit.play();
+    audio_play(audio_hit);
     await animBlink(to);
 
     // 状態異常
@@ -728,7 +728,7 @@ async function eventUI() {
     // apply
     if(key_input.apply)
         if(inv_cursor<inventory.length && await useItem(inv_cursor)) {
-            audio_apply.play();
+            audio_play(audio_apply);
             //inv_cursor = -1;
             ui_flag = false;
             return true;
@@ -744,7 +744,7 @@ async function eventUI() {
         if(inv_cursor<inventory.length) {
             if(!isEquiped(inventory[inv_cursor])) {
                 addLog(player.name+" は "+inventory[inv_cursor].name+" を振り被った");
-                audio_apply.play();
+                audio_play(audio_apply);
                 throwing_flag = true;
             }
             else addLog(inventory[inv_cursor].name+" は投擲できない");
@@ -778,7 +778,7 @@ function eventShop() {
                 if(addItem(shop_using.item[shop_cursor].id)) {
                     player.gold -= shop_using.item[shop_cursor].price;
                     shop_using.func_buy();
-                    audio_coin.play();
+                    audio_play(audio_coin);
                     return true;
                 }
             }
@@ -806,7 +806,7 @@ function eventShop() {
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
-                audio_coin.play();
+                audio_play(audio_coin);
                 addLog(item_sell.name+" を売った");
                 return true;
             }
@@ -856,7 +856,7 @@ async function gameoverEvent() {
 function gameover() {
     log_reserve = [];
     addLog("ゲームオーバー");
-    audio_death.play();
+    audio_play(audio_death);
     drawGameover();
     drawInfo();
     drawInv();
@@ -924,7 +924,7 @@ function lvUp(who) {
         if(who != player) addHP(who, who.hp_max);
 
         addLog(who.name+" はレベルが上がった");
-        audio_lvup.play();
+        audio_play(audio_lvup);
         lvUp(who);
 
         drawInfo();
@@ -1288,7 +1288,7 @@ async function eventEnv() {
     if(player.hung <= 0) {
         addLog("飢えが "+player.name+" を蝕む");
         await dealDmg(undefined, player, -15);
-        audio_hit.play();
+        audio_play(audio_hit);
     }
     if(!safe_flag && turn_cnt % player.hung_rate == 0) {
         if(player.hung > 0) {
@@ -1339,12 +1339,12 @@ async function eventEnv() {
         if(i.x == player.x && i.y == player.y) {
             if(i.id==0x000) {
                 player.gold += 5;
-                audio_apply.play();
+                audio_play(audio_apply);
                 addLog("金貨5枚 を入手");
                 item_group.splice(item_group.indexOf(i), 1);
             }
             else if(addItem(i.id)) {
-                audio_apply.play();
+                audio_play(audio_apply);
                 item_group.splice(item_group.indexOf(i), 1);
             }
         }

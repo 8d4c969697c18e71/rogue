@@ -174,6 +174,13 @@ btn_downright.addEventListener("touchend", () =>{
 // wait
 const wait = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// SE再生
+prevent_audio_flg = false;
+function audio_play(audio) {
+    if(prevent_audio_flg) return;
+    audio.play();
+}
+
 // スマホ検出
 function isPhone() {
     if(navigator.userAgent.match(/iPhone|Android.+Mobile/))

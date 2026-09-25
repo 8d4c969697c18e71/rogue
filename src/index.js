@@ -13,9 +13,11 @@ async function loadCanvas() {
 
 async function events() {
     if(key_input.apply) {
+        audio_apply(audio_apply);
         window.location.replace("./name.html");
     }
     else if(key_input.cancel) {
+        audio_apply(audio_apply);
         window.location.replace("./main.html");
     }
 }
