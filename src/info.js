@@ -111,34 +111,33 @@ function drawShop() {
 }
 
 function drawShopPhone() {
+    log.style.border = "solid 1px black";
     if(shop_flag) {   
-        inv.innerHTML = "";
-        inv.style.border = "solid 1px black";
-
         if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
-        if(shop_cursor >= inv_display_num + shop_start_offset) shop_start_offset = shop_cursor - inv_display_num + 1;
+        if(shop_cursor >= log_display_num + shop_start_offset) shop_start_offset = shop_cursor - log_display_num + 1;
         const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
         const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
-        inv_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
+        log_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
 
-        inv.style.border = "solid 1px white";
-        inv.insertAdjacentHTML("beforeend", "SHOP<br>");
-        for(let i=shop_start_offset; i<shop_using.item.length && i<inv_display_num+shop_start_offset; i++) {
+        log.innerHTML = "";
+        log.style.border = "solid 1px white";
+        log.insertAdjacentHTML("beforeend", "SHOP<br>");
+        for(let i=shop_start_offset; i<shop_using.item.length && i<log_display_num+shop_start_offset; i++) {
             if(i == shop_cursor)
-                inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+                log.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
             else if(i<9)
-                inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+                log.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
             else
-                inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+                log.insertAdjacentHTML("beforeend", (i+1)+": ");
             if(shop_using.item[i].price>=0) {
-                inv.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-                inv.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
+                log.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+                log.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
             }
             else{
-                inv.insertAdjacentHTML("beforeend", "売: "+shop_using.item[i].name);
-                inv.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+                log.insertAdjacentHTML("beforeend", "売: "+shop_using.item[i].name);
+                log.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
             }
-            inv.insertAdjacentHTML("beforeend", "<br>");
+            log.insertAdjacentHTML("beforeend", "<br>");
         }
     }
 }
