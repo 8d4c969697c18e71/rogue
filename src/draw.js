@@ -8,6 +8,14 @@ function drawAll() {
     drawShop();
 }
 
+function drawAllWithoutMap() {
+    updateMap();
+    drawInfo();
+    drawInv();
+    drawLog();
+    drawShop();
+}
+
 // PL中心
 function drawMap() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);

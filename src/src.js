@@ -1749,7 +1749,9 @@ async function eventEnemies() {
         // speed回行動
         for(let cnt=0; cnt<enemy.speed; cnt++) {
             await eventEnemy(enemy);
-            drawAll();
+            drawAllWithoutMap();
+            if(player.map_sight[enemy.y][enemy.x])
+                drawMap();
         }
 
         if(await isDead(player)) return;
@@ -1823,7 +1825,7 @@ async function eventEnemy(enemy) {
     }
 
     // 標的更新
-    updateTarget(enemy)
+    updateTarget(enemy);
 }
 
 // 標的情報更新
