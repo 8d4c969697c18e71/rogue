@@ -1867,6 +1867,7 @@ function getSight(who) {
             getRoomXY(who.x+j, who.y+i, room_xy);
             for(let xy of room_xy)
                 who.map_sight[xy.y][xy.x] = true;
+            continue;
         }
         // 通路
         getSightPath(who.x, who.y, (who.sight_range+who.sight_range_offset), who.map_sight);
@@ -1875,6 +1876,17 @@ function getSight(who) {
 
 // 通路の視界
 function getSightPath(x, y, sight_range, map_sight) {
+    for(let i=-sight_range; i<=sight_range; i++) {
+        for(let j=-sight_range; j<=sight_range; j++) {
+            if(isInMap(x+j, y+i)
+            && !isRoom(x+j, y+i)
+            && map[y+i][x+j] != ID_MAP.none)
+                map_sight[y+i][x+j] = true;
+        }
+    }
+}
+    
+function getSightPathRec(x, y, sight_range, map_sight) {
     map_sight[y][x] = true;
     for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
         if(isInMap(x+j,y+i) 
