@@ -163,7 +163,7 @@ async function events() {
     // ターン経過
     if(turn_flag) {
         await eventEnemies();
-        await eventEnv()
+        await eventEnv();
         turn_cnt++;
     }
 
@@ -1838,12 +1838,15 @@ function updateTarget(enemy) {
     initMap(enemy.map_sight, false);
     getSight(enemy);
     if(!enemy.chase_target) {
-        if(enemy.map_sight[player.y][player.x])
+        if(enemy.map_sight[player.y][player.x]) {
             setTarget(enemy, player);
+            enemy.travel_route.length = 0;
+        }
         else if(enemy.berserk_flag) {
             for(let en of enemy_group) {
                 if(en != enemy && enemy.map_sight[en.y][en.x]) {
                     setTarget(enemy, en);
+                    enemy.travel_route.length = 0;
                     return;
                 }
             }
@@ -1860,8 +1863,8 @@ function setTarget(who, target) {
 
 // 視界取得
 function getSight(who) {
+    // 部屋
     for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-        // 部屋
         if(isRoom(who.x+j, who.y+i)) {
             let room_xy = [];
             getRoomXY(who.x+j, who.y+i, room_xy);
@@ -1869,32 +1872,31 @@ function getSight(who) {
                 who.map_sight[xy.y][xy.x] = true;
             continue;
         }
-        // 通路
-        getSightPath(who.x, who.y, (who.sight_range+who.sight_range_offset), who.map_sight);
     }
+    // 周囲
+    getSightAround(who.x, who.y, (who.sight_range+who.sight_range_offset), who.map_sight);
 }
 
 // 通路の視界
-function getSightPath(x, y, sight_range, map_sight) {
+function getSightAround(x, y, sight_range, map_sight) {
     for(let i=-sight_range; i<=sight_range; i++) {
         for(let j=-sight_range; j<=sight_range; j++) {
             if(isInMap(x+j, y+i)
-            && !isRoom(x+j, y+i)
             && map[y+i][x+j] != ID_MAP.none)
                 map_sight[y+i][x+j] = true;
         }
     }
 }
     
-function getSightPathRec(x, y, sight_range, map_sight) {
+function getSightPath(x, y, sight_range, map_sight) {
     map_sight[y][x] = true;
     for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
         if(isInMap(x+j,y+i) 
-            && map[y+i][x+j] != ID_MAP.none 
-            && !map_sight[y+i][x+j] 
-            && sight_range > 0
-            && !isRoom(x, y)
-            && !isRoom(x+j, y+i)) {
+        && map[y+i][x+j] != ID_MAP.none 
+        && !map_sight[y+i][x+j] 
+        && sight_range > 0
+        && !isRoom(x, y)
+        && !isRoom(x+j, y+i)) {
             map_sight[y+i][x+j] = true;
             getSightPath(x+j, y+i, sight_range-1, map_sight);
         }
@@ -2007,11 +2009,11 @@ function getRoute(route, node, n) {
 
 // エネミー移動（巡回）
 async function moveEnemyTravel(enemy) {
-    if(enemy.travel_route.length < 1    // ルート未設定
+    if(enemy.travel_route.length <= 0    // ルート未設定
     || (enemy.x==enemy.travel_x && enemy.y==enemy.travel_y)) {    // 目的地到達
         setNextTravelRoom(enemy);
+        enemy.travel_route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
     }
-    enemy.travel_route = astar(enemy.x, enemy.y, enemy.travel_x, enemy.travel_y, 0, false);
     let next_xy = enemy.travel_route[enemy.travel_route.length-1];
 
     // ルート閉塞

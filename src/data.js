@@ -1059,7 +1059,7 @@ const ITEM_DATA = [
             hung_rate: 10,
             hp_regen_rate: 10,
             mp_regen_rate: 10,
-            sight_range: 6,
+            sight_range: 5,
             lvup: {hp_max: 25, mp_max: 2, dex: 4, int: 1},
         },
         func: async function() {
