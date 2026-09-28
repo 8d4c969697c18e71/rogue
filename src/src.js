@@ -695,7 +695,8 @@ async function doAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
 function straightRecursive(x, y, direction, range) {
     if(!canMove(x+direction.x, y+direction.y)
     || range <= 0
-    || isDoor(x+direction.x, y+direction.y)) {
+    //|| isDoor(x+direction.x, y+direction.y)
+    ) {
         return {x:x+direction.x, y:y+direction.y};
     }
     return straightRecursive(x+direction.x, y+direction.y, direction, --range);
@@ -705,7 +706,8 @@ function straightRecursiveDiagonal(x, y, direction, range) {
     if(!canMove(x+direction.x, y+direction.y)
     || !canDiagonal(x, y, direction.x, direction.y)
     || range <= 0
-    || isDoor(x+direction.x, y+direction.y)) {
+    //|| isDoor(x+direction.x, y+direction.y)
+    ) {
         return {x:x+direction.x, y:y+direction.y};
     }
     return straightRecursive(x+direction.x, y+direction.y, direction, --range);
@@ -2466,4 +2468,10 @@ function canDiagonal(x, y, dir_x, dir_y) {
         return false;
 
     return true;
+}
+
+// 掘削
+async function digWall(x, y) {
+    if(map[y][x] == ID_MAP.none)
+        map[y][x] = ID_MAP.path;
 }

@@ -5,6 +5,7 @@ const inv = document.getElementById("inv");
 const log = document.getElementById("log");
 const note = document.getElementById("note");
 const shop = document.getElementById("shop");
+const sub3 = document.getElementById("sub3");
 const button = document.getElementById("button");
 const btn_z = document.getElementById("btn_z");
 const btn_x = document.getElementById("btn_x");

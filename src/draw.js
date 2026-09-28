@@ -222,7 +222,7 @@ function updateMDWall() {
     for(let i=0; i<SIZEY; i++)
         for(let j=0; j<SIZEX; j++) {
             // 壁
-            if(player.map_sight[i][j] && (map[i][j] == ID_MAP.room || isStair(j, i) || isPortal(j, i))) {
+            if(player.map_sight[i][j] && map[i][j] == ID_MAP.room) {
                 // 縦
                 for(let k=-1; k<=1; k++)
                     if(map[i][j+k] == ID_MAP.none)
@@ -237,8 +237,8 @@ function updateMDWall() {
                         map_draw[i+k][j+l] = CHAR_MAP.wall_h;
             }
             // 扉
-            else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path] && isDoor(j, i))
-                map_draw[i][j] = CHAR_MAP.door;
+            //else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path] && isDoor(j, i))
+            //    map_draw[i][j] = CHAR_MAP.door;
         }
 }
 

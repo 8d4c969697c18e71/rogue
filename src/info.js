@@ -73,17 +73,14 @@ function drawInv() {
 //=========================SHOP=========================
 
 function drawShop() {
-    if(isPhone()) {
-        drawShopPhone();
-        return;
-    }
-
     shop.innerHTML = "";
     shop.style.border = "solid 1px black";
     if(shop_flag) {
         const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
         const shop_margin =  parseInt(window.getComputedStyle(document.body).marginTop);
-        shop_display_num = Math.floor((window.innerHeight-body_padding*2-shop_margin-canvas.clientHeight)/(FONT_SIZE+4)) - 1;
+        let content_height = window.innerHeight-body_padding*2-shop_margin-canvas.clientHeight-arrow_size*3;
+        if(isPhone()) content_height /= 2;
+        shop_display_num = Math.floor(content_height/(FONT_SIZE+4)) - 1;
 
         if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
         if(shop_cursor >= shop_display_num + shop_start_offset) shop_start_offset = shop_cursor - shop_display_num + 1;
@@ -121,49 +118,17 @@ function drawShop() {
     }
 }
 
-function drawShopPhone() {
-    log.style.border = "solid 1px black";
-    if(shop_flag) {   
-        if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
-        if(shop_cursor >= log_display_num + shop_start_offset) shop_start_offset = shop_cursor - log_display_num + 1;
-        const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
-        const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
-        log_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
-
-        log.innerHTML = "";
-        if(!storage_IO_flag) log.style.border = "solid 1px white";
-        if(!storage_flag) log.insertAdjacentHTML("beforeend", "SHOP<br>");
-        else log.insertAdjacentHTML("beforeend", "STORAGE<br>");
-        for(let i=shop_start_offset; i<shop_using.item.length && i<log_display_num+shop_start_offset; i++) {
-            if(i == shop_cursor)
-                log.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
-            else if(i<9)
-                log.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
-            else
-                log.insertAdjacentHTML("beforeend", (i+1)+": ");
-            if(shop_using.item[i].price>=0) {
-                log.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-                log.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
-            }
-            else{
-                log.insertAdjacentHTML("beforeend", "売: "+shop_using.item[i].name);
-                log.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
-            }
-            log.insertAdjacentHTML("beforeend", "<br>");
-        }
-    }
-}
-
 //=========================LOG=========================
 
 function drawLog() {
-    if(isPhone()) {
-        drawLogPhone();
-        return;
-    }
+    const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
+    const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
+    let content_height = window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3;
+    if(isPhone()) content_height /= 2;
+    log_display_num = Math.floor(content_height/(FONT_SIZE+5)-1);
 
     log.innerHTML = "";
-    for(let i=0; i<log_reserve.length; i++)
+    for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
         log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
     log.insertAdjacentHTML("afterbegin","LOG<br>");
 }
@@ -171,7 +136,9 @@ function drawLog() {
 function drawLogPhone() {
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
     const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
-    log_display_num = Math.floor((window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3)/(FONT_SIZE+5)-1);
+    let content_height = window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3;
+    if(isPhone()) content_height /= 2;
+    log_display_num = Math.floor(content_height/(FONT_SIZE+5)-1);
 
     log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)

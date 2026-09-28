@@ -264,11 +264,13 @@ function setCanvasSizePhone(info_disp_flg = true) {
     ctx.textBaseline = "top";
     
     info.style.fontSize = FONT_SIZE+"px";
-    log.style.fontSize = FONT_SIZE+"px";
-    inv.style.fontSize = FONT_SIZE+"px";
     info.style.width = screen.width-canvas_width-5+"px";
+    inv.style.fontSize = FONT_SIZE+"px";
+
+    sub3.style.flexDirection = "column";
+    log.style.fontSize = FONT_SIZE+"px";
     log.style.width = canvas_width+"px";
-    shop.style.display = "none";
+    shop.style.fontSize = FONT_SIZE+"px";
 
     document.body.style.paddingTop = 0+"px";
 }
