@@ -203,11 +203,9 @@ function updateSight() {
 function updateMapDraw() {
     for(let i=0; i<SIZEY; i++)
         for(let j=0; j<SIZEX; j++)
-            if(map_draw[i][j]=="√" || map_draw[i][j]=="㊦") continue;// debug
-            else if(player.map_sight[i][j])
-                map_draw[i][j] = CHAR_MAP[map[i][j]];
-            else if(map[i][j] != ID_MAP.none
-                && map_draw[i][j] != CHAR_MAP[ID_MAP.none])
+            if(map_draw[i][j]=="√" || map_draw[i][j]=="↓") continue;// debug
+            else if(player.map_sight[i][j]
+            || (map[i][j] != ID_MAP.none && map_draw[i][j] != CHAR_MAP[ID_MAP.none]))
                 map_draw[i][j] = CHAR_MAP[map[i][j]];
 }
 
@@ -277,7 +275,7 @@ function updateMDItem() {
     for(let i of item_group)
         if(player.map_sight[i.y][i.x]) {
             if(i.type=="stack")
-                map_draw[i.y][i.x] = CHAR_MAP[ITEM_DATA.find(v=>v.id==i.item_id).type];
+                map_draw[i.y][i.x] = CHAR_MAP[getItemData(i.id).type];
             else
                 map_draw[i.y][i.x] = CHAR_MAP[i.type];
         }
