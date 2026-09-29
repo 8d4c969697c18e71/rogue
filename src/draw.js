@@ -178,7 +178,7 @@ function updateMap() {
     if(shot_flag) updateShotRange(15);
     else if(throwing_flag) updateShotRange(THROWING_RANGE);
     else if(magic_flag) updateShotRange(MAGIC_RANGE);
-    else if(skill_draw_aim_flag) {
+    else if(skill_draw_aim_flag && skill_using) {
         if(skill_using.target_type == "range") updateShotRange(SKILL_RANGE);
         else if(skill_using.target_type == "next") updateShotRange(1, 1);
         else if(skill_using.target_type == "self") updateShotRange(0, 0);
