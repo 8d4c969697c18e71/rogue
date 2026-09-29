@@ -26,7 +26,7 @@ function drawInfo() {
     for(let cond of player.condition) cond_info += cond.name+" "
     info.insertAdjacentHTML("beforeend", "COND: "+cond_info+"<br>");
     info.insertAdjacentHTML("beforeend", "HP&nbsp; : "+player.hp+" / "+(player.hp_max+player.hp_max_offset)+"<br>");
-    info.insertAdjacentHTML("beforeend", "MP&nbsp; : "+player.mp+" / "+(player.mp_max+player.mp_max_offset)+"<br>");
+    info.insertAdjacentHTML("beforeend", "FP&nbsp; : "+player.fp+" / "+(player.fp_max+player.fp_max_offset)+"<br>");
     info.insertAdjacentHTML("beforeend", "ATK : "+(player.atk+player.atk_offset)+"<br>");
     info.insertAdjacentHTML("beforeend", "DEF : "+(player.def+player.def_offset)+"<br>");
     info.insertAdjacentHTML("beforeend", "HUNG: "+player.hung+" / "+(player.hung_max+player.hung_max_offset)+"<br>");
@@ -38,7 +38,7 @@ function drawInfo() {
 
 function drawInv() {
     inv.innerHTML = "";
-    if(ui_flag || storage_IO_flag) inv.style.border = "solid 1px white";
+    if(inventory_flag || storage_IO_flag || skill_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
 
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
@@ -48,25 +48,44 @@ function drawInv() {
     if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
     if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
 
-    inv.insertAdjacentHTML("beforeend", "INVENTORY<br>");
-    for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++) {
-        if(i == inv_cursor)
-            inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
-        else if(i<9)
-            inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
-        else
-            inv.insertAdjacentHTML("beforeend", (i+1)+": ");
-        if(i < inventory.length) {
-            if(inventory[i].equip_flag)
-                inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
+    if(remember_ui == "inventory") {
+        inv.insertAdjacentHTML("beforeend", "　 INVENTORY →<br>");
+        for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++) {
+            if(i == inv_cursor)
+                inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+            else if(i<9)
+                inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
             else
-                inv.insertAdjacentHTML("beforeend", inventory[i].name);
-            if(inventory[i].stack_num)
-                inv.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
+                inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+            if(i < inventory.length) {
+                if(inventory[i].equip_flag)
+                    inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
+                else
+                    inv.insertAdjacentHTML("beforeend", inventory[i].name);
+                if(inventory[i].stack_num)
+                    inv.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
+            }
+            else
+                inv.insertAdjacentHTML("beforeend", "------");
+            inv.insertAdjacentHTML("beforeend", "<br>");
         }
-        else
-            inv.insertAdjacentHTML("beforeend", "------");
-        inv.insertAdjacentHTML("beforeend", "<br>");
+    } 
+    else if(remember_ui == "skill") {
+        inv.insertAdjacentHTML("beforeend", "← SKILL 　<br>");
+        for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<SKILL_SIZE; i++) {
+            if(i == skill_cursor)
+                inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+            else if(i<9)
+                inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+            else
+                inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+            if(i < skill.length) {
+                inv.insertAdjacentHTML("beforeend", skill[i].name);
+            }
+            else
+                inv.insertAdjacentHTML("beforeend", "------");
+            inv.insertAdjacentHTML("beforeend", "<br>");
+        }
     }
 }
 
@@ -121,13 +140,14 @@ function drawShop() {
 //=========================LOG=========================
 
 function drawLog() {
+    log.innerHTML = "";
+
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
     const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
     let content_height = window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3;
     if(isPhone()) content_height /= 2;
     log_display_num = Math.floor(content_height/(FONT_SIZE+5)-1);
 
-    log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
         log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
     log.insertAdjacentHTML("afterbegin","LOG<br>");
@@ -239,6 +259,7 @@ function drawNote() {
     note.insertAdjacentHTML("beforeend", "- 使う/装備: Z<br>");
     note.insertAdjacentHTML("beforeend", "- 戻る: X<br>");
     note.insertAdjacentHTML("beforeend", "- 投擲: C<br>");
+    note.insertAdjacentHTML("beforeend", "- 項目切替: ← →<br>");
     note.insertAdjacentHTML("beforeend", "<br>");
 }
 

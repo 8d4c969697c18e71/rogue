@@ -62,7 +62,7 @@ foreach ($line in $file) {
     
     # skill
     if($line.Contains("const SKILL_DATA")) {
-        Add-Content $skill_path "id,name," -Encoding utf8
+        Add-Content $skill_path "id,name,target_type,cost_type,cost" -Encoding utf8
         $skill_flg = $true
     }
     if($skill_flg){
@@ -71,6 +71,15 @@ foreach ($line in $file) {
         }
         elseif($line | Select-String -Pattern " name: ") {
             $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+        }
+        elseif($line | Select-String -Pattern " target_type: ") {
+            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+        }
+        elseif($line | Select-String -Pattern " cost_type: ") {
+            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+        }
+        elseif($line | Select-String -Pattern " cost: ") {
+            $line_tmp = $line_tmp + $line.Substring($line.IndexOf(': '))
             $line_tmp | Add-Content $skill_path -Encoding utf8
         }
         elseif($line | Select-String -Pattern "^];") {

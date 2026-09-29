@@ -58,7 +58,7 @@ async function loadCookie() {
                 if(val !== "undefined") val = JSON.parse(val);
                 else val = undefined;
             }catch(err) {
-                console.log("error: JSON.parse: "+val);
+                console.log("loadCookie: JSON.parse: "+val);
                 return false;
             }
             
@@ -134,27 +134,31 @@ async function events() {
     }
     // 射撃
     else if(shot_flag) {
-        turn_flag = await eventShot();
+        turn_flag = await doEventShot();
     }
     // 投擲
     else if(throwing_flag) {
-        turn_flag = await eventThrowing();
+        turn_flag = await doEventThrowing();
     }
-    // 魔法
-    else if(magic_flag) {
-        turn_flag = await eventMagic();
+    // 魔法 (アイテムベース仕様)
+    //else if(magic_flag) {
+    //    turn_flag = await doEventMagic();
+    //}
+    // インベントリ
+    else if(inventory_flag) {
+        turn_flag = await doEventInventory();
     }
-    // UI
-    else if(ui_flag) {
-        turn_flag = await eventUI();
+    // スキル
+    else if(skill_flag) {
+        turn_flag = await doEventSkill();
     }
     // ショップ
     else if(shop_flag) {
-        turn_flag = await eventShop();
+        turn_flag = await doEventShop();
     }
     // マップ
     else{
-        turn_flag = await eventPlayer();
+        turn_flag = await doEventPlayer();
     }
 
     // 描画
@@ -162,8 +166,8 @@ async function events() {
 
     // ターン経過
     if(turn_flag) {
-        await eventEnemies();
-        await eventEnv();
+        await doEventEnemies();
+        await doEventEnv();
         turn_cnt++;
     }
 
@@ -175,7 +179,7 @@ async function events() {
 
 // プレイヤーイベント
 // @return: true: ターン経過
-async function eventPlayer() {
+async function doEventPlayer() {
     // 十字キー
     let kd;
     if(!key_input.ctrl) kd = KEY_DIRECTION;
@@ -253,8 +257,8 @@ async function eventPlayer() {
     // cancel
     if(key_input.cancel) {
         play_audio(audio_apply);
-        //inv_cursor = 0;
-        ui_flag = true;
+        if(remember_ui == "inventory") inventory_flag = true;
+        else if(remember_ui == "skill") skill_flag = true;
         return false;
     }
     // sub
@@ -295,8 +299,8 @@ async function sprint(direction, not_diagonal) {
 
     // 移動
     await move(player, direction);
-    await eventEnemies();
-    await eventEnv();
+    await doEventEnemies();
+    await doEventEnv();
     turn_cnt++;
 
     // 視界更新
@@ -399,7 +403,7 @@ async function attack(from, to) {
 }
 
 // 射撃イベント
-async function eventShot() {
+async function doEventShot() {
     let ammo = getItemInventory(player.ammo);
 
     // 十字キー
@@ -484,9 +488,9 @@ async function shotDmg(from, to, ammo) {
 }
 
 // 投擲イベント
-async function eventThrowing() {
+async function doEventThrowing() {
     let item;
-    if(ui_flag) item = inventory[inv_cursor];
+    if(inventory_flag) item = inventory[inv_cursor];
     else item = getItemInventory(player.ammo);
 
     // 十字キー
@@ -511,7 +515,7 @@ async function eventThrowing() {
                 inventory.splice(inv_cursor, 1);
 
             //inv_cursor = -1;
-            ui_flag = false;
+            inventory_flag = false;
             return true;
         }
     
@@ -521,7 +525,7 @@ async function eventThrowing() {
         play_audio(audio_cancel);
         //inv_cursor = -1;
         throwing_flag = false;
-        ui_flag = false;
+        inventory_flag = false;
         return false;
     }
 }
@@ -583,7 +587,7 @@ async function throwDmg(from, to, item) {
 }
 
 // 魔法イベント
-async function eventMagic() {
+async function doEventMagic() {
     // 十字キー
     let kd;
     if(!key_input.ctrl) kd = KEY_DIRECTION;
@@ -595,7 +599,7 @@ async function eventMagic() {
             checkKill(player);
             
             player.magic_using = undefined;
-            ui_flag = false;
+            inventory_flag = false;
             //inv_cursor = -1;
             return true;
         }
@@ -607,7 +611,7 @@ async function eventMagic() {
         magic_flag = false;
         player.magic_using = undefined;
         //inv_cursor = -1;
-        ui_flag = false;
+        inventory_flag = false;
         return false;
     }
 }
@@ -693,16 +697,18 @@ async function doAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
 }
 
 function straightRecursive(x, y, direction, range) {
+    const range_next = --range;
     if(!canMove(x+direction.x, y+direction.y)
     || range <= 0
     //|| isDoor(x+direction.x, y+direction.y)
     ) {
         return {x:x+direction.x, y:y+direction.y};
     }
-    return straightRecursive(x+direction.x, y+direction.y, direction, --range);
+    return straightRecursive(x+direction.x, y+direction.y, direction, range_next);
 }
 
 function straightRecursiveDiagonal(x, y, direction, range) {
+    const range_next = --range;
     if(!canMove(x+direction.x, y+direction.y)
     || !canDiagonal(x, y, direction.x, direction.y)
     || range <= 0
@@ -710,7 +716,7 @@ function straightRecursiveDiagonal(x, y, direction, range) {
     ) {
         return {x:x+direction.x, y:y+direction.y};
     }
-    return straightRecursive(x+direction.x, y+direction.y, direction, --range);
+    return straightRecursiveDiagonal(x+direction.x, y+direction.y, direction, range_next);
 }
 
 function straightRecursiveAllMap(x, y, direction) {
@@ -729,7 +735,8 @@ function getDirection(from, to) {
 }
 
 // UIイベント
-async function eventUI() {
+async function doEventInventory() {
+    remember_ui = "inventory";
     // 上下
     if(key_input.up) {
         if(inv_cursor > 0)
@@ -745,18 +752,26 @@ async function eventUI() {
             inv_cursor = 0;
         return false;
     }
+    // 右
+    if(key_input.right) {
+        inventory_flag = false;
+        skill_flag = true;
+        skill_using = undefined;
+        key_input.left = false;
+        return await doEventSkill();
+    }
     // apply
     if(key_input.apply)
         if(inv_cursor<inventory.length && await useItem(inv_cursor)) {
             play_audio(audio_apply);
             //inv_cursor = -1;
-            ui_flag = false;
+            inventory_flag = false;
             return true;
         }
     // cancel
     if(key_input.cancel) {
         //inv_cursor = -1;
-        ui_flag = false;
+        inventory_flag = false;
         return false;
     }
     // sub
@@ -776,10 +791,156 @@ async function eventUI() {
     }
 }
 
+// スキルイベント
+async function doEventSkill() {
+    remember_ui = "skill";
+    // サブイベント起動
+    if(skill_using != undefined) {
+        if(await doSubEventSkill()) {
+            // コスト支払い
+            if(skill_using.cost_type == "hp") addHP(player, -skill_using.cost);
+            else if(skill_using.cost_type == "fp") addFP(player, -skill_using.cost);
+            else console.log("doEventSkill: cannot pay cost properly");
+
+            skill_flag = false;
+            skill_using = undefined;
+            return true;
+        }
+        return false;
+    }
+
+    // 上下
+    if(key_input.up) {
+        if(skill_cursor > 0)
+            skill_cursor--;
+        else
+            skill_cursor = SKILL_SIZE - 1;
+        return false;
+    }
+    if(key_input.down) {
+        if(skill_cursor < SKILL_SIZE - 1)
+            skill_cursor++;
+        else
+            skill_cursor = 0;
+        return false;
+    }
+    // 左
+    if(key_input.left) {
+        skill_flag = false;
+        skill_using = undefined;
+        inventory_flag = true;
+        key_input.right = false;
+        return await doEventInventory();
+    }
+    // apply
+    if(key_input.apply)
+        if(skill_cursor < skill.length) {
+            if(await preSkill(skill_cursor)) {
+                skill_draw_aim_flag = true;
+                play_audio(audio_apply);
+                addLog(skill_using.name+"（使用コスト: "
+                    +skill_using.cost_type.toUpperCase()+" "
+                    +skill_using.cost+"）");
+            }
+            else
+                play_audio(audio_cancel);
+            return false;
+        }
+    // cancel
+    if(key_input.cancel) {
+        skill_flag = false;
+        skill_using = undefined;
+        return false;
+    }
+}
+
+async function doSubEventSkill() {
+    if(skill_using.target_type == "range") {
+        // 十字キー
+        let kd;
+        if(!key_input.ctrl) kd = KEY_DIRECTION;
+        else kd = KEY_DIRECTION_DIAGONAL;
+        for(let k in kd)
+            if(key_input[k]) {
+                const target = straightRecursive(player.x, player.y, kd[k], SKILL_RANGE);
+                return await useSkill(skill_cursor, target);
+            }
+    }
+    else if(skill_using.target_type == "next") {
+        // 十字キー
+        let kd;
+        if(!key_input.ctrl) kd = KEY_DIRECTION;
+        else kd = KEY_DIRECTION_DIAGONAL;
+        for(let k in kd)
+            if(key_input[k]) {
+                const target = straightRecursive(player.x, player.y, kd[k], 1);
+                return await useSkill(skill_cursor, target);
+            }
+    }
+    else if(skill_using.target_type == "self") {
+        // apply
+        if(key_input.apply) {
+            return await useSkill(skill_cursor, player)
+        }
+    }
+    // cancel
+    if(key_input.cancel) {
+        skill_using = undefined;
+        return false;
+    }
+}
+
+async function setSkill(id) {
+    if(skill.length > SKILL_SIZE) {
+        addLog("これ以上記憶できない");
+        return false;
+    }
+    skill.push(getSkillData(id));
+    return true;
+}
+
+async function useSkill(skill_cursor, target) {
+    const s = skill[skill_cursor];
+    skill_draw_aim_flag = false;
+    if(s != undefined && s.func != undefined) 
+        return await s.func(player, target);
+    skill_draw_aim_flag = true;
+    return false;
+}
+
+async function preSkill(skill_cursor) {
+    const s = skill[skill_cursor];
+    // コスト
+    if(s.cost_type == "hp" && player.hp <= s.cost) {
+        addLog("HP が足りない");
+        return false;
+    }
+    else if(s.cost_type == "fp" && player.fp < s.cost) {
+        addLog("FP が足りない");
+        return false;
+    }
+
+    // ターゲット種別
+    switch(s.target_type) {
+        case "range":
+        case "next":
+        case "self":
+            skill_using = s;
+            return true;
+        default:
+            console.log("preSkill: invalid skill target type: "+s.target_type);
+            return false;
+    }
+}
+
+function getSkillData(id) {
+    return SKILL_DATA.find(v=>v.id == id);
+}
+
 // ショップイベント
-async function eventShop() {
+async function doEventShop() {
     // 保管庫(入)用サブイベント
-    if(storage_flag && storage_IO_flag) return await subEventStorageInput();
+    if(storage_flag && storage_IO_flag) return await doSubEventStorageInput();
 
     // 上下
     if(key_input.up) {
@@ -905,7 +1066,8 @@ async function eventShop() {
     }
 }
 
-async function subEventStorageInput() {
+// 保管庫(入)サブイベント
+async function doSubEventStorageInput() {
     // 上下
     if(key_input.up) {
         if(inv_cursor > 0)
@@ -1093,13 +1255,13 @@ function addHP(who, value) {
         who.hp = 0;
 }
 
-// MP
-function addMP(who, value) {
-    who.mp += value;
-    if(who.mp > (who.mp_max + who.mp_max_offset))
-        who.mp = who.mp_max + who.mp_max_offset;
-    else if(who.mp < 0)
-        who.mp = 0;
+// FP
+function addFP(who, value) {
+    who.fp += value;
+    if(who.fp > (who.fp_max + who.fp_max_offset))
+        who.fp = who.fp_max + who.fp_max_offset;
+    else if(who.fp < 0)
+        who.fp = 0;
 }
 
 // 空腹度
@@ -1123,7 +1285,7 @@ function addExp(who, value) {
 function fullRecovery(who) {
     removeCondition(who);
     who.hp = who.hp_max + who.hp_max_offset;
-    who.mp = who.mp_max + who.mp_max_offset;
+    who.fp = who.fp_max + who.fp_max_offset;
     if(who == player) player.hung = player.hung_max + player.hung_max_offset;
 }
 
@@ -1188,19 +1350,20 @@ function initStatusAll() {
     initStatus();
     player.gold = 15;
     player.job = 0xf00;
+    skill = [];
     backLv();
 }
 
 // ステ初期化
 function initStatus() {
     player.hp_max_offset = 0;
-    player.mp_max_offset = 0;
+    player.fp_max_offset = 0;
     player.atk_offset = 0;
     player.def_offset = 0;
     player.hung_max_offset = 0;
     player.hung_rate_offset = 0;
     player.hp_regen_rate_offset = 0;
-    player.mp_regen_rate_offset = 0;
+    player.fp_regen_rate_offset = 0;
     player.sight_range_offset = 0;
     player.condition = [];
     player.weapon = undefined;
@@ -1212,8 +1375,9 @@ function initStatus() {
 }
 
 // 状態異常追加
-async function setCondition(who, id) {
-    let cond = CONDITION_DATA.find(v=>v.id==id);
+async function setCondition(who, id, turn = -1) {
+    const cond = CONDITION_DATA.find(v=>v.id==id);
+    const turn_use = turn < 0 ? cond.turn : turn;
     
     if(!cond || !("condition" in who)) {
         console.warn("setCondition: id or who.condtion not found");
@@ -1225,7 +1389,7 @@ async function setCondition(who, id) {
             return false;
         }
 
-    let c = Object.assign({}, cond);
+    let c = Object.assign({}, cond, {turn: turn_use});
     who.condition.push(c);
     await who.condition[who.condition.length-1].func_be(who);
     return true;
@@ -1244,13 +1408,6 @@ async function removeCondition(who, cond = "all") {
             who.condition.shift();
         }
     }
-}
-
-// ターン数指定
-async function setConditionTurn(who, id, turn) {
-    if(!await setCondition(who, id)) return false;
-    who.condition[who.condition.length-1].turn = turn;
-    return true;
 }
 
 // 状態異常経過
@@ -1488,19 +1645,15 @@ function isEquiped(inv_cursor) {
     return false;
 }
 
-function getSkillData(id) {
-    return SKILL_DATA.find(v=>v.id == id);
-}
-
 //==================================================ENVIRONMENT==================================================
 
 // 環境イベント
-async function eventEnv() {
+async function doEventEnv() {
     // 自然回復
     if(turn_cnt % (player.hp_regen_rate - player.hp_regen_rate_offset) == 0)
         addHP(player, 10);
-    if(turn_cnt % (player.mp_regen_rate - player.mp_regen_rate_offset) == 0)
-        addMP(player, 2);
+    if(turn_cnt % (player.fp_regen_rate - player.fp_regen_rate_offset) == 0)
+        addFP(player, 2);
 
     // 空腹度
     if(player.hung <= 0) {
@@ -1743,14 +1896,14 @@ function getEnemyData(id) {
 }
 
 // エネミーイベント
-async function eventEnemies() {
+async function doEventEnemies() {
     for(let enemy of enemy_group) {
         // 行動不能
         if(enemy.cannot_action_flag) continue;
         
         // speed回行動
         for(let cnt=0; cnt<enemy.speed; cnt++) {
-            await eventEnemy(enemy);
+            await doEventEnemy(enemy);
             drawAllWithoutMap();
             if(player.map_sight[enemy.y][enemy.x])
                 drawMap();
@@ -1760,7 +1913,7 @@ async function eventEnemies() {
     }
 }
 
-async function eventEnemy(enemy) {
+async function doEventEnemy(enemy) {
     // 標的更新
     updateTarget(enemy)
 
@@ -1784,10 +1937,38 @@ async function eventEnemy(enemy) {
     if(target) {
         // スキル
         for(let skill of enemy.skill) {
+            // 使用確率
             if(!(Math.floor(Math.random()+skill.chance))) continue;
-            if(await skill.func(enemy, target)) {
-                checkKill(enemy);
-                return;
+            
+            // コスト
+            if(skill.cost_type == "hp" && enemy.hp <= skill.cost) 
+                continue;
+            else if(skill.cost_type == "fp" && enemy.fp < skill.cost) 
+                continue;
+
+            // 使用
+            if(enemy.map_sight[target.y][target.x]) {
+                let check = false; // 使用判定
+                if(skill.target_type == "range") {
+                    const xy = straightRecursive(enemy.x, enemy.y, getDirection(enemy, target), SKILL_RANGE);
+                    check = xy.x == target.x && xy.y == target.y;
+                }
+                else if(skill.target_type == "next") {
+                    check = Math.abs(enemy.x-target.x) <= 1 && Math.abs(enemy.y-target.y) <= 1;
+                }
+                else if(skill/target_type == "self") {
+                    check = true;
+                }
+                // スキル使用
+                if(check && await skill.func(enemy, target)) {
+                    checkKill(enemy);
+
+                    // コスト消費
+                    if(skill.cost_type == "hp") addHP(enemy, -skill.cost);
+                    else if(skill.cost_type == "fp") addFP(enemy, -skill.cost);
+                    else console.log("doEventEnemy: "+enemy.name+": "+skill.name+": cannot pay cost properly");
+                    return;
+                }
             }
         }
 
@@ -2095,7 +2276,7 @@ async function setEnemy(id, x, y) {
     map_sight: [], condition: [], travel_route: [],
     cannot_action_flag: false, cannot_move_flag: false,
     chase_count: 0, chase_limit: 7, chase_target: undefined,
-    hp_max_offset: 0, mp_max_offset: 0, sight_range_offset: 0,
+    hp_max_offset: 0, fp_max_offset: 0, sight_range_offset: 0,
     atk_offset:0, def_offset:0,
     next_exp: 10, lvup: {atk:10},
     };
@@ -2344,60 +2525,6 @@ function initMap(m, v) {
         for(let j=0; j<SIZEX; j++) {
             m[i].push(v);
         }
-    }
-}
-
-// 射撃・投擲・魔法の射程
-function updateShotRange() {
-    initMap(map_shotrange, false);
-
-    // 左上
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y-cnt][player.x-cnt]==ID_MAP.none)
-            break;
-        map_shotrange[player.y-cnt][player.x-cnt] = true;
-    }
-    // 上
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y-cnt][player.x]==ID_MAP.none)
-            break;
-        map_shotrange[player.y-cnt][player.x] = true;
-    }
-    // 右上
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y-cnt][player.x+cnt]==ID_MAP.none)
-            break;
-        map_shotrange[player.y-cnt][player.x+cnt] = true;
-    }
-    // 左
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y][player.x-cnt]==ID_MAP.none)
-            break;
-        map_shotrange[player.y][player.x-cnt] = true;
-    }
-    // 右
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y][player.x+cnt]==ID_MAP.none)
-            break;
-        map_shotrange[player.y][player.x+cnt] = true;
-    }
-    // 左下
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y+cnt][player.x-cnt]==ID_MAP.none)
-            break;
-        map_shotrange[player.y+cnt][player.x-cnt] = true;
-    }
-    // 下
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y+cnt][player.x]==ID_MAP.none)
-            break;
-        map_shotrange[player.y+cnt][player.x] = true;
-    }
-    // 右下
-    for(let cnt = 1; cnt<=10; cnt++) {
-        if(map[player.y+cnt][player.x+cnt]==ID_MAP.none)
-            break;
-        map_shotrange[player.y+cnt][player.x+cnt] = true;
     }
 }
 

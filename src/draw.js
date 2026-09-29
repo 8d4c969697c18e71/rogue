@@ -174,11 +174,15 @@ function updateMap() {
     // 罠
     updateMDTrap();
     // 射撃・投擲・魔法
-    if(shot_flag || throwing_flag|| magic_flag)
-        updateShotRange();
-    else
-        initMap(map_shotrange, false);
-
+    initMap(map_shotrange, false);
+    if(shot_flag) updateShotRange(15);
+    else if(throwing_flag) updateShotRange(THROWING_RANGE);
+    else if(magic_flag) updateShotRange(MAGIC_RANGE);
+    else if(skill_draw_aim_flag) {
+        if(skill_using.target_type == "range") updateShotRange(SKILL_RANGE);
+        else if(skill_using.target_type == "next") updateShotRange(1, 1);
+        else if(skill_using.target_type == "self") updateShotRange(0, 0);
+    }
     // アイテム
     updateMDItem();
     // エネミー
@@ -249,6 +253,58 @@ function updateMDTrap() {
             map_draw[t.y][t.x] = CHAR_MAP.trap;
 }
 
+// 射撃・投擲・魔法の射程
+function updateShotRange(range = 0, idx_init = 1) {
+    // 左上
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y-cnt][player.x-cnt]==ID_MAP.none)
+            break;
+        map_shotrange[player.y-cnt][player.x-cnt] = true;
+    }
+    // 上
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y-cnt][player.x]==ID_MAP.none)
+            break;
+        map_shotrange[player.y-cnt][player.x] = true;
+    }
+    // 右上
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y-cnt][player.x+cnt]==ID_MAP.none)
+            break;
+        map_shotrange[player.y-cnt][player.x+cnt] = true;
+    }
+    // 左
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y][player.x-cnt]==ID_MAP.none)
+            break;
+        map_shotrange[player.y][player.x-cnt] = true;
+    }
+    // 右
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y][player.x+cnt]==ID_MAP.none)
+            break;
+        map_shotrange[player.y][player.x+cnt] = true;
+    }
+    // 左下
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y+cnt][player.x-cnt]==ID_MAP.none)
+            break;
+        map_shotrange[player.y+cnt][player.x-cnt] = true;
+    }
+    // 下
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y+cnt][player.x]==ID_MAP.none)
+            break;
+        map_shotrange[player.y+cnt][player.x] = true;
+    }
+    // 右下
+    for(let cnt=idx_init; cnt<=range; cnt++) {
+        if(map[player.y+cnt][player.x+cnt]==ID_MAP.none)
+            break;
+        map_shotrange[player.y+cnt][player.x+cnt] = true;
+    }
+}
+
 // エネミー描画
 function updateMDEnemyGroup() {
     for(let e of enemy_group)
@@ -275,7 +331,7 @@ function updateMDItem() {
     for(let i of item_group)
         if(player.map_sight[i.y][i.x]) {
             if(i.type=="stack")
-                map_draw[i.y][i.x] = CHAR_MAP[getItemData(i.id).type];
+                map_draw[i.y][i.x] = CHAR_MAP[getItemData(i.item_id).type];
             else
                 map_draw[i.y][i.x] = CHAR_MAP[i.type];
         }

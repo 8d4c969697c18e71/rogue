@@ -234,6 +234,7 @@ function setCanvasSizePC() {
     info.style.paddingLeft = PADDING+"px";
     // inv
     inv.style.paddingLeft = PADDING+"px"; 
+    inv.style.border = "solid 1px black";
     // log
     log.style.width = canvas_width+"px";
     log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";

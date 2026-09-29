@@ -217,10 +217,11 @@ let room_num;
 let turn_cnt = 1;
 let floor_cnt;
 
-// 遷移フラグ
+// イベント遷移フラグ
 let exeEventsFlg = false;
 let gameover_flag = false;
-let ui_flag = false;
+let inventory_flag = false;
+let skill_flag = false;
 let shop_flag = false;
 let upgrade_flag = false;
 let shot_flag = false;
@@ -248,7 +249,7 @@ let player = {
     job_name: "",
     exp:0, next_exp:0,
     hp:0, hp_max:0, hp_max_offset:0,
-    mp:0, mp_max:0, mp_max_offset:0,
+    fp:0, fp_max:0, fp_max_offset:0,
     
     str:0,
     dex:0,
@@ -264,7 +265,7 @@ let player = {
     hung:0, hung_max:0, hung_max_offset: 0,
     hung_rate: 0, hung_rate_offset: 0, // 空腹度の減り具合 /turn
     hp_regen_rate: 0, hp_regen_rate_offset: 0,
-    mp_regen_rate: 0, mp_regen_rate_offset: 0,
+    fp_regen_rate: 0, fp_regen_rate_offset: 0,
     sight_range: 0, sight_range_offset: 0, // 視界距離
     condition: [], // 状態異常
     cannot_action_flag: false, // 行動不能
@@ -284,6 +285,155 @@ let player = {
     // 視界
     map_sight: [],
 };
+
+// inventory
+const INVENTORY_SIZE = 20;
+let inventory = [];
+let inv_cursor = 0;
+
+// skill
+const SKILL_SIZE = 10;
+const SKILL_RANGE = 20;
+let skill = [];
+let skill_cursor = 0;
+let skill_using = undefined;
+let skill_draw_aim_flag = false;
+
+// inv skill
+let remember_ui = "inventory";
+
+// shop
+let shop_cursor = -1;
+let shop_using = undefined; // 利用中のショップ
+
+// storage
+const STORAGE_SIZE = 60;
+let storage = [];
+let storage_flag = false;
+let storage_IO_flag = false; // out: false, in: true
+
+// groups
+let item_group = [];
+let enemy_group = [];
+let killed_group = []; // そのターンに殺した数
+let trap_group = [];
+let npc_group = [];
+let shop_group = [];
+
+// item
+const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
+const STACK_TYPE = ["ammo"];
+const STACK_MAX = 32;
+const UPGRADE_TYPE = ["weapon"];
+
+//==================================================TABLE==================================================
+
+const ITEM_TABLE = [
+    [
+        0x000, 0x000, 0x000,
+        0x010, 0x020, 0x030,
+        0x080,
+        0x800,
+    ],
+    [
+        0x000, 0x000, 0x000,
+        0x010, 0x020, 0x030,
+        0x080,
+        0x800,
+    ],
+    [
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x080, 0x080,
+        0x400, 
+        0x500,
+        //0x609,
+        0x800, 0x800,
+    ],
+    [
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x080, 0x080,
+        0x400, 0x401, 0x402,
+        0x500,
+        //0x609,
+        0x800, 0x800, 0x801,
+    ],
+    [
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x080, 0x080,
+        0x400, 0x401, 0x402,
+        0x500,
+        //0x603, 0x609,
+        0x800, 0x800, 0x801,
+    ],
+    [
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x012, 0x012,
+        0x080, 0x080,
+        0x101, 0x201, 0x301,
+        0x400, 0x401, 0x402, 0x403,
+        0x500,
+        //0x603, 0x606, 0x609,
+        0x800, 0x800, 0x801, 0x801,
+    ],
+    [
+        0x000, 0x000, 0x000, 0x000,
+        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x021, 0x021,
+        0x012, 0x012,
+        0x080, 0x080,
+        0x101, 0x201, 0x301, 0x302,
+        0x400, 0x401, 0x402, 0x403,
+        0x500,
+        //0x603, 0x605, 0x606, 0x609,
+        0x800, 0x800, 0x801, 0x801,
+    ],
+];
+const ENEMY_TABLE = [
+    [
+        0x000, 0x000, 0x001,
+    ],
+    [
+        0x000, 0x000, 0x002, 0x003,
+    ],
+    [
+        0x002, 0x002, 0x002, 0x003, 0x004,
+    ],
+    [
+        0x002, 0x004, 0x005,
+    ],
+    [
+        0x002, 0x004, 0x005, 0x006,
+    ],
+    [
+        0x002, 0x003, 0x004, 0x005, 0x006,
+    ],
+];
+const TRAP_TABLE = [
+    [],
+    [
+        0x00,
+    ],
+    [
+        0x00, 0x01, 0x04,
+    ],
+    [
+        0x00, 0x02, 0x04,
+    ],
+    [
+        0x01, 0x02, 0x03, 0x04,
+    ],
+    [
+        0x01, 0x02, 0x03, 0x04,
+    ],
+];
 
 //==================================================ITEM==================================================
 
@@ -377,8 +527,8 @@ const ITEM_DATA = [
         price: 10,
         func: async function() {
             let value = 15;
-            addMP(player, value);
-            addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+            addFP(player, value);
+            addLog(this.name+" を嗅いだ　FP が "+value+" 回復した");
             play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
@@ -391,8 +541,8 @@ const ITEM_DATA = [
         price: 30,
         func: async function() {
             let value = 30;
-            addMP(player, value);
-            addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+            addFP(player, value);
+            addLog(this.name+" を嗅いだ　FP が "+value+" 回復した");
             play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
@@ -404,9 +554,9 @@ const ITEM_DATA = [
         type: "potion",
         price: 60,
         func: async function() {
-            let value = player.mp_max;
-            addMP(player, value);
-            addLog(this.name+" を嗅いだ　MP が "+value+" 回復した");
+            let value = player.fp_max;
+            addFP(player, value);
+            addLog(this.name+" を嗅いだ　FP が "+value+" 回復した");
             play_audio(audio_heal);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
@@ -615,10 +765,10 @@ const ITEM_DATA = [
         type: "armor",
         price: 44,
         func_equip: async function() {
-            player.mp_max_offset += 3;
+            player.fp_max_offset += 3;
         },
         func_unequip: async function() {
-            player.mp_max_offset -= 3;
+            player.fp_max_offset -= 3;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -630,11 +780,11 @@ const ITEM_DATA = [
         price: 45,
         func_equip: async function() {
             player.hp_regen_rate_offset += 1;
-            player.mp_max_offset += 2;
+            player.fp_max_offset += 2;
         },
         func_unequip: async function() {
             player.hp_regen_rate_offset -= 1;
-            player.mp_max_offset -= 2;
+            player.fp_max_offset -= 2;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -646,11 +796,11 @@ const ITEM_DATA = [
         price: 42,
         func_equip: async function() {
             player.def_offset += 3;
-            player.mp_max_offset += 2;
+            player.fp_max_offset += 2;
         },
         func_unequip: async function() {
             player.def_offset -= 3;
-            player.mp_max_offset -= 2;
+            player.fp_max_offset -= 2;
         },
         func_attacked: async function(from) {},
         func_recalc: async function() {},
@@ -676,11 +826,11 @@ const ITEM_DATA = [
         type: "ring",
         price: 78,
         func_equip: async function() {
-            player.mp_max_offset += 10;
+            player.fp_max_offset += 10;
         },
         func_unequip: async function() {
-            player.mp_max_offset -= 10;
-            addMP(player, 0);
+            player.fp_max_offset -= 10;
+            addFP(player, 0);
         },
         func_recalc: async function() {},
     },
@@ -731,8 +881,8 @@ const ITEM_DATA = [
         type: "staff",
         price: 129,
         func: async function() {
-            if(player.mp < 5) {
-                addLog("MP が足りない");
+            if(player.fp < 5) {
+                addLog("FP が足りない");
                 return false;
             }
             addLog(player.name+" は "+this.name+" を構えた");
@@ -741,7 +891,7 @@ const ITEM_DATA = [
             return false;
         },
         func_cast: async function(dir) {
-            addMP(player, -5);
+            addFP(player, -5);
             const skill = getSkillData(0x300);
             const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
             return await skill.func(player, target);
@@ -753,13 +903,13 @@ const ITEM_DATA = [
         type: "staff",
         price: 96,
         func: async function() {
-            if(player.mp < 8) {
-                addLog("MP が足りない");
+            if(player.fp < 8) {
+                addLog("FP が足りない");
                 return false;
             }
             const skill = getSkillData(0x400);
 
-            addMP(player, -8);
+            addFP(player, -8);
             await skill.func(player, player);
             return true;
         },
@@ -771,8 +921,8 @@ const ITEM_DATA = [
         type: "staff",
         price: 254,
         func: async function() {
-            if(player.mp < 7) {
-                addLog("MP が足りない");
+            if(player.fp < 7) {
+                addLog("FP が足りない");
                 return false;
             }
             addLog(this.name+" を構えた");
@@ -785,7 +935,7 @@ const ITEM_DATA = [
             skill.direction = dir;
             skill.distance = 3;
 
-            addMP(player, -7);
+            addFP(player, -7);
             await skill.func(player, undefined);
             return true;
         }
@@ -796,13 +946,13 @@ const ITEM_DATA = [
         type: "staff",
         price: 80,
         func: async function() {
-            if(player.mp < 4) {
-                addLog("MP が足りない");
+            if(player.fp < 4) {
+                addLog("FP が足りない");
                 return false;
             }
             const skill = getSkillData(0x480);
 
-            addMP(player, -4);
+            addFP(player, -4);
             await skill.func(player, undefined);
             return true;
         },
@@ -814,8 +964,8 @@ const ITEM_DATA = [
         type: "staff",
         price: 110,
         func: async function() {
-            if(player.mp < 5) {
-                addLog("MP が足りない");
+            if(player.fp < 5) {
+                addLog("FP が足りない");
                 return false;
             }
             addLog(player.name+" は "+this.name+" を構えた");
@@ -824,7 +974,7 @@ const ITEM_DATA = [
             return false;
         },
         func_cast: async function(dir) {
-            addMP(player, -5);
+            addFP(player, -5);
             const skill = getSkillData(0x500);
             const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
             return await skill.func(player, target);
@@ -836,8 +986,8 @@ const ITEM_DATA = [
         type: "staff",
         price: 140,
         func: async function() {
-            if(player.mp < 8) {
-                addLog("MP が足りない");
+            if(player.fp < 8) {
+                addLog("FP が足りない");
                 return false;
             }
             addLog(player.name+" は "+this.name+" を構えた");
@@ -846,7 +996,7 @@ const ITEM_DATA = [
             return false;
         },
         func_cast: async function(dir) {
-            addMP(player, -8);
+            addFP(player, -8);
             const skill = getSkillData(0x501);
             const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
             return await skill.func(player, target);
@@ -858,13 +1008,13 @@ const ITEM_DATA = [
         type: "staff",
         price: 124,
         func: async function() {
-            if(player.mp < 16) {
-                addLog("MP が足りない");
+            if(player.fp < 16) {
+                addLog("FP が足りない");
                 return false;
             }
             const skill = getSkillData(0x401);
 
-            addMP(player, -16);
+            addFP(player, -16);
             await skill.func(player, player);
             return true;
         },
@@ -876,13 +1026,13 @@ const ITEM_DATA = [
         type: "staff",
         price: 141,
         func: async function() {
-            if(player.mp < 30) {
-                addLog("MP が足りない");
+            if(player.fp < 30) {
+                addLog("FP が足りない");
                 return false;
             }
             const skill = getSkillData(0x402);
 
-            addMP(player, -30);
+            addFP(player, -30);
             await skill.func(player, player);
             return true;
         },
@@ -894,13 +1044,13 @@ const ITEM_DATA = [
         type: "staff",
         price: 187,
         func: async function() {
-            if(player.mp < 45) {
-                addLog("MP が足りない");
+            if(player.fp < 45) {
+                addLog("FP が足りない");
                 return false;
             }
             const skill = getSkillData(0x403);
 
-            addMP(player, -45);
+            addFP(player, -45);
             await skill.func(player, player);
             return true;
         },
@@ -912,13 +1062,13 @@ const ITEM_DATA = [
         type: "staff",
         price: 103,
         func: async function() {
-            if(player.mp < 13) {
-                addLog("MP が足りない");
+            if(player.fp < 13) {
+                addLog("FP が足りない");
                 return false;
             }
             const skill = getSkillData(0x404);
 
-            addMP(player, -13);
+            addFP(player, -13);
             await skill.func(player, player);
             return true;
         },
@@ -978,8 +1128,8 @@ const ITEM_DATA = [
         st: {
             hp: 100,
             hp_max: 100,
-            mp: 10,
-            mp_max: 10,
+            fp: 10,
+            fp_max: 10,
             str: 2,
             dex: 2,
             int: 2,
@@ -988,9 +1138,9 @@ const ITEM_DATA = [
             def: 5,
             hung_rate: 30,
             hp_regen_rate: 10,
-            mp_regen_rate: 10,
+            fp_regen_rate: 10,
             sight_range: 4,
-            lvup: {hp_max: 30, mp_max: 3, str: 2, dex: 2, fth: 3},
+            lvup: {hp_max: 30, fp_max: 3, str: 2, dex: 2, fth: 3},
         },
         func: async function() {
             log_reserve.pop();
@@ -1009,8 +1159,8 @@ const ITEM_DATA = [
         st: {
             hp: 175,
             hp_max: 175,
-            mp: 0,
-            mp_max: 0,
+            fp: 0,
+            fp_max: 0,
             str: 4,
             dex: 2,
             int: 1,
@@ -1019,9 +1169,9 @@ const ITEM_DATA = [
             def: 15,
             hung_rate: 10,
             hp_regen_rate: 10,
-            mp_regen_rate: 10,
+            fp_regen_rate: 10,
             sight_range: 3,
-            lvup: {hp_max: 40, mp_max: 1, str: 3, dex: 2},
+            lvup: {hp_max: 40, fp_max: 1, str: 3, dex: 2},
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
@@ -1049,8 +1199,8 @@ const ITEM_DATA = [
         st: {
             hp: 130,
             hp_max: 130,
-            mp: 10,
-            mp_max: 10,
+            fp: 10,
+            fp_max: 10,
             str: 2,
             dex: 4,
             int: 3,
@@ -1059,9 +1209,9 @@ const ITEM_DATA = [
             def: 10,
             hung_rate: 10,
             hp_regen_rate: 10,
-            mp_regen_rate: 10,
+            fp_regen_rate: 10,
             sight_range: 5,
-            lvup: {hp_max: 25, mp_max: 2, dex: 4, int: 1},
+            lvup: {hp_max: 25, fp_max: 2, dex: 4, int: 1},
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 5) {
@@ -1090,8 +1240,8 @@ const ITEM_DATA = [
         st: {
             hp: 110,
             hp_max: 110,
-            mp: 20,
-            mp_max: 20,
+            fp: 20,
+            fp_max: 20,
             str: 1,
             dex: 2,
             int: 6,
@@ -1100,9 +1250,9 @@ const ITEM_DATA = [
             def: 2,
             hung_rate: 10,
             hp_regen_rate: 10,
-            mp_regen_rate: 7,
+            fp_regen_rate: 7,
             sight_range: 5,
-            lvup: {hp_max: 15, mp_max: 4, int: 4, fth: 1},
+            lvup: {hp_max: 15, fp_max: 4, int: 4, fth: 1},
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
@@ -1111,7 +1261,8 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x102);
-                addItem(0x600);
+                //addItem(0x600);
+                setSkill(0x300);
                 addItem(0x380);
                 addItem(0x020);
                 inventory.splice(inventory.indexOf(this), 1);
@@ -1131,8 +1282,8 @@ const ITEM_DATA = [
         st: {
             hp: 140,
             hp_max: 140,
-            mp: 17,
-            mp_max: 17,
+            fp: 17,
+            fp_max: 17,
             str: 3,
             dex: 2,
             int: 1,
@@ -1141,9 +1292,9 @@ const ITEM_DATA = [
             def: 7,
             hung_rate: 10,
             hp_regen_rate: 10,
-            mp_regen_rate: 9,
+            fp_regen_rate: 9,
             sight_range: 4,
-            lvup: {hp_max: 20, mp_max: 3, str: 2, fth: 3},
+            lvup: {hp_max: 20, fp_max: 3, str: 2, fth: 3},
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
@@ -1152,7 +1303,8 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x104);
-                addItem(0x601);
+                //addItem(0x601);
+                setSkill(0x400);
                 addItem(0x381);
                 addItem(0x020);
                 inventory.splice(inventory.indexOf(this), 1);
@@ -1172,8 +1324,8 @@ const ITEM_DATA = [
         st: {
             hp: 120,
             hp_max: 120,
-            mp: 17,
-            mp_max: 17,
+            fp: 17,
+            fp_max: 17,
             str: 1,
             dex: 1,
             int: 4,
@@ -1182,9 +1334,9 @@ const ITEM_DATA = [
             def: 5,
             hung_rate: 10,
             hp_regen_rate: 10,
-            mp_regen_rate: 7,
+            fp_regen_rate: 7,
             sight_range: 5,
-            lvup: {hp_max: 15, mp_max: 3, int: 3, fth: 3},
+            lvup: {hp_max: 15, fp_max: 3, int: 3, fth: 3},
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
@@ -1193,7 +1345,8 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x103);
-                addItem(0x604);
+                //addItem(0x604);
+                setSkill(0x500);
                 addItem(0x382);
                 addItem(0x020);
                 inventory.splice(inventory.indexOf(this), 1);
@@ -1206,84 +1359,6 @@ const ITEM_DATA = [
         },
     },
 ];
-const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
-const STACK_TYPE = ["ammo"];
-const STACK_MAX = 32;
-const UPGRADE_TYPE = ["weapon"];
-const INVENTORY_SIZE = 20;
-let inventory = [];
-let inv_cursor = 0;
-
-// 落ちてるアイテム
-const ITEM_TABLE = [
-    [
-        0x000, 0x000, 0x000,
-        0x010, 0x020, 0x030,
-        0x080,
-        0x800,
-    ],
-    [
-        0x000, 0x000, 0x000,
-        0x010, 0x020, 0x030,
-        0x080,
-        0x800,
-    ],
-    [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
-        0x080, 0x080,
-        0x400, 
-        0x500,
-        0x609,
-        0x800, 0x800,
-    ],
-    [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
-        0x080, 0x080,
-        0x400, 0x401, 0x402,
-        0x500,
-        0x609,
-        0x800, 0x800, 0x801,
-    ],
-    [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
-        0x080, 0x080,
-        0x400, 0x401, 0x402,
-        0x500,
-        0x603, 0x609,
-        0x800, 0x800, 0x801,
-    ],
-    [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
-        0x012, 0x012,
-        0x080, 0x080,
-        0x101, 0x201, 0x301,
-        0x400, 0x401, 0x402, 0x403,
-        0x500,
-        0x603, 0x606, 0x609,
-        0x800, 0x800, 0x801, 0x801,
-    ],
-    [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
-        0x012, 0x012,
-        0x080, 0x080,
-        0x101, 0x201, 0x301, 0x302,
-        0x400, 0x401, 0x402, 0x403,
-        0x500,
-        0x603, 0x605, 0x606, 0x609,
-        0x800, 0x800, 0x801, 0x801,
-    ],
-];
-let item_group = [];
 
 //==================================================ENEMY==================================================
 
@@ -1294,7 +1369,7 @@ const ENEMY_DATA = [
         char: "亡",
         lv:1,
         hp:80, hp_max:80, 
-        mp:0, mp_max:0, 
+        fp:0, fp_max:0, 
         atk:30, def:10,
         speed:1,
         sight_range:3,
@@ -1313,7 +1388,7 @@ const ENEMY_DATA = [
         char: "花",
         lv:1,
         hp:50, hp_max:50, 
-        mp:0, mp_max:0, 
+        fp:0, fp_max:0, 
         atk:20, def:5,
         speed:1,
         sight_range:2,
@@ -1323,7 +1398,7 @@ const ENEMY_DATA = [
         berserk_flag: false,
         exp:2,
         func_spawn: async function(me) {
-            await setConditionTurn(me, 0x03, 1000);
+            await setCondition(me, 0x03, 1000);
             log_reserve.splice(log_reserve.length-1, 1);
         },
         func_died: async function() {},
@@ -1341,7 +1416,7 @@ const ENEMY_DATA = [
         char: "兵",
         lv:1,
         hp:120, hp_max:120,
-        mp:0, mp_max:0,
+        fp:0, fp_max:0,
         atk:50, def:15,
         speed:1,
         sight_range:4,
@@ -1360,7 +1435,7 @@ const ENEMY_DATA = [
         char: "弓",
         lv:1,
         hp:80, hp_max:80, 
-        mp:15, mp_max:15,
+        fp:15, fp_max:15,
         atk:40, def:10,
         speed:1,
         sight_range:5,
@@ -1384,8 +1459,8 @@ const ENEMY_DATA = [
         name: "スケルトン",
         char: "骨",
         lv:1,
-        hp:120, hp_max:120,
-        mp:5, mp_max:5,
+        hp:150, hp_max:150,
+        fp:5, fp_max:5,
         atk:60, def:5,
         speed:1,
         sight_range:4,
@@ -1409,7 +1484,7 @@ const ENEMY_DATA = [
         char: "犬",
         lv:1,
         hp:90, hp_max:90,
-        mp:3, mp_max:3,
+        fp:3, fp_max:3,
         atk:20, def:5,
         speed:2,
         sight_range:8,
@@ -1424,6 +1499,7 @@ const ENEMY_DATA = [
             {
                 id: 0x003,
                 chance: 0.5,
+                cost: 0,
             }
         ],
     },
@@ -1433,7 +1509,7 @@ const ENEMY_DATA = [
         char: "車",
         lv:1,
         hp:150, hp_max:150,
-        mp:5, mp_max:5,
+        fp:5, fp_max:5,
         atk:40, def:7,
         speed:1,
         sight_range:5,
@@ -1447,7 +1523,7 @@ const ENEMY_DATA = [
         skill: [
             {
                 id: 0x004,
-                chance: 1,
+                chance: 0.75,
             }
         ],
     },
@@ -1457,7 +1533,7 @@ const ENEMY_DATA = [
         char: "練",
         lv:1,
         hp:0xffff, hp_max:0xffff,
-        mp:0, mp_max:0,
+        fp:0, fp_max:0,
         atk:0, def:10,
         speed:0,
         sight_range:0,
@@ -1474,52 +1550,22 @@ const ENEMY_DATA = [
     },
 ];
 
-const ENEMY_TABLE = [
-    [
-        0x000, 0x000, 0x001,
-    ],
-    [
-        0x000, 0x000, 0x002, 0x003,
-    ],
-    [
-        0x002, 0x002, 0x002, 0x003, 0x004,
-    ],
-    [
-        0x002, 0x004, 0x005,
-    ],
-    [
-        0x002, 0x004, 0x005, 0x006,
-    ],
-    [
-        0x002, 0x003, 0x004, 0x005, 0x006,
-    ],
-];
-let enemy_group = [];
-let killed_group = [];
-
 //==================================================SKILL==================================================
 
 const SKILL_DATA = [
     {
         id: 0x000,
         name: "射撃",
+        target_type: "range",
+        cost_type: "hp",
+        cost: 0,
         ammo: undefined,
         func: async function(from, to) {
-            for(let d in KEY_DIRECTION) {
-                let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
-                let xy = straightRecursive(from.x, from.y, KEY_DIRECTION[d], ammo.range-1);
-                if(xy.x == to.x && xy.y == to.y && from.map_sight[to.y][to.x]) {
-                    await shot(from, ammo, KEY_DIRECTION[d]);
-                    return true;
-                }
-            }
-            for(let d in KEY_DIRECTION_DIAGONAL) {
-                let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
-                let xy = straightRecursive(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], ammo.range-1);
-                if(xy.x == to.x && xy.y == to.y && from.map_sight[to.y][to.x]) {
-                    await shot(from, ammo, KEY_DIRECTION_DIAGONAL[d]);
-                    return true;
-                }
+            let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
+            let xy = straightRecursive(from.x, from.y, getDirection(from, to), ammo.range);
+            if(xy.x == to.x && xy.y == to.y) {
+                await shot(from, ammo, getDirection(from, to));
+                return true;
             }
             return false;
         },
@@ -1527,20 +1573,27 @@ const SKILL_DATA = [
     {
         id: 0x001,
         name: "受け流し",
+        target_type: "self",
+        cost_type: "hp",
+        cost: 10,
         func: async function(from, to) {
-            await setCondition(from, 0x80);
+            await setCondition(from, 0x80, 1);
+            await setCondition(from, 0x03, 1);
             return true;
         }
     },
     {
         id: 0x002,
         name: "クイックステップ",
+        target_type: "range",
+        cost_type: "fp",
+        cost: 15,
         direction: undefined,
         distance: undefined,
         func: async function(from, to) {
-            if(jump(from, this.direction, this.distance)) {
-                addLog(who.name+" は跳び退いた");
-                play_audio(audio_jump);
+            if(jufp(from, this.direction, this.distance)) {
+                addLog(from.name+" は跳び退いた");
+                play_audio(audio_jufp);
                 return true;
             }
             return false;
@@ -1549,67 +1602,42 @@ const SKILL_DATA = [
     {
         id: 0x003,
         name: "毒攻撃",
+        target_type: "next",
+        cost_type: "hp",
+        cost: 5,
         func: async function(from, to) {
-            for(let d in KEY_DIRECTION) {
-                let x = from.x + KEY_DIRECTION[d].x;
-                let y = from.y + KEY_DIRECTION[d].y;
-                if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)) {
-                    await attack(from, to);
-                    if(Math.floor(Math.random()+0.33))
-                        await setCondition(to, 0x00);
-                    return true;
-                }
-            }
-            for(let d in KEY_DIRECTION_DIAGONAL) {
-                let x = from.x + KEY_DIRECTION_DIAGONAL[d].x;
-                let y = from.y + KEY_DIRECTION_DIAGONAL[d].y;
-                if(x == to.x && y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)) {
-                    await attack(from, to);
-                    if(Math.floor(Math.random()+0.33))
-                        await setCondition(to, 0x00);
-                    return true;
-                }
-            }
-            return false;
+            await attack(from, to);
+            if(Math.floor(Math.random()+0.33))
+                await setCondition(to, 0x00);
+            return true;
         }
     },
     {
         id: 0x004,
         name: "突撃",
+        target_type: "range",
+        cost_type: "hp",
+        cost: 15,
         func: async function(from, to) {
-            for(let d in KEY_DIRECTION) {
-                let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION[d], SIZEX+SIZEY);
-                if(xy.x+KEY_DIRECTION[d].x == to.x && xy.y+KEY_DIRECTION[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y) && from.map_sight[to.y][to.x]) {
-                    addLog(from.name+" は "+to.name+" に突撃した");
-                    while(await move(from, KEY_DIRECTION[d])) {
-                        updateMap();
-                        drawMap();
-                        await wait(50);
-                    }
-                    await attack(from, to);
-                    return true;
-                }
+            addLog(from.name+" は突撃した");
+            while(await move(from, getDirection(from, to))) {
+                updateMap();
+                drawMap();
+                await wait(50);
             }
-            for(let d in KEY_DIRECTION_DIAGONAL) {
-                let xy = straightRecursiveDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d], SIZEX+SIZEY);
-                if(xy.x+KEY_DIRECTION_DIAGONAL[d].x == to.x && xy.y+KEY_DIRECTION_DIAGONAL[d].y == to.y && canDiagonal(from.x, from.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y) && from.map_sight[to.y][to.x]) {
-                    addLog(from.name+" は "+to.name+" に突撃した");
-                    while(await move(from, KEY_DIRECTION_DIAGONAL[d])) {
-                        updateMap();
-                        drawMap();
-                        await wait(50);
-                    }
-                    await attack(from, to);
-                    return true;
-                }
-            }
-            return false;
+            // 敵が居たら攻撃
+            if(to.x == player.x && to.y == player.y) await attack(from, player);
+            else if(getEnemy(to.x, to.y)) await attack(from, getEnemy(to.x, to.y));
+            return true;
         }
     },
     // int由来 0x3XX
     {
         id: 0x300,
         name: "ソウルの光",
+        target_type: "range",
+        cost_type: "fp",
+        cost: 5,
         func: async function(from, to) {
             play_audio(audio_ray);
             addLog(from.name+" はソウルの光を放った");
@@ -1624,58 +1652,73 @@ const SKILL_DATA = [
     {
         id: 0x400,
         name: "小回復",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 8,
         func: async function(from, to) {
             play_audio(audio_heal);
 
             let fth = from.fth ? from.fth : 10;
             let value = 30 + fth * 2;
             addHP(from, value);
-            addLog("淡い光が "+to.name+" を包む　HPが "+value+" 回復した");
+            addLog("淡い光が "+from.name+" を包む　HPが "+value+" 回復した");
             return true;
         }
     },
     {
         id: 0x401,
         name: "回復",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 16,
         func: async function(from, to) {
             play_audio(audio_heal);
 
             let fth = from.fth ? from.fth : 10;
             let value = 40 + fth * 3;
             addHP(from, value);
-            addLog("光が "+to.name+" を包む　HPが "+value+" 回復した");
+            addLog("光が "+from.name+" を包む　HPが "+value+" 回復した");
             return true;
         }
     },
     {
         id: 0x402,
         name: "大回復",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 30,
         func: async function(from, to) {
             play_audio(audio_heal);
 
             let fth = from.fth ? from.fth : 10;
             let value = 60 + fth * 4;
             addHP(from, value);
-            addLog("眩い光が "+to.name+" を包む　HPが "+value+" 回復した");
+            addLog("眩い光が "+from.name+" を包む　HPが "+value+" 回復した");
             return true;
         }
     },
     {
         id: 0x403,
         name: "王たる回復",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 45,
         func: async function(from, to) {
             play_audio(audio_heal);
 
             let fth = from.fth ? from.fth : 10;
             let value = 80 + fth * 5;
             addHP(from, value);
-            addLog("大いなる光が "+to.name+" を包む　HPが "+value+" 回復した");
+            addLog("大いなる光が "+from.name+" を包む　HPが "+value+" 回復した");
             return true;
         }
     },
     {
         id: 0x404,
         name: "恵みの祝福",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 13,
         func: async function(from, to) {
             play_audio(audio_heal);
 
@@ -1686,17 +1729,22 @@ const SKILL_DATA = [
     {
         id: 0x480,
         name: "フォース",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 5,
         func: async function(from, to) {
+            const range = 2;
+
             play_audio(audio_force);
             addLog(from.name+" から衝撃波が迸る");
-            await animSpread(from.x, from.y, 1, "光");
+            await animSpread(from.x, from.y, range, "光");
             
-            for(let i=-1; i<=1; i++){
+            for(let i=-range; i<=range; i++){
                 if(from.y+i < 0 || from.y+i >= SIZEY) continue;
-                for(let j=-1; j<=1; j++) {
+                for(let j=-range; j<=range; j++) {
                     if(from.x+j < 0 || from.x+j >= SIZEX) continue;
                     let enemy = getEnemy(from.x+j, from.y+i);
-                    if(enemy) jump(enemy, {x:j, y:i}, 1);
+                    if(enemy) jufp(enemy, {x:j, y:i}, 1);
                 }
             }
             updateMap();
@@ -1709,6 +1757,9 @@ const SKILL_DATA = [
     {
         id: 0x500,
         name: "火球",
+        target_type: "range",
+        cost_type: "fp",
+        cost: 5,
         func: async function(from, to) {
             play_audio(audio_fire);
             addLog(from.name+" は火球を投げた");
@@ -1723,6 +1774,9 @@ const SKILL_DATA = [
     {
         id: 0x501,
         name: "大火球",
+        target_type: "range",
+        cost_type: "fp",
+        cost: 10,
         func: async function(from, to) {
             play_audio(audio_fire);
             addLog(from.name+" は大きな火球を投げた");
@@ -1731,7 +1785,7 @@ const SKILL_DATA = [
 
             let int = from.int ? from.int : 10;
             let fth = from.fth ? from.fth : 10;
-            let dmg = 20 + int * 2.5 + fth * 2.5;
+            let dmg = 30 + int * 2.5 + fth * 2.5;
             //await magic(from, dmg, getDirection(from, to));
             await doAOE(to.x, to.y, 1, from, dmg);
             return true;
@@ -1894,25 +1948,6 @@ const TRAP_DATA = [
         },
     },
 ];
-const TRAP_TABLE = [
-    [],
-    [
-        0x00,
-    ],
-    [
-        0x00, 0x01, 0x04,
-    ],
-    [
-        0x00, 0x02, 0x04,
-    ],
-    [
-        0x01, 0x02, 0x03, 0x04,
-    ],
-    [
-        0x01, 0x02, 0x03, 0x04,
-    ],
-];
-let trap_group = [];
 
 //==================================================NPC==================================================
 
@@ -2031,7 +2066,6 @@ const NPC_DATA = [
         func_after: async function() {},
     },
 ];
-let npc_group = [];
 
 // ショップ
 const SHOP_DATA = [
@@ -2223,15 +2257,7 @@ const SHOP_DATA = [
         },
     },
 ];
-let shop_group = [];
-let shop_cursor = -1;
-let shop_using = undefined; // 利用中のショップ
-const STORAGE_SIZE = 60;
-let storage = [];
-let storage_flag = false;
-let storage_IO_flag = false; // out: false, in: true
-
-// 
+ 
 //==================================================UNIQUE MAP==================================================
 
 let unique_map = [    // 固有マップ

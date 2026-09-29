@@ -28,7 +28,7 @@ function drawTitle() {
     const nodata_flg = new URLSearchParams(location.search).get("nodata") !== null
     const title_fig = [
         "",
-        "Ｒｏｇｕｅっぽいやつ",
+        "Rogueっぽいやつ",
         "",
         "",
         "ｚ：はじめから　　　　　　　　　　",
