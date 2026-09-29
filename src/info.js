@@ -50,7 +50,7 @@ function drawInv() {
         if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
         if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
 
-        inv.insertAdjacentHTML("beforeend", "　 INVENTORY →<br>");
+        inv.insertAdjacentHTML("beforeend", " 　 INVENTORY → <br>");
         for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++) {
             let str = "";
             if(i == inv_cursor)
@@ -68,7 +68,7 @@ function drawInv() {
                     str += " ×" + inventory[i].stack_num;
             }
             else
-                str += "------";
+                str += "　------　";
             inv.insertAdjacentHTML("beforeend", str + "<br>");
         }
     } 
@@ -77,7 +77,7 @@ function drawInv() {
         if(skill_cursor < skill_start_offset) skill_start_offset = skill_cursor;
         if(skill_cursor >= skill_display_num + skill_start_offset) skill_start_offset = skill_cursor - skill_display_num + 1;
 
-        inv.insertAdjacentHTML("beforeend", "← SKILL 　<br>");
+        inv.insertAdjacentHTML("beforeend", " ← SKILL 　 <br>");
         for(let i=skill_start_offset; i<skill_display_num+skill_start_offset && i<SKILL_SIZE; i++) {
             let str = "";
             if(i == skill_cursor)
@@ -90,7 +90,7 @@ function drawInv() {
                 str += skill[i].name;
             }
             else
-                str += "------";
+                str += "　------　";
             inv.insertAdjacentHTML("beforeend", str + "<br>");
         }
     }
