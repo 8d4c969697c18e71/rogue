@@ -1964,7 +1964,7 @@ async function doEventEnemy(enemy) {
                 else if(skill.target_type == "next") {
                     check = Math.abs(enemy.x-target.x) <= 1 && Math.abs(enemy.y-target.y) <= 1;
                 }
-                else if(skill/target_type == "self") {
+                else if(skill.target_type == "self") {
                     check = true;
                 }
                 // スキル使用

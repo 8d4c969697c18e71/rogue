@@ -22,10 +22,10 @@ function drawMap() {
     for(let i=-player.y; i<SIZEY-player.y; i++)
         for(let j=-player.x; j<SIZEX-player.x; j++) {
             if(!player.map_sight[player.y+i][player.x+j]) {
-                ctx.fillStyle = "gray";
+                ctx.fillStyle = color_gray;
             }
             else if(map_shotrange[player.y+i][player.x+j]) {
-                ctx.fillStyle = "blue";
+                ctx.fillStyle = color_blue;
             }
             else{
                 if(map_draw[player.y+i][player.x+j]==CHAR_MAP[ID_MAP.path]
@@ -33,11 +33,11 @@ function drawMap() {
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.door
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.wall_h
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.wall_v)
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = color_white;
                 else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.stair
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.portal
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.trap)
-                    ctx.fillStyle = "green";
+                    ctx.fillStyle = color_green;
                 else if(map_draw[player.y+i][player.x+j]==CHAR_MAP.player
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.gold
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.potion
@@ -50,23 +50,23 @@ function drawMap() {
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.staff
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.ammo
                     || map_draw[player.y+i][player.x+j]==CHAR_MAP.unique)
-                    ctx.fillStyle = "yellow";
+                    ctx.fillStyle = color_yellow;
                 else if(map_draw[player.y+i][player.x+j]=="魂")
-                    ctx.fillStyle = "skyblue";
+                    ctx.fillStyle = color_light_blue;
                 else if(map_draw[player.y+i][player.x+j]=="火")
-                    ctx.fillStyle = "orange";
+                    ctx.fillStyle = color_orange;
                 else if(map_draw[player.y+i][player.x+j]=="光"
                     || map_draw[player.y+i][player.x+j]=="雷")
-                    ctx.fillStyle = "#ffffaa";
+                    ctx.fillStyle = color_light_yellow;
                 else{
-                    ctx.fillStyle = "red";
+                    ctx.fillStyle = color_red;
 
                     for(let n of npc_group)
                         if((player.x+j)==n.x && (player.y+i)==n.y)
-                            ctx.fillStyle = "yellow";
+                            ctx.fillStyle = color_yellow;
                     for(let s of shop_group)
                         if((player.x+j)==s.x && (player.y+i)==s.y)
-                            ctx.fillStyle = "yellow";
+                            ctx.fillStyle = color_yellow;
                 }
             }
             ctx.fillText(map_draw[player.y+i][player.x+j], FONT_SIZE*j+canvas.clientWidth/2, FONT_SIZE*i+canvas.clientHeight/2);
@@ -79,10 +79,10 @@ function drawMapAll() {
     for(let i=0; i<SIZEY; i++) {
         for(let j=0; j<SIZEX; j++) {
             if(!player.map_sight[i][j]) {
-                ctx.fillStyle = "gray";
+                ctx.fillStyle = color_gray;
             }
             else if(map_shotrange[i][j]) {
-                ctx.fillStyle = "green";
+                ctx.fillStyle = color_green;
             }
             else{
                 if(map_draw[i][j]==CHAR_MAP[ID_MAP.path]
@@ -90,11 +90,11 @@ function drawMapAll() {
                     || map_draw[i][j]==CHAR_MAP.door
                     || map_draw[i][j]==CHAR_MAP.wall_h
                     || map_draw[i][j]==CHAR_MAP.wall_v)
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = color_white;
                 else if(map_draw[i][j]==CHAR_MAP.stair
                     || map_draw[i][j]==CHAR_MAP.portal
                     || map_draw[i][j]==CHAR_MAP.trap)
-                    ctx.fillStyle = "blue";
+                    ctx.fillStyle = color_blue;
                 else if(map_draw[i][j]==CHAR_MAP.player
                     || map_draw[i][j]==CHAR_MAP.gold
                     || map_draw[i][j]==CHAR_MAP.potion
@@ -106,16 +106,16 @@ function drawMapAll() {
                     || map_draw[i][j]==CHAR_MAP.staff
                     || map_draw[i][j]==CHAR_MAP.ammo
                     || map_draw[i][j]==CHAR_MAP.unique)
-                    ctx.fillStyle = "yellow";
+                    ctx.fillStyle = color_yellow;
                 else{
-                    ctx.fillStyle = "red";
+                    ctx.fillStyle = color_red;
 
                     for(let n of npc_group)
                         if(j==n.x && i==n.y)
-                            ctx.fillStyle = "yellow";
+                            ctx.fillStyle = color_yellow;
                     for(let s of shop_group)
                         if(j==s.x && i==s.y)
-                            ctx.fillStyle = "yellow";
+                            ctx.fillStyle = color_yellow;
                 }
             }
             ctx.fillText(map_draw[i][j], FONT_SIZE*j, FONT_SIZE*i);
@@ -143,7 +143,7 @@ function drawGameover() {
     // 描画
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     ctx.textAlign = "center";
-    ctx.fillStyle = "white";
+    ctx.fillStyle = color_white;
     for(let i=0; i<gameover_fig.length-1; i++) {
         ctx.fillText(gameover_fig[i], canvas.clientWidth/2, FONT_SIZE*i);
     }
@@ -152,12 +152,12 @@ function drawGameover() {
     ctx.fillText(DATE+" "+MONTH, canvas.clientWidth/2, FONT_SIZE*9);
     ctx.fillText(YEAR, canvas.clientWidth/2, FONT_SIZE*10);
 
-    ctx.fillStyle = "green";
+    ctx.fillStyle = color_green;
     ctx.fillText(gameover_fig[gameover_fig.length-1], canvas.clientWidth/2, FONT_SIZE*(gameover_fig.length-1));
 
     //Press Esc Key
     ctx.textAlign = "start";
-    ctx.fillStyle = "white";
+    ctx.fillStyle = color_white;
     ctx.fillText("Press z/x/c key", canvas.clientWidth/2 + gameover_fig.length/2, FONT_SIZE*(gameover_fig.length));
 }
 
@@ -241,8 +241,8 @@ function updateMDWall() {
                         map_draw[i+k][j+l] = CHAR_MAP.wall_h;
             }
             // 扉
-            //else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path] && isDoor(j, i))
-            //    map_draw[i][j] = CHAR_MAP.door;
+            else if(map_draw[i][j] == CHAR_MAP[ID_MAP.path] && isDoor(j, i))
+                map_draw[i][j] = CHAR_MAP.door;
         }
 }
 

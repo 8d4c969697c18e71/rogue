@@ -44,8 +44,8 @@ function drawTitle() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     ctx.textAlign = "center";
     for(let i=0; i<title_fig.length; i++) {
-        if(i == 5 && nodata_flg) ctx.fillStyle = "gray";
-        else ctx.fillStyle = "white";
+        if(i == 5 && nodata_flg) ctx.fillStyle = color_gray;
+        else ctx.fillStyle = color_white;
         ctx.fillText(title_fig[i], canvas.clientWidth/2, FONT_SIZE*i);
     }
 }

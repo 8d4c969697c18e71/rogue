@@ -44,8 +44,10 @@ let zxc_size = 0;
 let arrow_size = 0;
 let log_display_num = 5;
 let inv_display_num = 15;
+let skill_display_num = 15;
 let shop_display_num = 10;
 let inv_start_offset = 0;
+let skill_start_offset = 0;
 let shop_start_offset = 0;
 
 
@@ -153,36 +155,11 @@ const KEY_CODE={
 const ROOMNUM = 10;
 const ROOMSIZEMIN = 6;
 const ROOMSIZEMAX = 10;
-let map = [];
 const ID_MAP = {
     none: 0,
     room: 1,
     path: 2,
 };
-let map_draw = [];    // 描画用
-//const char_map = {
-//    0: " ",
-//    1: ".",
-//    2: "#",
-//    player: "@",
-//    wall_v: "|",
-//    wall_h: "—",
-//    stair: "%",
-//    portal: "<",
-//    door: "+",
-//    trap: "^",
-//    // item
-//    gold: "$",
-//    potion: "!",
-//    food: ":",
-//    weapon: ")",
-//    armor: "[",
-//    ring: "=",
-//    scroll: "?",
-//    staff: "/",
-//    ammo: "\"",
-//    unique: "&",
-//};
 const CHAR_MAP = {
     0: " ",
     1: "．",
@@ -207,6 +184,19 @@ const CHAR_MAP = {
     ammo: "”",
     unique: "＆",
 };
+
+const color_red = "#ff5555";
+const color_green = "#55ff55";
+const color_blue = "#5555ff";
+const color_orange = "#ff8800";
+const color_light_blue = "#66aaff";
+const color_yellow = "#ffff00";
+const color_light_yellow = "#ffffaa";
+const color_white = "#ffffff";
+const color_gray = "#888888";
+
+let map = [];
+let map_draw = [];    // 描画用
 let map_shotrange = []; // 射撃・投擲・魔法の範囲
 let stair_pos = {x:undefined, y:undefined};
 let portal_pos = {x:undefined, y:undefined};
@@ -1577,9 +1567,7 @@ const SKILL_DATA = [
         cost_type: "hp",
         cost: 10,
         func: async function(from, to) {
-            await setCondition(from, 0x80, 1);
-            await setCondition(from, 0x03, 1);
-            return true;
+            return setCondition(from, 0x80, 1);
         }
     },
     {
@@ -1866,7 +1854,6 @@ const CONDITION_DATA = [
         func_be: async function(who) {
             addLog(who.name+" は受け流しの構えをとった");
             who.cannot_action_flag = true;
-            if(who == player) turn--;
         },
         func_during: async function(who) {
             who.cannot_action_flag = true;

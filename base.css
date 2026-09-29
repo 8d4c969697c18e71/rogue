@@ -19,6 +19,16 @@ body{
     flex-direction: row;
     justify-content: center;
 }
+.sub3{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.sub4{
+    display: flex;
+    flex-direction: column;
+}
 .button{
     display: flex;
     flex-direction: row;
@@ -26,13 +36,4 @@ body{
 .arrow{
     display: flex;
     position: relative;
-}
-.sub3{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-.sub4{
-    display: flex;
-    flex-direction: column;
 }

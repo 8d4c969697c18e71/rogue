@@ -222,8 +222,8 @@ function setCanvasSizePC() {
     canvas.width = Math.floor(canvas_width*canvas_scale);
     canvas.height = Math.floor(canvas_height*canvas_scale);
     ctx.scale(canvas_scale, canvas_scale);
-    ctx.font = FONT_SIZE+"px 'MS Gothic'";
-    ctx.fillStyle = "white";
+    ctx.font = FONT_SIZE+"px "+FONT;
+    ctx.fillStyle = color_white;
     ctx.textBaseline = "top";
 
     // note
@@ -237,7 +237,6 @@ function setCanvasSizePC() {
     inv.style.border = "solid 1px black";
     // log
     log.style.width = canvas_width+"px";
-    log.style.height = FONT_SIZE*(LOG_RESERVE_SIZE+1)+"px";
     log.style.marginTop = MARGIN+"px";
     log.style.marginLeft = MARGIN+"px";
     // shop
@@ -255,22 +254,28 @@ function setCanvasSizePhone(info_disp_flg = true) {
     const canvas_scale = window.devicePixelRatio;
     FONT_SIZE = 12;
 
+    // canvas
     canvas.style.width = canvas_width+"px";
     canvas.style.height = canvas_height+"px";
     canvas.width = Math.floor(canvas_width*canvas_scale);
     canvas.height = Math.floor(canvas_height*canvas_scale);
     ctx.scale(canvas_scale, canvas_scale);
     ctx.font = FONT_SIZE+"px "+FONT;
-    ctx.fillStyle = "white";
+    ctx.fillStyle = color_white;
     ctx.textBaseline = "top";
     
+    // info
     info.style.fontSize = FONT_SIZE+"px";
     info.style.width = screen.width-canvas_width-5+"px";
+    // inv
     inv.style.fontSize = FONT_SIZE+"px";
-
+    // sub3 (parent log,shop)
     sub3.style.flexDirection = "column";
+    // log
     log.style.fontSize = FONT_SIZE+"px";
     log.style.width = canvas_width+"px";
+    // shop
+    shop.style.width = canvas_width+"px";
     shop.style.fontSize = FONT_SIZE+"px";
 
     document.body.style.paddingTop = 0+"px";
@@ -326,12 +331,12 @@ function dispButton() {
 
 function setButtonNotPressed(button) {
     button.style.backgroundColor = "black";
-    button.style.border = "solid 1px "+"white";
-    button.style.color = "white";
+    button.style.border = "solid 1px "+color_white;
+    button.style.color = color_white;
 }
 
 function setButtonPressed(button) {
-    button.style.backgroundColor = "white";
+    button.style.backgroundColor = color_white;
     button.style.border = "solid 1px "+"black";
     button.style.color = "black";
 }

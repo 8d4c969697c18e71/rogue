@@ -37,54 +37,61 @@ function drawInfo() {
 //=========================INVENTORY=========================
 
 function drawInv() {
-    inv.innerHTML = "";
+    inv.innerHTML = "loading";
     if(inventory_flag || storage_IO_flag || skill_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
 
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
     const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
-    inv_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/(FONT_SIZE+4)) - 1;
+    inv_display_num = Math.floor((window.innerHeight-body_padding-body_margin-info.clientHeight-arrow_size*3)/inv.clientHeight) - 2;
 
-    if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
-    if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
-
+    inv.innerHTML = "";
     if(remember_ui == "inventory") {
+        if(inv_cursor < inv_start_offset) inv_start_offset = inv_cursor;
+        if(inv_cursor >= inv_display_num + inv_start_offset) inv_start_offset = inv_cursor - inv_display_num + 1;
+
         inv.insertAdjacentHTML("beforeend", "　 INVENTORY →<br>");
         for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++) {
+            let str = "";
             if(i == inv_cursor)
-                inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+                str += ">&nbsp;&nbsp; ";
             else if(i<9)
-                inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+                str += (i+1) + ":&nbsp; ";
             else
-                inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+                str += (i+1) + ": ";
             if(i < inventory.length) {
                 if(inventory[i].equip_flag)
-                    inv.insertAdjacentHTML("beforeend", "[E]"+inventory[i].name);
+                    str += "[E]" + inventory[i].name;
                 else
-                    inv.insertAdjacentHTML("beforeend", inventory[i].name);
+                    str += inventory[i].name;
                 if(inventory[i].stack_num)
-                    inv.insertAdjacentHTML("beforeend", " ×"+inventory[i].stack_num)
+                    str += " ×" + inventory[i].stack_num;
             }
             else
-                inv.insertAdjacentHTML("beforeend", "------");
-            inv.insertAdjacentHTML("beforeend", "<br>");
+                str += "------";
+            inv.insertAdjacentHTML("beforeend", str + "<br>");
         }
     } 
     else if(remember_ui == "skill") {
+        skill_display_num = inv_display_num;
+        if(skill_cursor < skill_start_offset) skill_start_offset = skill_cursor;
+        if(skill_cursor >= skill_display_num + skill_start_offset) skill_start_offset = skill_cursor - skill_display_num + 1;
+
         inv.insertAdjacentHTML("beforeend", "← SKILL 　<br>");
-        for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<SKILL_SIZE; i++) {
+        for(let i=skill_start_offset; i<skill_display_num+skill_start_offset && i<SKILL_SIZE; i++) {
+            let str = "";
             if(i == skill_cursor)
-                inv.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+                str += ">&nbsp;&nbsp; ";
             else if(i<9)
-                inv.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+                str += (i+1)+":&nbsp; ";
             else
-                inv.insertAdjacentHTML("beforeend", (i+1)+": ");
+                str += (i+1)+": ";
             if(i < skill.length) {
-                inv.insertAdjacentHTML("beforeend", skill[i].name);
+                str += skill[i].name;
             }
             else
-                inv.insertAdjacentHTML("beforeend", "------");
-            inv.insertAdjacentHTML("beforeend", "<br>");
+                str += "------";
+            inv.insertAdjacentHTML("beforeend", str + "<br>");
         }
     }
 }
@@ -95,44 +102,50 @@ function drawShop() {
     shop.innerHTML = "";
     shop.style.border = "solid 1px black";
     if(shop_flag) {
+        shop.innerHTML = "loading";
+        if(!storage_IO_flag) shop.style.border = "solid 1px white";
+
         const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
         const shop_margin =  parseInt(window.getComputedStyle(document.body).marginTop);
         let content_height = window.innerHeight-body_padding*2-shop_margin-canvas.clientHeight-arrow_size*3;
         if(isPhone()) content_height /= 2;
-        shop_display_num = Math.floor(content_height/(FONT_SIZE+4)) - 1;
+        shop_display_num = Math.floor(content_height/shop.clientHeight) - 2;
 
         if(shop_cursor < shop_start_offset) shop_start_offset = shop_cursor;
         if(shop_cursor >= shop_display_num + shop_start_offset) shop_start_offset = shop_cursor - shop_display_num + 1;
 
-        if(!storage_IO_flag) shop.style.border = "solid 1px white";
-        if(storage_flag) shop.insertAdjacentHTML("beforeend", "STORAGE<br>");
-        else if(upgrade_flag) shop.insertAdjacentHTML("beforeend", "UPGRADE<br>");
-        else shop.insertAdjacentHTML("beforeend", "SHOP<br>");
+        shop.innerHTML = "";
+        let header;
+        if(storage_flag) header = "STORAGE";
+        else if(upgrade_flag) header = "UPGRADE";
+        else header = "SHOP";
+        shop.insertAdjacentHTML("beforeend", header + "<br>");
         for(let i=shop_start_offset; i<shop_using.item.length && i<shop_display_num+shop_start_offset; i++) {
+            let str = "";
             if(i == shop_cursor)
-                shop.insertAdjacentHTML("beforeend", ">&nbsp;&nbsp; ");
+                str += ">&nbsp;&nbsp; ";
             else if(i<9)
-                shop.insertAdjacentHTML("beforeend", (i+1)+":&nbsp; ");
+                str += (i+1)+":&nbsp; ";
             else
-                shop.insertAdjacentHTML("beforeend", (i+1)+": ");
+                str += (i+1)+": ";
             if(upgrade_flag) {
-                shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-                shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].upgrade_cost+"G");
+                str += shop_using.item[i].name;
+                str += " : "+shop_using.item[i].upgrade_cost+"G";
             }
             else if(storage_flag) {
-                shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
+                str += shop_using.item[i].name;
                 if(shop_using.item[i].stack_num > 0)
-                    shop.insertAdjacentHTML("beforeend", "×"+shop_using.item[i].stack_num);
+                    str += "×"+shop_using.item[i].stack_num;
             }
             else if(shop_using.item[i].price>=0) {
-                shop.insertAdjacentHTML("beforeend", shop_using.item[i].name);
-                shop.insertAdjacentHTML("beforeend", " : "+shop_using.item[i].price+"G");
+                str += shop_using.item[i].name;
+                str += " : "+shop_using.item[i].price+"G";
             }
             else{
-                shop.insertAdjacentHTML("beforeend", "(売) "+shop_using.item[i].name);
-                shop.insertAdjacentHTML("beforeend", " : "+(-shop_using.item[i].price)+"G");
+                str += "(売) "+shop_using.item[i].name;
+                str += " : "+(-shop_using.item[i].price)+"G";
             }
-            shop.insertAdjacentHTML("beforeend", "<br>");
+            shop.insertAdjacentHTML("beforeend", str + "<br>");
         }
     }
 }
@@ -140,25 +153,13 @@ function drawShop() {
 //=========================LOG=========================
 
 function drawLog() {
-    log.innerHTML = "";
+    log.innerHTML = "loading";
 
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
     const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
     let content_height = window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3;
     if(isPhone()) content_height /= 2;
-    log_display_num = Math.floor(content_height/(FONT_SIZE+5)-1);
-
-    for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
-        log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
-    log.insertAdjacentHTML("afterbegin","LOG<br>");
-}
-
-function drawLogPhone() {
-    const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
-    const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
-    let content_height = window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3;
-    if(isPhone()) content_height /= 2;
-    log_display_num = Math.floor(content_height/(FONT_SIZE+5)-1);
+    log_display_num = Math.floor(content_height/log.clientHeight) - 2;
 
     log.innerHTML = "";
     for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
@@ -214,43 +215,43 @@ function drawNote() {
 
     note.innerHTML = "NOTE<br>";
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.player+"&nbsp;", "yellow")+": "+player.name+"<br>");
+        colorUI("&nbsp;"+CHAR_MAP.player+"&nbsp;", color_yellow)+": "+player.name+"<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;赤 ", "red")+": 敵<br>");
+        colorUI("&nbsp;赤 ", color_red)+": 敵<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;黄 ", "yellow")+": NPC<br>");
+        colorUI("&nbsp;黄 ", color_yellow)+": NPC<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.stair+"&nbsp;", "green")+": 階段<br>");;
+        colorUI("&nbsp;"+CHAR_MAP.stair+"&nbsp;", color_green)+": 階段<br>");;
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.portal+"&nbsp;", "green")+": 帰還ゲート<br>");
+        colorUI("&nbsp;"+CHAR_MAP.portal+"&nbsp;", color_green)+": 帰還ゲート<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.trap+"&nbsp;", "green")+": 罠<br>");
+        colorUI("&nbsp;"+CHAR_MAP.trap+"&nbsp;", color_green)+": 罠<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.gold+"&nbsp;", "yellow")+": 金貨<br>");
+        colorUI("&nbsp;"+CHAR_MAP.gold+"&nbsp;", color_yellow)+": 金貨<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.weapon+"&nbsp;", "yellow")+": 武器<br>");
+        colorUI("&nbsp;"+CHAR_MAP.weapon+"&nbsp;", color_yellow)+": 武器<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.armor+"&nbsp;", "yellow")+": 鎧<br>");
+        colorUI("&nbsp;"+CHAR_MAP.armor+"&nbsp;", color_yellow)+": 鎧<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.ring+"&nbsp;", "yellow")+": 指輪<br>");
+        colorUI("&nbsp;"+CHAR_MAP.ring+"&nbsp;", color_yellow)+": 指輪<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.potion+"&nbsp;", "yellow")+": 回復<br>");
+        colorUI("&nbsp;"+CHAR_MAP.potion+"&nbsp;", color_yellow)+": 回復<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.food+"&nbsp;", "yellow")+": 食料<br>");
+        colorUI("&nbsp;"+CHAR_MAP.food+"&nbsp;", color_yellow)+": 食料<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.consume+"&nbsp;", "yellow")+": 消耗品<br>");
+        colorUI("&nbsp;"+CHAR_MAP.consume+"&nbsp;", color_yellow)+": 消耗品<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.scroll+"&nbsp;", "yellow")+": 巻物<br>");
+        colorUI("&nbsp;"+CHAR_MAP.scroll+"&nbsp;", color_yellow)+": 巻物<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.staff+"&nbsp;", "yellow")+": 杖<br>");
+        colorUI("&nbsp;"+CHAR_MAP.staff+"&nbsp;", color_yellow)+": 杖<br>");
     note.insertAdjacentHTML("beforeend", 
-        colorUI("&nbsp;"+CHAR_MAP.ammo+"&nbsp;", "yellow")+": 弾薬<br>");
+        colorUI("&nbsp;"+CHAR_MAP.ammo+"&nbsp;", color_yellow)+": 弾薬<br>");
     note.insertAdjacentHTML("beforeend", "<br>");
     note.insertAdjacentHTML("beforeend", "CONTROL<br>");
     note.insertAdjacentHTML("beforeend", "- 移動<br>&nbsp; ←↑↓→<br>");
     note.insertAdjacentHTML("beforeend", "- 斜め移動<br>&nbsp; ←↑↓→ + CTRL<br>");
     note.insertAdjacentHTML("beforeend", "- 高速移動<br>&nbsp; ←↑↓→ + SHIFT<br>");
-    note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←↑↓→ TO "+colorUI("赤字", "red")+"<br>");
+    note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←↑↓→ TO "+colorUI("赤字", color_red)+"<br>");
     note.insertAdjacentHTML("beforeend", "- 待機: Z<br>");
     note.insertAdjacentHTML("beforeend", "- インベントリ: X<br>");
     note.insertAdjacentHTML("beforeend", "- 射撃: C<br>");
