@@ -24,7 +24,7 @@ function drawMap() {
             if(!player.map_sight[player.y+i][player.x+j]) {
                 ctx.fillStyle = color_gray;
             }
-            else if(map_shotrange[player.y+i][player.x+j]) {
+            else if(map_shotrange[player.y+i][player.x+j] && interval_sr_flag) {
                 ctx.fillStyle = color_blue;
             }
             else{

@@ -169,6 +169,18 @@ async function events() {
         turn_flag = await doEventPlayer();
     }
 
+    // shotrange点滅制御
+    if((shot_flag || throwing_flag || magic_flag || skill_draw_aim_flag) && id_interval_sr == undefined)
+        id_interval_sr = setInterval(() => {
+            interval_sr_flag = interval_sr_flag ? false : true;
+            drawMap();
+        }, 500);
+    else {
+        clearInterval(id_interval_sr);
+        id_interval_sr = undefined;
+        interval_sr_flag = true;
+    }
+
     // 描画
     if(!gameover_flag) drawAll();
 
@@ -856,6 +868,7 @@ async function doEventSkill() {
         }
     // cancel
     if(key_input.cancel) {
+        play_audio(audio_cancel);
         skill_flag = false;
         skill_using = undefined;
         return false;
@@ -893,6 +906,7 @@ async function doSubEventSkill() {
     }
     // cancel
     if(key_input.cancel) {
+        play_audio(audio_cancel);
         skill_using = undefined;
         return false;
     }

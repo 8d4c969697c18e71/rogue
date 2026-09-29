@@ -93,6 +93,7 @@ async function inputName() {
     }
     // cancel
     if(key_input.cancel) {
+        play_audio(audio_cancel);
         player.name = player.name.slice(0, -1);
     }
 

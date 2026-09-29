@@ -196,8 +196,10 @@ const color_white = "#ffffff";
 const color_gray = "#888888";
 
 let map = [];
-let map_draw = [];    // 描画用
-let map_shotrange = []; // 射撃・投擲・魔法の範囲
+let map_draw = []; // 描画用
+let map_shotrange = []; // 射撃・投擲・スキルの範囲
+let id_interval_sr = undefined; // shotrangeの点滅インターバルID
+let interval_sr_flag = true;
 let stair_pos = {x:undefined, y:undefined};
 let portal_pos = {x:undefined, y:undefined};
 
@@ -229,7 +231,6 @@ const MAGIC_RANGE = 10;
 const DEF_BASE = 0;
 
 // プレイヤー
-// FIXME: 関数を保持するとjson変換で情報が落ちる
 let player = {
     x: 0, y: 0,
 
@@ -2149,9 +2150,9 @@ const SHOP_DATA = [
             {id: 0x380},
             {id: 0x381},
             {id: 0x382},
-            {id: 0x600},
-            {id: 0x601},
-            {id: 0x604},
+            //{id: 0x600},
+            //{id: 0x601},
+            //{id: 0x604},
         ],
         func_before: async function() {},
         func_buy: async function() {},
