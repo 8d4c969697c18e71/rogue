@@ -993,6 +993,7 @@ async function doEventShop() {
                 addLog("金貨が足りない");
             }
             else if(await upgradeWeapon(cursor)) {
+                player.gold -= shop_using.item[shop_cursor].upgrade_cost;
                 shop_using.func_buy();
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
