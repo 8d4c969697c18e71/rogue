@@ -79,7 +79,7 @@ foreach ($line in $file) {
             $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
         }
         elseif($line | Select-String -Pattern " cost: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf(': '))
+            $line_tmp = $line_tmp + $line.Substring($line.IndexOf(': ')+2)
             $line_tmp | Add-Content $skill_path -Encoding utf8
         }
         elseif($line | Select-String -Pattern "^];") {
