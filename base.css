@@ -9,6 +9,7 @@ body{
     user-select: none;
     overflow: hidden;
     touch-action: manipulation;
+    white-space: nowrap;
 }
 .sub1{
     display: flex;

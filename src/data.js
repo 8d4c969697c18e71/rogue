@@ -44,7 +44,7 @@ const audio_smith = new Audio("sound/smith.wav");
 const audio_stair = new Audio("sound/stair.wav");
 
 // font
-let FONT_SIZE = 16;
+let FONT_SIZE = 14;
 const FONT = "'BIZ UD Gothic'";
 
 const PADDING = 5;
@@ -95,7 +95,7 @@ const KATAKANA = [
     ["ッ","ャ","ュ","ョ","゛","゜","　","消","ｶﾅ","終",],
 ];
 let input_name_pos = {x:0, y:0};
-let name_max_length = 12;
+let name_max_length = 6;
 let syllabary = HIRAGANA;
 
 // キー

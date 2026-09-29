@@ -125,18 +125,18 @@ function drawMapAll() {
 
 function drawGameover() {
     const gameover_fig = [
-        "       ______       ",
-        "     ／      ＼     ",
-        "   ／          ＼   ",
-        "  |     REST     |  ",
-        "  |      IN      |  ",
-        "  |    PEACE     |  ",
-        "  |              |  ",
-        "  |              |  ",
-        "  |              |  ",
-        "  |              |  ",
-        "  |              |  ",
-        "  |              |  ",
+        "　　　＿＿＿＿　　　",
+        "　　／　　　　＼　　",
+        "　／　　　　　　＼　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
+        "　|　　　　　　　|　",
         "＼(//))＼/(_/)＼))//",
     ];
 
@@ -148,6 +148,7 @@ function drawGameover() {
         ctx.fillText(gameover_fig[i], canvas.clientWidth/2, FONT_SIZE*i);
     }
 
+    ctx.fillText("R.I.P.", canvas.clientWidth/2, FONT_SIZE*4);
     ctx.fillText(player.name, canvas.clientWidth/2, FONT_SIZE*7);
     ctx.fillText(DATE+" "+MONTH, canvas.clientWidth/2, FONT_SIZE*9);
     ctx.fillText(YEAR, canvas.clientWidth/2, FONT_SIZE*10);

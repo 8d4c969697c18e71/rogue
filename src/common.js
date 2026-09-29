@@ -227,19 +227,25 @@ function setCanvasSizePC() {
     ctx.textBaseline = "top";
 
     // note
+    note.style.fontSize = FONT_SIZE+"px";
     note.style.width = NOTE_WIDTH+"px";
     note.style.paddingRight = PADDING+"px";
     // info
+    info.style.fontSize = FONT_SIZE+"px";
     info.style.width = INFO_WIDTH+"px";
     info.style.paddingLeft = PADDING+"px";
     // inv
+    inv.style.fontSize = FONT_SIZE+"px";
+    inv.style.width = INFO_WIDTH+"px";
     inv.style.paddingLeft = PADDING+"px"; 
     inv.style.border = "solid 1px black";
     // log
+    log.style.fontSize = FONT_SIZE+"px";
     log.style.width = canvas_width+"px";
     log.style.marginTop = MARGIN+"px";
     log.style.marginLeft = MARGIN+"px";
     // shop
+    shop.style.fontSize = FONT_SIZE+"px";
     shop.style.width = canvas_width+"px";
     shop.style.marginTop = MARGIN+"px";
     shop.style.paddingLeft = PADDING+"px";
@@ -253,7 +259,7 @@ function setCanvasSizePhone(info_disp_flg = true) {
     if(info_disp_flg) canvas_width = window.innerWidth * 2 / 3;
     const canvas_height = canvas_width;
     const canvas_scale = window.devicePixelRatio;
-    FONT_SIZE = 12;
+    FONT_SIZE = Math.floor(FONT_SIZE * 3 / 4);
 
     // canvas
     canvas.style.width = canvas_width+"px";
@@ -270,6 +276,7 @@ function setCanvasSizePhone(info_disp_flg = true) {
     info.style.width = screen.width-canvas_width-5+"px";
     // inv
     inv.style.fontSize = FONT_SIZE+"px";
+    info.style.width = screen.width-canvas_width-5+"px";
     inv.style.border = "solid 1px black";
     // sub3 (parent log,shop)
     sub3.style.flexDirection = "column";
@@ -277,8 +284,8 @@ function setCanvasSizePhone(info_disp_flg = true) {
     log.style.fontSize = FONT_SIZE+"px";
     log.style.width = canvas_width+"px";
     // shop
-    shop.style.width = canvas_width+"px";
     shop.style.fontSize = FONT_SIZE+"px";
+    shop.style.width = canvas_width+"px";
     shop.style.border = "solid 1px black";
 
     document.body.style.paddingTop = 0+"px";

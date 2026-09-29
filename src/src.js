@@ -174,7 +174,7 @@ async function events() {
         id_interval_sr = setInterval(() => {
             interval_sr_flag = interval_sr_flag ? false : true;
             drawMap();
-        }, 500);
+        }, 300);
     else {
         clearInterval(id_interval_sr);
         id_interval_sr = undefined;

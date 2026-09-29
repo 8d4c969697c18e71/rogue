@@ -54,11 +54,9 @@ function drawInv() {
         for(let i=inv_start_offset; i<inv_display_num+inv_start_offset && i<INVENTORY_SIZE; i++) {
             let str = "";
             if(i == inv_cursor)
-                str += ">&nbsp;&nbsp; ";
-            else if(i<9)
-                str += (i+1) + ":&nbsp; ";
+                str += "＞\u2007";
             else
-                str += (i+1) + ": ";
+                str += "　\u2007";
             if(i < inventory.length) {
                 if(inventory[i].equip_flag)
                     str += "[E]" + inventory[i].name;
@@ -81,11 +79,9 @@ function drawInv() {
         for(let i=skill_start_offset; i<skill_display_num+skill_start_offset && i<SKILL_SIZE; i++) {
             let str = "";
             if(i == skill_cursor)
-                str += ">&nbsp;&nbsp; ";
-            else if(i<9)
-                str += (i+1)+":&nbsp; ";
+                str += "＞\u2007";
             else
-                str += (i+1)+": ";
+                str += "　\u2007";
             if(i < skill.length) {
                 str += skill[i].name;
             }
@@ -123,11 +119,9 @@ function drawShop() {
         for(let i=shop_start_offset; i<shop_using.item.length && i<shop_display_num+shop_start_offset; i++) {
             let str = "";
             if(i == shop_cursor)
-                str += ">&nbsp;&nbsp; ";
-            else if(i<9)
-                str += (i+1)+":&nbsp; ";
+                str += "＞\u2007";
             else
-                str += (i+1)+": ";
+                str += "　\u2007";
             if(upgrade_flag) {
                 str += shop_using.item[i].name;
                 str += " : "+shop_using.item[i].upgrade_cost+"G";

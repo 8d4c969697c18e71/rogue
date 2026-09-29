@@ -103,7 +103,7 @@ async function inputName() {
     // 文字数制限
     let name_length = 0;
     for(let c of player.name) {
-        if(c.match(/^[^\x01-\x7E\xA1-\xDF]+$/)) name_length += 2;
+        if(c.match(/^[^\x01-\x7E\xA1-\xDF]+$/)) name_length += 1;
         else name_length++;
     }
     if(name_length > name_max_length) player.name = player.name.slice(0, -1);
@@ -111,8 +111,8 @@ async function inputName() {
     // 名前描画
     let space = "";
     for(let i=0; i<name_max_length-name_length; i++)
-        space += "_";
-    ctx.fillText(player.name+space, canvas.clientWidth/2-name_max_length/2, FONT_SIZE*3/2+y_offset);
+        space += "＿";
+    ctx.fillText(player.name+space, canvas.clientWidth/2-name_max_length, FONT_SIZE*3/2+y_offset);
     
     // 操作説明
     ctx.fillText("z : 決定　　←↑↓→ : 移動", canvas.clientWidth/2, FONT_SIZE*2*(syllabary.length+2)+y_offset);
@@ -126,8 +126,8 @@ function displaySyllabary(y_offset) {
     for(let i=0; i<syllabary.length; i++)
         for(let j=0; j<syllabary[i].length; j++) {
             if(input_name_pos.x == j && input_name_pos.y == i)
-                ctx.fillText(">"+syllabary[i][j], x_offset+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
+                ctx.fillText("＞"+syllabary[i][j], x_offset+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
             else
-                ctx.fillText(" "+syllabary[i][j], x_offset+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
+                ctx.fillText("　"+syllabary[i][j], x_offset+FONT_SIZE*2*j, FONT_SIZE*2*i+y_offset);
         }
 }
