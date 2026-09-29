@@ -228,16 +228,17 @@ function updateMDWall() {
             // 壁
             if(player.map_sight[i][j] && map[i][j] == ID_MAP.room) {
                 // 縦
-                for(let k=-1; k<=1; k++)
+                for(let k of [-1, 1])
                     if(map[i][j+k] == ID_MAP.none)
                         map_draw[i][j+k] = CHAR_MAP.wall_v;
                 // 横
-                for(let k=-1; k<=1; k++)
+                for(let k of [-1, 1])
                     if(map[i+k][j] == ID_MAP.none)
                         map_draw[i+k][j] = CHAR_MAP.wall_h;
                 // 角
                 for(let [k, l] of [[1,1],[1,-1],[-1,1],[-1,-1]])
-                    if(map_draw[i+k][j+l] == CHAR_MAP[ID_MAP.none])
+                    if(map_draw[i+k][j+l] == CHAR_MAP[ID_MAP.none]
+                    && map[i][j+l] != ID_MAP.room && map[i+k][j] != ID_MAP.room)
                         map_draw[i+k][j+l] = CHAR_MAP.wall_h;
             }
             // 扉
