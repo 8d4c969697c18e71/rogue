@@ -790,6 +790,7 @@ async function doEventInventory() {
         }
     // cancel
     if(key_input.cancel) {
+        play_audio(audio_cancel);
         //inv_cursor = -1;
         inventory_flag = false;
         return false;
@@ -1068,6 +1069,7 @@ async function doEventShop() {
     }
     // cancel
     if(key_input.cancel) {
+        play_audio(audio_cancel);
         let dialog = shop_using.dialogue_outro;
         if(dialog != "") {
             if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
@@ -1118,6 +1120,7 @@ async function doSubEventStorageInput() {
     }
     // cancel
     if(key_input.cancel) {
+        play_audio(audio_cancel);
         let dialog = shop_using.dialogue_outro;
         if(dialog != "") {
             if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
