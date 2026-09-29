@@ -25,22 +25,23 @@ const btn_arrow = document.getElementsByClassName("btn_arrow");
 
 // audio
 const audio_apply = new Audio("sound/apply.wav");
-const audio_cancel = new Audio("sound/cancel.wav");
-const audio_fire = new Audio("sound/fire.wav");
-const audio_heal = new Audio("sound/heal.wav");
 const audio_attack = new Audio("sound/attack.wav");
+const audio_cancel = new Audio("sound/cancel.wav");
+const audio_coin = new Audio("sound/coin.wav");
+const audio_death = new Audio("sound/death.wav");
+const audio_explosion = new Audio("sound/explosion.wav");
+const audio_fire = new Audio("sound/fire.wav");
+const audio_force = new Audio("sound/force.wav");
+const audio_heal = new Audio("sound/heal.wav");
 const audio_hit = new Audio("sound/hit.wav");
 const audio_jump = new Audio("sound/jump.wav");
+const audio_lvup = new Audio("sound/lvup.wav");
 const audio_poison = new Audio("sound/poison.wav");
 const audio_portal = new Audio("sound/portal.wav");
 const audio_ray = new Audio("sound/ray.wav");
 const audio_shot = new Audio("sound/shot.wav");
+const audio_smith = new Audio("sound/smith.wav");
 const audio_stair = new Audio("sound/stair.wav");
-const audio_lvup = new Audio("sound/lvup.wav");
-const audio_death = new Audio("sound/death.wav");
-const audio_coin = new Audio("sound/coin.wav");
-const audio_force = new Audio("sound/force.wav");
-const audio_explosion = new Audio("sound/explosion.wav");
 
 // font
 let FONT_SIZE = 16;

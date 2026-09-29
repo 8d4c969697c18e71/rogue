@@ -999,7 +999,7 @@ async function doEventShop() {
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
-                play_audio(audio_apply);
+                play_audio(audio_smith);
                 return false;
             }
             play_audio(audio_cancel);
@@ -1189,8 +1189,8 @@ async function upgradeWeapon(inv_index) {
 
     // 装備中
     if(equip_flg) {
-        const log_tmp = log_reserve;
-        equip(inv_index);
+        const log_tmp = Array.from(log_reserve);
+        await equip(inv_index);
         log_reserve = log_tmp;
     }
 
@@ -1201,8 +1201,8 @@ async function upgradeWeapon(inv_index) {
 
     // 再装備
     if(equip_flg) {
-        const log_tmp = log_reserve;
-        equip(inv_index);
+        const log_tmp = Array.from(log_reserve);
+        await equip(inv_index);
         log_reserve = log_tmp;
     }
     return true;
@@ -1250,7 +1250,7 @@ async function gameoverEvent() {
 
         // ステ初期化
         initStatus();
-        const log_tmp = log_reserve;
+        const log_tmp = Array.from(log_reserve);
         addItem(player.job);
         useItem(0);
         log_reserve = log_tmp;
