@@ -1,3 +1,4 @@
+// element
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const info = document.getElementById("info");
@@ -22,36 +23,7 @@ const btn_downright = document.getElementById("btn_downright");
 const btn = document.getElementsByClassName("btn");
 const btn_arrow = document.getElementsByClassName("btn_arrow");
 
-
-
-let FONT_SIZE = 16;
-const FONT = "'MS Gothic'";
-// MAP
-const SIZEX = 64;
-const SIZEY = 64;
-
-let log_reserve = [];
-const LOG_RESERVE_SIZE = 15;
-
-const PADDING = 5;
-const MARGIN = 25;
-const NOTE_WIDTH = 150;
-const INFO_WIDTH = 175;
-
-// スマホ用
-button.style.visibility = "hidden";//"visible";
-let zxc_size = 0;
-let arrow_size = 0;
-let log_display_num = 5;
-let inv_display_num = 15;
-let skill_display_num = 15;
-let shop_display_num = 10;
-let inv_start_offset = 0;
-let skill_start_offset = 0;
-let shop_start_offset = 0;
-
-
-
+// audio
 const audio_apply = new Audio("sound/apply.wav");
 const audio_cancel = new Audio("sound/cancel.wav");
 const audio_fire = new Audio("sound/fire.wav");
@@ -69,6 +41,27 @@ const audio_death = new Audio("sound/death.wav");
 const audio_coin = new Audio("sound/coin.wav");
 const audio_force = new Audio("sound/force.wav");
 const audio_explosion = new Audio("sound/explosion.wav");
+
+// font
+let FONT_SIZE = 16;
+const FONT = "'BIZ UD Gothic'";
+
+const PADDING = 5;
+const MARGIN = 25;
+const NOTE_WIDTH = 150;
+const INFO_WIDTH = 175;
+
+// スマホ用
+button.style.visibility = "hidden";
+let zxc_size = 0;
+let arrow_size = 0;
+let log_display_num = 5;
+let inv_display_num = 15;
+let skill_display_num = 15;
+let shop_display_num = 10;
+let inv_start_offset = 0;
+let skill_start_offset = 0;
+let shop_start_offset = 0;
 
 //====================================================================================================
 
@@ -152,6 +145,8 @@ const KEY_CODE={
 
 //==================================================MAP==================================================
 
+const SIZEX = 64;
+const SIZEY = 64;
 const ROOMNUM = 10;
 const ROOMSIZEMIN = 6;
 const ROOMSIZEMAX = 10;
@@ -185,6 +180,7 @@ const CHAR_MAP = {
     unique: "＆",
 };
 
+// color
 const color_red = "#ff5555";
 const color_green = "#55ff55";
 const color_blue = "#5555ff";
@@ -276,6 +272,10 @@ let player = {
     // 視界
     map_sight: [],
 };
+
+// log
+const LOG_RESERVE_SIZE = 15;
+let log_reserve = [];
 
 // inventory
 const INVENTORY_SIZE = 20;

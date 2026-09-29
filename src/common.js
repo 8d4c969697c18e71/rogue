@@ -244,6 +244,7 @@ function setCanvasSizePC() {
     shop.style.marginTop = MARGIN+"px";
     shop.style.paddingLeft = PADDING+"px";
     shop.style.marginRight = MARGIN+"px";
+    shop.style.border = "solid 1px black";
 }
 
 // ウィンドウサイズ（スマホ）
@@ -269,6 +270,7 @@ function setCanvasSizePhone(info_disp_flg = true) {
     info.style.width = screen.width-canvas_width-5+"px";
     // inv
     inv.style.fontSize = FONT_SIZE+"px";
+    inv.style.border = "solid 1px black";
     // sub3 (parent log,shop)
     sub3.style.flexDirection = "column";
     // log
@@ -277,6 +279,7 @@ function setCanvasSizePhone(info_disp_flg = true) {
     // shop
     shop.style.width = canvas_width+"px";
     shop.style.fontSize = FONT_SIZE+"px";
+    shop.style.border = "solid 1px black";
 
     document.body.style.paddingTop = 0+"px";
 }

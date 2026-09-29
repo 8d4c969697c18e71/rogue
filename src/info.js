@@ -37,7 +37,7 @@ function drawInfo() {
 //=========================INVENTORY=========================
 
 function drawInv() {
-    inv.innerHTML = "loading";
+    inv.innerHTML = "ロード中";
     if(inventory_flag || storage_IO_flag || skill_flag) inv.style.border = "solid 1px white";
     else inv.style.border = "solid 1px black";
 
@@ -102,7 +102,7 @@ function drawShop() {
     shop.innerHTML = "";
     shop.style.border = "solid 1px black";
     if(shop_flag) {
-        shop.innerHTML = "loading";
+        shop.innerHTML = "ロード中";
         if(!storage_IO_flag) shop.style.border = "solid 1px white";
 
         const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
@@ -153,7 +153,7 @@ function drawShop() {
 //=========================LOG=========================
 
 function drawLog() {
-    log.innerHTML = "loading";
+    log.innerHTML = "ロード中";
 
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
     const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
