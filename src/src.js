@@ -32,25 +32,29 @@ async function setCookie() {
     }
 
     // セット
+    const age = "; max-age=31536000";
     for(let key in player) {
         if(key != "map_sight")
-            document.cookie = "player_"+key+"="+encodeURIComponent(JSON.stringify(player[key]))+"; max-age=31536000";
+            document.cookie = "player_"+key+"="+encodeURIComponent(JSON.stringify(player[key]))+age;
     }
     for(let i=0; i<inventory.length; i++) {
-        document.cookie = "inventory_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+"; max-age=31536000";
+        document.cookie = "inventory_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+age;
+    }
+    for(let i=0; i<skill.length; i++) {
+        document.cookie = "skill_"+i+"="+encodeURIComponent(JSON.stringify(skill[i]))+age;
     }
     for(let i=0; i<storage.length; i++) {
-        document.cookie = "storage_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+"; max-age=31536000";
+        document.cookie = "storage_"+i+"="+encodeURIComponent(JSON.stringify(storage[i]))+age;
     }
     cookie_date = DATE + " " + MONTH + " " + YEAR;
-    document.cookie = "date=" + encodeURIComponent(JSON.stringify(cookie_date)) + "; max-age=31536000";
+    document.cookie = "date=" + encodeURIComponent(JSON.stringify(cookie_date)) + age;
 }
 
 async function loadCookie() {
     const cookie = document.cookie;
     if(cookie.match(/player_.+=/)) {
         const data = decodeURIComponent(cookie).split("; ");
-        let read_flg = {player: false, inventory: false, storage: false, date: false};
+        let read_flg = {player: false, inventory: false, skill: false, storage: false, date: false};
         for(let idx in data) {
             let [key, val] = data[idx].split("=");
 
@@ -72,8 +76,12 @@ async function loadCookie() {
                 inventory.push(Object.assign({}, getItemData(val.id), val));
                 read_flg.inventory = true;
             }
+            else if(key.match(/skill_([0-9]*)/)) {
+                skill.push(Object.assign({}, getSkillData(val.id), val));
+                read_flg.skill = true;
+            }
             else if(key.match(/storage_([0-9]*)/)) {
-                storage.push(Object.assign({}, getItemData(val.id). val));
+                storage.push(Object.assign({}, getItemData(val.id), val));
                 read_flg.storage = true;
             }
             else if(key == "date") {

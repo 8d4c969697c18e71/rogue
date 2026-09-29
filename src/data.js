@@ -299,7 +299,7 @@ let skill_cursor = 0;
 let skill_using = undefined;
 let skill_draw_aim_flag = false;
 
-// inv skill
+// ui記憶用
 let remember_ui = "inventory";
 
 // shop
@@ -2225,9 +2225,10 @@ const SHOP_DATA = [
         random_flag: false,
         item_table: [],
         func_before: async function() {
-            storage_flag = true;
-            storage_IO_flag = false;
             setStorageList(this.item);
+            storage_flag = true;
+            storage_IO_flag = storage.length > 0 ? false : true;
+            remember_ui = "inventory";
         },
         func_buy: async function() {
             setStorageList(this.item);
