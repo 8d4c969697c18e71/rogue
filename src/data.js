@@ -223,9 +223,10 @@ let clairvoyance_flag = false;    // 透視
 let bow_flag = false;
 
 const STATUS_LIST= ["str", "dex", "int", "fth"];
+const DEF_BASE = 0;
 const THROWING_RANGE = 5;
 const MAGIC_RANGE = 10;
-const DEF_BASE = 0;
+let magic_using = undefined;
 
 // プレイヤー
 let player = {
@@ -268,7 +269,6 @@ let player = {
     armor: undefined,
     ring1: undefined,
     ring2: undefined,
-    magic_using: undefined,
     
     // 視界
     map_sight: [],
@@ -317,6 +317,9 @@ const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
 const STACK_TYPE = ["ammo"];
 const STACK_MAX = 32;
 const UPGRADE_TYPE = ["weapon"];
+
+// enemy
+const enemy_sleep_chance = 0.2;
 
 //==================================================TABLE==================================================
 
@@ -583,7 +586,7 @@ const ITEM_DATA = [
             play_audio(audio_fire);
             await animSpread(dst.x, dst.y, 1, "火");
             
-            await doAOE(dst.x, dst.y, 1, who, 25);
+            await doAOE(dst.x, dst.y, 1, who, 50);
             return true;
         },
     },
@@ -879,7 +882,7 @@ const ITEM_DATA = [
             }
             addLog(player.name+" は "+this.name+" を構えた");
             magic_flag = true;
-            player.magic_using = this.id;
+            magic_using = this.id;
             return false;
         },
         func_cast: async function(dir) {
@@ -919,7 +922,7 @@ const ITEM_DATA = [
             }
             addLog(this.name+" を構えた");
             magic_flag = true;
-            player.magic_using = this.id;
+            magic_using = this.id;
             return false;
         },
         func_cast: async function(dir) {
@@ -962,7 +965,7 @@ const ITEM_DATA = [
             }
             addLog(player.name+" は "+this.name+" を構えた");
             magic_flag = true;
-            player.magic_using = this.id;
+            magic_using = this.id;
             return false;
         },
         func_cast: async function(dir) {
@@ -984,7 +987,7 @@ const ITEM_DATA = [
             }
             addLog(player.name+" は "+this.name+" を構えた");
             magic_flag = true;
-            player.magic_using = this.id;
+            magic_using = this.id;
             return false;
         },
         func_cast: async function(dir) {
@@ -1621,6 +1624,18 @@ const SKILL_DATA = [
             return true;
         }
     },
+    {
+        id: 0x005,
+        name: "突撃",
+        target_type: "range",
+        cost_type: "hp",
+        cost: 15,
+        func: async function(from, to) {
+            addLog(from.name+" は突撃した");
+            
+            return true;
+        }
+    },
     // int由来 0x3XX
     {
         id: 0x300,
@@ -1848,6 +1863,21 @@ const CONDITION_DATA = [
             who.cannot_move_flag = false;
         },
     },
+    {
+        id: 0x04,
+        name: "眠", // 浅眠
+        turn: 0xffff,
+        func_be: async function(who) {
+            who.cannot_action_flag = true;
+        },
+        func_during: async function(who) {
+            who.cannot_action_flag = true;
+        },
+        func_recovery: async function(who) {
+            addLog(who.name+" は目を覚ました");
+            who.cannot_action_flag = false;
+        },
+    },
     // バフ 0x80~
     {
         id: 0x80,
@@ -1986,6 +2016,7 @@ const NPC_DATA = [
             "怪物は君が見えなくなってしばらくすると追跡を諦めるよ",
             "広範囲の攻撃は壁を貫通することがあるよ",
             "迷宮で倒れると金貨だけ持ち帰れるよ",
+            "最初に持ってた装備だけは支給するよ",
             // 職業
             "職業毎に能力の成長率が違うよ",
             "戦士は耐久力が高く、筋技がバランス良く伸びるよ",
@@ -2001,7 +2032,9 @@ const NPC_DATA = [
             "カレは初期装備を売ってくれるよ",
             "メレンは物を買ってくれるよ",
             "リーシュは君のこれまでの功績を記録してくれるよ",
-            "石碑には記録した日時が記されるよ",
+            "石碑には記録した日付が記されるよ",
+            "アンドレは武器を強化してくれるよ",
+            "とっておきたいものは保管庫に入れるといいよ",
             "ポータル部屋にいるガヴァは物を買ってくれるよ",
         ],
         dialogue_cnt: 0,

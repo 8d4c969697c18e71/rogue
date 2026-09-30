@@ -69,6 +69,8 @@ async function loadCookie() {
             if(key.match(/player_(.+)/)) {
                 let pl_key = key.match(/player_(.+)/)[1];
                 player[pl_key] = val;
+                if(EQUIP_TYPE.includes(pl_key) && val)
+                    player[pl_key] = Object.assign({}, getItemData(val.id), val);
                 player.condition = [];
                 read_flg.player = true;
             }
@@ -596,11 +598,11 @@ async function throwing(who, item, direction) {
 async function throwDmg(from, to, item) {
     let dmg;
     if(item.type=="ammo" )
-        dmg = Math.floor((item.dmg/3 + item.dmg * Math.random()) * (100-to.def-to.def_offset) / 100);
+        dmg = Math.floor((item.dmg/3 + item.dmg * (Math.random() + 0.5)) * (100-to.def-to.def_offset) / 100);
     else if(item.type=="weapon")
         dmg = Math.floor((item.base_dmg/5) * (100-to.def-to.def_offset) / 100);
     else
-        dmg = Math.round(Math.random()) + 10;
+        dmg = Math.round(Math.random() * 10) + 10;
     if(dmg < 0) dmg = 0;
 
     await dealDmg(from, to, dmg);
@@ -615,10 +617,10 @@ async function doEventMagic() {
     for(let k in kd)
         if(key_input[k]) {
             magic_flag = false;
-            await getItemData(player.magic_using).func_cast(kd[k]);
+            await getItemData(magic_using).func_cast(kd[k]);
             checkKill(player);
             
-            player.magic_using = undefined;
+            magic_using = undefined;
             inventory_flag = false;
             //inv_cursor = -1;
             return true;
@@ -629,7 +631,7 @@ async function doEventMagic() {
         addLog("構えを解いた");
         play_audio(audio_cancel);
         magic_flag = false;
-        player.magic_using = undefined;
+        magic_using = undefined;
         //inv_cursor = -1;
         inventory_flag = false;
         return false;
@@ -654,9 +656,9 @@ async function magic(who, value, direction) {
 async function magicDmg(from, to, value) {
     let dmg;
     dmg = value;
-    let rand = Math.random() * dmg/4 - dmg/8;
+    let rand = (Math.random() + 0.5) * dmg/4 - dmg/8;
     dmg += rand;
-    dmg = Math.round(dmg);
+    dmg = Math.floor(dmg);
     if(dmg < 0) dmg = 0;
     
     await dealDmg(from, to, dmg);
@@ -1349,9 +1351,11 @@ async function calcAtkFromStatus(status, rate, offset = 0) {
 async function recalcStatus(who) {
     who.atk = getItemData(who.job).st.atk;
     const EQ_TYPE = [...EQUIP_TYPE, ...["ring1", "ring2"]];
-    for(let idx in EQ_TYPE) {
-        const eq_id = who[EQ_TYPE[idx]];
-        if(eq_id && getItemData(eq_id).func_recalc) getItemData(eq_id).func_recalc();
+    for(let type of EQ_TYPE) {
+        const equip = who[type];
+        if(equip && equip.func_recalc) {
+            equip.func_recalc();
+        }
     }
 }
 
@@ -1403,12 +1407,13 @@ function initStatus() {
 // 状態異常追加
 async function setCondition(who, id, turn = -1) {
     const cond = CONDITION_DATA.find(v=>v.id==id);
-    const turn_use = turn < 0 ? cond.turn : turn;
-    
     if(!cond || !("condition" in who)) {
         console.warn("setCondition: id or who.condtion not found");
         return false;
     }
+    const turn_use = turn < 0 ? cond.turn : turn;
+    
+    // 重複判定
     for(let c of who.condition)
         if(c.id == id) {
             console.log("setCondition: already have "+cond.name+".")
@@ -1424,9 +1429,11 @@ async function setCondition(who, id, turn = -1) {
 // 状態異常除外
 async function removeCondition(who, cond = "all") {
     if(cond != "all") {
+        if(!who.condition.includes(cond)) return false;
         await cond.func_recovery(who);
         who.condition.splice(who.condition.indexOf(cond), 1);
     }
+    // 全消去
     else {
         while(who.condition.length > 0) {
             await who.condition[0].func_recovery(who);
@@ -1434,18 +1441,30 @@ async function removeCondition(who, cond = "all") {
             who.condition.shift();
         }
     }
+    return true;
 }
 
 // 状態異常経過
 async function progressCondition(who) {
+    let cond_remove = [];
     for(let cond of who.condition) {
-        if(cond.turn<=0) {
-            await removeCondition(who, cond);
-        }
-        else{
+        // 効果切れ
+        if(cond.turn<=0)
+            cond_remove.push(cond);
+        // 浅眠
+        else if(cond.id == 0x04 && player.map_sight[who.y][who.x])
+            cond_remove.push(cond)
+        // 経過処理
+        else {
             await cond.func_during(who);
             cond.turn--;
         }
+    }
+
+    // 削除
+    while(cond_remove.length > 0) {
+        await removeCondition(who, cond_remove[0]);
+        cond_remove.shift();
     }
 }
 
@@ -1519,7 +1538,7 @@ async function equip(index) {
                 player.ring1 = equip_item.id;
         }
         else
-            player[equip_item.type] = equip_item.id;
+            player[equip_item.type] = equip_item;
         
         if(equip_item.func_recalc) await equip_item.func_recalc();
         if(equip_item.func_equip) await equip_item.func_equip(player);
@@ -1552,8 +1571,16 @@ async function equip(index) {
 // アイテム取得
 function addItem(id) {
     let item = getItemData(id);
-    // スタックアイテム
-    if(item.type=="stack") {
+    let it = Object.assign({}, item);
+    
+    // 金貨
+    if(item.type == "gold") {
+        player.gold += 10;
+        addLog("金貨10枚 を入手");
+        return true;
+    }
+    // スタックアイテム etc)木の矢の束
+    else if(item.type == "stack") {
         if(inventory.length < INVENTORY_SIZE) {
             for(let i=0; i<item.num; i++) {
                 addItem(item.item_id);
@@ -1579,13 +1606,10 @@ function addItem(id) {
             }
         }
     }
-
-    let it = Object.assign({}, item);
-
-    // スタック可能アイテム
-    if(STACK_TYPE.includes(item.type)) {
+    // スタック可能アイテム etc)木の矢
+    else if(STACK_TYPE.includes(item.type)) {
         let index = getStackIndex(item);
-        if(index) {
+        if(index !== undefined) {
             inventory[index].stack_num++;
             addLog(item.name+" を入手");
             return true;
@@ -1733,17 +1757,9 @@ async function doEventEnv() {
     
     // アイテム取得
     for(let i of item_group)
-        if(i.x == player.x && i.y == player.y) {
-            if(i.id==0x000) {
-                player.gold += 5;
-                play_audio(audio_apply);
-                addLog("金貨5枚 を入手");
-                item_group.splice(item_group.indexOf(i), 1);
-            }
-            else if(addItem(i.id)) {
-                play_audio(audio_apply);
-                item_group.splice(item_group.indexOf(i), 1);
-            }
+        if(i.x == player.x && i.y == player.y && addItem(i.id)) {
+            play_audio(audio_apply);
+            item_group.splice(item_group.indexOf(i), 1);
         }
 }
 
@@ -2327,6 +2343,7 @@ async function setEnemy(id, x, y) {
     }
     enemy_group.push(e);
     await e.func_spawn(e);
+    return e;
 }
 
 // エネミーグループ
@@ -2352,8 +2369,12 @@ async function setEnemyGroup() {
             // 位置
             const [x, y] = setSpawnXY(0, enemy.group_spawn_flag, enemy.id);
             // 設置
-            await setEnemy(enemy_id, x, y);
-            let e = enemy_group[enemy_group.length-1];
+            let enemy_set = await setEnemy(enemy_id, x, y);
+            
+            // 眠り付与
+            if(Math.random() + enemy_sleep_chance) {
+                setCondition(enemy_set, 0x04);
+            }
         }
     }
 }
