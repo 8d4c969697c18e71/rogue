@@ -286,12 +286,12 @@ async function doEventPlayer() {
             play_audio(audio_cancel);
         }
         else if(bow_flag) {
-            addLog(player.name+" は "+getItemData(player.weapon).name+" を構えた");
+            addLog(player.name+" は "+player.weapon.name+" を構えた");
             play_audio(audio_apply);
             shot_flag = true;
         }
         else{
-            addLog(player.name+" は "+getItemData(player.ammo).name+" を振り被った")
+            addLog(player.name+" は "+player.ammo.name+" を振り被った")
             play_audio(audio_apply);
             throwing_flag = true;
         }
@@ -416,8 +416,8 @@ async function attack(from, to) {
         }
 
     await dealDmg(from, to, dmg);
-    if("weapon" in from && from.weapon) await getItemData(from.weapon).func_attack(to);
-    if("armor" in to && to.armor) await getItemData(to.armor).func_attacked(from);
+    if("weapon" in from && from.weapon) await from.weapon.func_attack(to);
+    if("armor" in to && to.armor) await to.armor.func_attacked(from);
 
     return true;
 }
@@ -477,16 +477,16 @@ async function shot(who, ammo, direction) {
     if(getEnemy(dst.x, dst.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await shotDmg(who, enemy, ammo);
-        if("weapon" in who && who.weapon) await getItemData(who.weapon).func_attack(enemy);
-        if("ammo" in who && who.ammo) await getItemData(who.ammo).func_attack(enemy);
-        if("armor" in enemy && enemy.armor) await getItemData(enemy.armor).func_attacked(who);
+        if("weapon" in who && who.weapon) await who.weapon.func_attack(enemy);
+        if("ammo" in who && who.ammo) await who.ammo.func_attack(enemy);
+        if("armor" in enemy && enemy.armor) await enemy.armor.func_attacked(who);
         return enemy;
     }
     else if(dst.x == player.x && dst.y == player.y) {
         await shotDmg(who, player, ammo);
-        if("weapon" in who && who.weapon) await getItemData(who.weapon).func_attack(player);
-        if("ammo" in who && who.ammo) await getItemData(who.ammo).func_attack(player);
-        if("armor" in player && player.armor) await getItemData(player.armor).func_attacked(who);
+        if("weapon" in who && who.weapon) await who.weapon.func_attack(player);
+        if("ammo" in who && who.ammo) await who.ammo.func_attack(player);
+        if("armor" in player && player.armor) await player.armor.func_attacked(who);
         return player;
     }
     else{// 外した
@@ -2383,6 +2383,8 @@ async function setEnemyGroup() {
             
             // 眠り付与
             if(Math.floor(Math.random() + enemy_sleep_chance)) {
+                initMap(enemy_set.map_sight, false);
+                getSight(enemy_set);
                 setCondition(enemy_set, 0x04);
             }
         }

@@ -319,7 +319,7 @@ const STACK_MAX = 32;
 const UPGRADE_TYPE = ["weapon"];
 
 // enemy
-const enemy_sleep_chance = 0.2;
+const enemy_sleep_chance = 0.3;
 
 //==================================================TABLE==================================================
 
