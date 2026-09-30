@@ -150,17 +150,13 @@ async function events() {
     else if(throwing_flag) {
         turn_flag = await doEventThrowing();
     }
-    // 杖 (アイテムベース仕様)
-    //else if(staff_flag) {
-    //    turn_flag = await doEventStaff();
-    //}
-    // インベントリ
-    else if(inventory_flag) {
-        turn_flag = await doEventInventory();
-    }
     // スキル
     else if(skill_flag) {
         turn_flag = await doEventSkill();
+    }
+    // インベントリ
+    else if(inventory_flag) {
+        turn_flag = await doEventInventory();
     }
     // ショップ
     else if(shop_flag) {
@@ -172,7 +168,7 @@ async function events() {
     }
 
     // shotrange点滅制御
-    if((shot_flag || throwing_flag || staff_flag || skill_draw_aim_flag) && id_interval_sr == undefined)
+    if((shot_flag || throwing_flag || skill_draw_aim_flag) && id_interval_sr == undefined)
         id_interval_sr = setInterval(() => {
             interval_sr_flag = interval_sr_flag ? false : true;
             drawMap();
@@ -629,35 +625,6 @@ async function throwDmg(from, to, item) {
     await dealDmg(from, to, dmg);
 }
 
-// 杖イベント
-async function doEventStaff() {
-    // 十字キー
-    let kd;
-    if(!key_input.ctrl) kd = KEY_DIRECTION;
-    else kd = KEY_DIRECTION_DIAGONAL;
-    for(let k in kd)
-        if(key_input[k]) {
-            staff_flag = false;
-            await getItemData(staff_using).func_cast(kd[k]);
-            await checkKill(player);
-            
-            staff_using = undefined;
-            inventory_flag = false;
-            //inv_cursor = -1;
-            return true;
-        }
-    
-    // cancel
-    if(key_input.cancel) {
-        play_audio(audio_cancel);
-        staff_flag = false;
-        staff_using = undefined;
-        //inv_cursor = -1;
-        inventory_flag = false;
-        return false;
-    }
-}
-
 // 魔法
 async function magic(who, value, direction) {
     let dst = straightRecursive(who.x, who.y, direction, SKILL_RANGE);
@@ -775,7 +742,6 @@ function getDirection(from, to) {
 
 // UIイベント
 async function doEventInventory() {
-    remember_ui = "inventory";
     // 上下
     if(key_input.up) {
         if(inv_cursor > 0)
@@ -793,6 +759,7 @@ async function doEventInventory() {
     }
     // 右
     if(key_input.right) {
+        remember_ui = "skill";
         inventory_flag = false;
         skill_flag = true;
         skill_using = undefined;
@@ -833,7 +800,6 @@ async function doEventInventory() {
 
 // スキルイベント
 async function doEventSkill() {
-    remember_ui = "skill";
     // サブイベント起動
     if(skill_using != undefined) {
         if(await doSubEventSkill()) {
@@ -842,7 +808,14 @@ async function doEventSkill() {
             // コスト支払い
             if(skill_using.cost_type == "hp") addHP(player, -skill_using.cost);
             else if(skill_using.cost_type == "fp") addFP(player, -skill_using.cost);
+            else if(skill_using.cost_type == "hung") addHung(-skill_using.cost);
             else console.warn("doEventSkill: cannot pay cost properly");
+
+            // アイテムからスキル使った後処理
+            if(skill_from_item) {
+                await skill_from_item.func_skill_after();
+                skill_from_item = undefined;
+            }
 
             skill_flag = false;
             skill_using = undefined;
@@ -868,6 +841,7 @@ async function doEventSkill() {
     }
     // 左
     if(key_input.left) {
+        remember_ui = "inventory";
         skill_flag = false;
         skill_using = undefined;
         inventory_flag = true;
@@ -878,11 +852,15 @@ async function doEventSkill() {
     if(key_input.apply)
         if(skill_cursor < skill.length) {
             if(await preSkill(skill_cursor)) {
+                // コスト種別
+                let type = "";
+                if(skill_using.cost_type == "hp") type = "HP";
+                else if(skill_using.cost_type == "fp") type = "FP";
+                else if(skill_using.cost_type == "hung") type = "空腹度";
+
                 skill_draw_aim_flag = true;
                 play_audio(audio_apply);
-                addLog(skill_using.name+"（使用コスト: "
-                    +skill_using.cost_type.toUpperCase()+" "
-                    +skill_using.cost+"）");
+                addLog(skill_using.name+"（使用コスト: "+type+" "+skill_using.cost+"）");
             }
             else
                 play_audio(audio_cancel);
@@ -906,7 +884,7 @@ async function doSubEventSkill() {
         for(let k in kd)
             if(key_input[k]) {
                 const target = straightRecursive(player.x, player.y, kd[k], SKILL_RANGE);
-                return await useSkill(skill_cursor, target);
+                return await useSkill(skill_using, target);
             }
     }
     else if(skill_using.target_type == "next") {
@@ -917,13 +895,13 @@ async function doSubEventSkill() {
         for(let k in kd)
             if(key_input[k]) {
                 const target = straightRecursive(player.x, player.y, kd[k], 1);
-                return await useSkill(skill_cursor, target);
+                return await useSkill(skill_using, target);
             }
     }
     else if(skill_using.target_type == "self") {
         // apply
         if(key_input.apply) {
-            return await useSkill(skill_cursor, player)
+            return await useSkill(skill_using, player)
         }
     }
     // cancel
@@ -943,11 +921,10 @@ async function setSkill(id) {
     return true;
 }
 
-async function useSkill(skill_cursor, target) {
-    const s = skill[skill_cursor];
+async function useSkill(skill_using, target) {
     skill_draw_aim_flag = false;
-    if(s != undefined && s.func != undefined) 
-        return await s.func(player, target);
+    if(skill_using != undefined && skill_using.func != undefined) 
+        return await skill_using.func(player, target);
     skill_draw_aim_flag = true;
     return false;
 }
@@ -963,6 +940,10 @@ async function preSkill(skill_cursor) {
         addLog("FP が足りない");
         return false;
     }
+    else if(s.cost_type == "hung" && player.hung < s.cost) {
+        addLog("空腹度 が足りない");
+        return false;
+    }
 
     // ターゲット種別
     switch(s.target_type) {
@@ -975,6 +956,13 @@ async function preSkill(skill_cursor) {
             console.warn("preSkill: invalid skill target type: "+s.target_type);
             return false;
     }
+}
+
+function setSkillItem(skill, item) {
+    skill_using = skill;
+    skill_from_item = item;
+    skill_flag = true;
+    skill_draw_aim_flag = true;
 }
 
 function getSkillData(id) {
@@ -1348,7 +1336,7 @@ function lvUp(who) {
         if(who == player) recalcStatus(who);
 
         // エネミー全回復
-        if(who != player) addHP(who, who.hp_max);
+        if(who != player) addHP(who, who.hp_max+who.hp_max_offset);
 
         addLog(who.name+" はレベルが上がった");
         play_audio(audio_lvup);
@@ -1471,7 +1459,7 @@ async function progressCondition(who) {
         if(cond.turn<=0)
             cond_remove.push(cond);
         // 浅眠
-        else if(cond.id == 0x04 && player.map_sight[who.y][who.x])
+        else if(cond.id == 0x04 && who.map_sight[player.y][player.x])
             cond_remove.push(cond)
         // 経過処理
         else {
@@ -1591,6 +1579,7 @@ async function equip(index) {
 function addItem(id) {
     let item = getItemData(id);
     let it = Object.assign({}, item);
+    if(!item) return false;
     
     // 金貨
     if(item.type == "gold") {
@@ -1999,13 +1988,14 @@ async function doEventEnemy(enemy) {
         // スキル
         for(let skill of enemy.skill) {
             // 使用確率
-            if(!(Math.floor(Math.random()+skill.chance))) continue;
+            if(!(Math.floor(Math.random() + skill.chance))) continue;
             
             // コスト
-            if(skill.cost_type == "hp" && enemy.hp <= skill.cost) 
+            if(skill.cost_type == "hp" && enemy.hp <= skill.cost)
                 continue;
-            else if(skill.cost_type == "fp" && enemy.fp < skill.cost) 
+            else if(skill.cost_type == "fp" && enemy.fp < skill.cost)
                 continue;
+            // hungは消費なし
 
             // 使用
             if(enemy.map_sight[target.y][target.x]) {
@@ -2027,6 +2017,7 @@ async function doEventEnemy(enemy) {
                     // コスト消費
                     if(skill.cost_type == "hp") addHP(enemy, -skill.cost);
                     else if(skill.cost_type == "fp") addFP(enemy, -skill.cost);
+                    else if(skill.cost_type == "hung") ;
                     else console.warn("doEventEnemy: "+enemy.name+": "+skill.name+": cannot pay cost properly");
                     return;
                 }
@@ -2391,7 +2382,7 @@ async function setEnemyGroup() {
             let enemy_set = await setEnemy(enemy_id, x, y);
             
             // 眠り付与
-            if(Math.random() + enemy_sleep_chance) {
+            if(Math.floor(Math.random() + enemy_sleep_chance)) {
                 setCondition(enemy_set, 0x04);
             }
         }

@@ -215,7 +215,6 @@ let shop_flag = false;
 let upgrade_flag = false;
 let shot_flag = false;
 let throwing_flag = false;
-let staff_flag = false;
 
 let turn_flag = false;    // ターン経過
 let safe_flag = false;    // 空腹度無効化
@@ -288,9 +287,9 @@ let skill_cursor = 0;
 let skill_using = undefined;
 let skill_draw_aim_flag = false;
 
-// staff etc
+// etc
 const THROWING_RANGE = 5;
-let staff_using = undefined;
+let skill_from_item = undefined;
 
 // ui記憶用
 let remember_ui = "inventory";
@@ -335,6 +334,7 @@ const ITEM_TABLE = [
         0x000, 0x000, 0x000,
         0x010, 0x020, 0x030,
         0x080,
+        0x600,
         0x800,
     ],
     [
@@ -344,7 +344,7 @@ const ITEM_TABLE = [
         0x080, 0x080,
         0x400, 
         0x500,
-        //0x609,
+        0x600,
         0x800, 0x800,
     ],
     [
@@ -354,7 +354,7 @@ const ITEM_TABLE = [
         0x080, 0x080,
         0x400, 0x401, 0x402,
         0x500,
-        //0x609,
+        0x600,
         0x800, 0x800, 0x801,
     ],
     [
@@ -364,7 +364,7 @@ const ITEM_TABLE = [
         0x080, 0x080, 0x081,
         0x400, 0x401, 0x402,
         0x500,
-        //0x603, 0x609,
+        0x600,
         0x800, 0x800, 0x801,
     ],
     [
@@ -376,7 +376,7 @@ const ITEM_TABLE = [
         0x101, 0x201, 0x301,
         0x400, 0x401, 0x402, 0x403,
         0x500,
-        //0x603, 0x606, 0x609,
+        0x600, 0x601,
         0x800, 0x800, 0x801, 0x801,
     ],
     [
@@ -388,7 +388,7 @@ const ITEM_TABLE = [
         0x101, 0x201, 0x301, 0x302,
         0x400, 0x401, 0x402, 0x403,
         0x500,
-        //0x603, 0x605, 0x606, 0x609,
+        0x600, 0x601,
         0x800, 0x800, 0x801, 0x801,
     ],
 ];
@@ -507,7 +507,7 @@ const ITEM_DATA = [
         type: "potion",
         price: 50,
         func: async function() {
-            let value = player.hp_max;
+            let value = player.hp_max + player.hp_max_offset;
             addHP(player, value);
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
@@ -550,7 +550,7 @@ const ITEM_DATA = [
         type: "potion",
         price: 60,
         func: async function() {
-            let value = player.fp_max;
+            let value = player.fp_max + player.fp_max_offset;
             addFP(player, value);
             addLog(this.name+" を嗅いだ　FP が "+value+" 回復した");
             play_audio(audio_heal);
@@ -894,43 +894,45 @@ const ITEM_DATA = [
     // 杖 0x6XX
     {
         id: 0x600,
-        name: "ソウルの杖",
+        name: "つるはし",
         type: "staff",
-        price: 129,
+        price: 45,
+        least: 2,
         func: async function() {
-            if(player.fp < 5) {
-                addLog("FP が足りない");
-                return false;
-            }
             addLog(player.name+" は "+this.name+" を構えた");
-            staff_flag = true;
-            staff_using = this.id;
-            return false;
+
+            const skill = Object.assign({}, getSkillData(0x005));
+            setSkillItem(skill, this);
+            return true;
         },
-        func_cast: async function(dir) {
-            addFP(player, -5);
-            const skill = getSkillData(0x300);
-            const target = straightRecursive(player.x, player.y, dir, SKILL_RANGE);
-            return await skill.func(player, target);
-        }
+        func_skill_after: async function() {
+            this.least--;
+            if(this.least < 0 && Math.floor(Math.random() + 0.2)) {
+                inventory.splice(inventory.indexOf(this), 1);
+                addLog(this.name+" が壊れた");
+            }
+        },
     },
     {
         id: 0x601,
-        name: "小回復の聖鈴",
+        name: "祈りの杖",
         type: "staff",
-        price: 96,
+        price: 150,
+        least: 1,
         func: async function() {
-            if(player.fp < 8) {
-                addLog("FP が足りない");
-                return false;
-            }
-            const skill = getSkillData(0x400);
+            addLog(player.name+" は "+this.name+" を構えた");
 
-            addFP(player, -8);
-            await skill.func(player, player);
+            const skill = Object.assign({}, getSkillData(0xf01), {cost: 0, value: 20});
+            setSkillItem(skill, this);
             return true;
         },
-        func_cast: async function(dir) {}
+        func_skill_after: async function() {
+            this.least--;
+            if(this.least < 0 && Math.floor(Math.random() + 0.33)) {
+                inventory.splice(inventory.indexOf(this), 1);
+                addLog(this.name+" が壊れた");
+            }
+        },
     },
     // 弾薬 0x7XX
     {
@@ -1415,7 +1417,7 @@ const SKILL_DATA = [
         id: 0x000,
         name: "射撃",
         target_type: "range",
-        cost_type: "hp",
+        cost_type: "hung",
         cost: 0,
         ammo: undefined,
         func: async function(from, to) {
@@ -1432,7 +1434,7 @@ const SKILL_DATA = [
         id: 0x001,
         name: "受け流し",
         target_type: "self",
-        cost_type: "hp",
+        cost_type: "hung",
         cost: 5,
         func: async function(from, to) {
             return setCondition(from, 0x80, 1);
@@ -1440,29 +1442,20 @@ const SKILL_DATA = [
     },
     {
         id: 0x002,
-        name: "クイックステップ",
+        name: "",
         target_type: "range",
-        cost_type: "fp",
-        cost: 15,
-        direction: undefined,
-        distance: undefined,
-        func: async function(from, to) {
-            if(jufp(from, this.direction, this.distance)) {
-                addLog(from.name+" は跳び退いた");
-                play_audio(audio_jufp);
-                return true;
-            }
-            return false;
-        }
+        cost_type: "hung",
+        cost: 10,
+        func: async function(from, to) {}
     },
     {
         id: 0x003,
         name: "毒攻撃",
         target_type: "next",
-        cost_type: "hp",
+        cost_type: "hung",
         cost: 5,
         func: async function(from, to) {
-            if(await attack(from, to) && Math.floor(Math.random()+0.33))
+            if(await attack(from, to) && Math.floor(Math.random() + 0.33))
                 await setCondition(to, 0x00);
             return true;
         }
@@ -1471,7 +1464,7 @@ const SKILL_DATA = [
         id: 0x004,
         name: "突撃",
         target_type: "range",
-        cost_type: "hp",
+        cost_type: "hung",
         cost: 15,
         func: async function(from, to) {
             addLog(from.name+" は突撃した");
@@ -1490,8 +1483,8 @@ const SKILL_DATA = [
         id: 0x005,
         name: "掘削",
         target_type: "next",
-        cost_type: "hp",
-        cost: 30,
+        cost_type: "hung",
+        cost: 15,
         func: async function(from, to) {
             await attack(from, to);
             await digWall(to.x, to.y);
@@ -1611,7 +1604,7 @@ const SKILL_DATA = [
                 for(let j=-range; j<=range; j++) {
                     if(from.x+j < 0 || from.x+j >= SIZEX) continue;
                     let enemy = getEnemy(from.x+j, from.y+i);
-                    if(enemy) jufp(enemy, {x:j, y:i}, 1);
+                    if(enemy) jump(enemy, {x:j, y:i}, 1);
                 }
             }
             updateMap();
@@ -1655,6 +1648,40 @@ const SKILL_DATA = [
             let dmg = 30 + int * 2.5 + fth * 2.5;
             //await magic(from, dmg, getDirection(from, to));
             await magicDmgAOE(to.x, to.y, 1, from, dmg);
+            return true;
+        }
+    },
+    // util 0xfXX
+    {
+        id: 0xf00,
+        name: "クイックステップ",
+        target_type: "range",
+        cost_type: "hung",
+        cost: 10,
+        direction: undefined,
+        distance: undefined,
+        func: async function(from, to) {
+            if(jump(from, this.direction, this.distance)) {
+                addLog(from.name+" は跳び退いた");
+                play_audio(audio_jump);
+                return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: 0xf01,
+        name: "瞑想",
+        target_type: "range",
+        cost_type: "hung",
+        cost: 30,
+        value: undefined,
+        func: async function(from, to) {
+            const value = this.value ? value : who.fp + who.fp_max;
+            addFP(who, value);
+
+            addLog(from.name+" の魔力がみるみる回復する");
+            play_audio(audio_heal);
             return true;
         }
     },
@@ -1725,7 +1752,7 @@ const CONDITION_DATA = [
             who.cannot_move_flag = false;
         },
     },
-    {
+    {// 敵スポーン時の浅眠
         id: 0x04,
         name: "眠",
         turn: 0xffff,
