@@ -52,12 +52,12 @@ async function animShot(from, dst, direction, char = CHAR_MAP.ammo, fps = 60) {
 }
 
 // 伝播
-async function animSpread(x, y, radius, char, fps = 60) {
+async function animSpread(x, y, radius, char, on_wall_flag = false, fps = 60) {
     for(let k=0; k<=radius; k++) {
         updateMap();
         for(let i=-k; i<=k; i++) {
             for(let j=-k; j<=k; j++) {
-                if(map[y+i][x+j] == ID_MAP.none) continue;
+                if(!on_wall_flag && map[y+i][x+j] == ID_MAP.none) continue;
                 map_draw[y+i][x+j] = char;
             }
         }

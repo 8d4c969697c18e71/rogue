@@ -150,9 +150,9 @@ async function events() {
     else if(throwing_flag) {
         turn_flag = await doEventThrowing();
     }
-    // 魔法 (アイテムベース仕様)
-    //else if(magic_flag) {
-    //    turn_flag = await doEventMagic();
+    // 杖 (アイテムベース仕様)
+    //else if(staff_flag) {
+    //    turn_flag = await doEventStaff();
     //}
     // インベントリ
     else if(inventory_flag) {
@@ -172,7 +172,7 @@ async function events() {
     }
 
     // shotrange点滅制御
-    if((shot_flag || throwing_flag || magic_flag || skill_draw_aim_flag) && id_interval_sr == undefined)
+    if((shot_flag || throwing_flag || staff_flag || skill_draw_aim_flag) && id_interval_sr == undefined)
         id_interval_sr = setInterval(() => {
             interval_sr_flag = interval_sr_flag ? false : true;
             drawMap();
@@ -213,7 +213,7 @@ async function doEventPlayer() {
             if(getEnemy(x, y) && canDiagonal(player.x, player.y, kd[k].x, kd[k].y)) {
                 let enemy = enemy_group.find(v=>(v.x==x && v.y==y));
                 await attack(player, enemy);
-                checkKill(player);
+                await checkKill(player);
                 return true;
             }
             else if(isShop(x, y)) {
@@ -398,6 +398,7 @@ function jump(who, direction, distance) {
 
 // 攻撃
 async function attack(from, to) {
+    if(!from || !to) return false;
     if(!from.atk || !to.def || !to.condition) return false;
     addLog(from.name+" の攻撃");
 
@@ -425,6 +426,19 @@ async function attack(from, to) {
     return true;
 }
 
+// 範囲攻撃
+async function attackAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
+    for(let i=-radius; i<=radius; i++) {
+        if(y+i < 0 || y+i >= SIZEY) continue;
+        for(let j=-radius; j<=radius; j++) {
+            if(x+j < 0 || x+j >= SIZEX) continue;
+            if(!self_dmg_flg && x+j == who.x && y+i == who.y) continue;
+            const target = x+j == player.x && y+i == player.y ? player : getEnemy(x+j, y+i);
+            await attack(who, target, dmg);
+        }
+    }
+}
+
 // 射撃イベント
 async function doEventShot() {
     let ammo = getItemInventory(player.ammo);
@@ -437,7 +451,7 @@ async function doEventShot() {
         if(key_input[k]) {
             shot_flag = false;
             await shot(player, ammo, kd[k]);
-            checkKill(player);
+            await checkKill(player);
             if(ammo.stack_num > 0) ammo.stack_num--;
             if(ammo.stack_num <= 0) {
                 await equip(inventory.indexOf(ammo));
@@ -500,6 +514,9 @@ async function shot(who, ammo, direction) {
 }
 
 async function shotDmg(from, to, ammo) {
+    if(!from || !to || !ammo) return false;
+    if(!from.atk || !to.def) return false;
+
     let dmg;
     dmg = ((from.atk+from.atk_offset)/2+ammo.dmg)*(100-to.def-to.def_offset)/100;;
     let rand = Math.random() * dmg/4 - dmg/8;
@@ -524,7 +541,7 @@ async function doEventThrowing() {
         if(key_input[k]) {
             throwing_flag = false;
             await throwing(player, item, kd[k])
-            checkKill(player);
+            await checkKill(player);
             // インベントリから削除
             if(STACK_TYPE.includes(item.type)) {
                 if(item.stack_num > 0) item.stack_num--;
@@ -597,6 +614,9 @@ async function throwing(who, item, direction) {
 }
 
 async function throwDmg(from, to, item) {
+    if(!from || !to || !item) return false;
+    if(!from.atk || !to.def) return false;
+
     let dmg;
     if(item.type=="ammo" )
         dmg = Math.floor((item.dmg/3 + item.dmg * (Math.random() + 0.5)) * (100-to.def-to.def_offset) / 100);
@@ -609,19 +629,19 @@ async function throwDmg(from, to, item) {
     await dealDmg(from, to, dmg);
 }
 
-// 魔法イベント
-async function doEventMagic() {
+// 杖イベント
+async function doEventStaff() {
     // 十字キー
     let kd;
     if(!key_input.ctrl) kd = KEY_DIRECTION;
     else kd = KEY_DIRECTION_DIAGONAL;
     for(let k in kd)
         if(key_input[k]) {
-            magic_flag = false;
-            await getItemData(magic_using).func_cast(kd[k]);
-            checkKill(player);
+            staff_flag = false;
+            await getItemData(staff_using).func_cast(kd[k]);
+            await checkKill(player);
             
-            magic_using = undefined;
+            staff_using = undefined;
             inventory_flag = false;
             //inv_cursor = -1;
             return true;
@@ -629,10 +649,9 @@ async function doEventMagic() {
     
     // cancel
     if(key_input.cancel) {
-        addLog("構えを解いた");
         play_audio(audio_cancel);
-        magic_flag = false;
-        magic_using = undefined;
+        staff_flag = false;
+        staff_using = undefined;
         //inv_cursor = -1;
         inventory_flag = false;
         return false;
@@ -641,7 +660,7 @@ async function doEventMagic() {
 
 // 魔法
 async function magic(who, value, direction) {
-    let dst = straightRecursive(who.x, who.y, direction, MAGIC_RANGE);
+    let dst = straightRecursive(who.x, who.y, direction, SKILL_RANGE);
     if(getEnemy(dst.x, dst.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await magicDmg(who, enemy, value);
@@ -665,9 +684,22 @@ async function magicDmg(from, to, value) {
     await dealDmg(from, to, dmg);
 }
 
+async function magicDmgAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
+    for(let i=-radius; i<=radius; i++) {
+        if(y+i < 0 || y+i >= SIZEY) continue;
+        for(let j=-radius; j<=radius; j++) {
+            if(x+j < 0 || x+j >= SIZEX) continue;
+            if(!self_dmg_flg && x+j == who.x && y+i == who.y) continue;
+            const target = x+j == player.x && y+i == player.y ? player : getEnemy(x+j, y+i);
+            await magicDmg(who, target, dmg);
+        }
+    }
+}
+
 // ダメージ
 async function dealDmg(from, to, dmg) {
-    if(!from || !to || !to.hp || !to.condition) return;
+    if(!from || !to) return;
+    if(!to.hp || !to.condition) return;
     dmg = Math.round(dmg);
 
     addHP(to, -dmg);
@@ -701,22 +733,6 @@ async function dealDmg(from, to, dmg) {
 
     // 死亡判定
     await isDead(to);
-}
-
-// 範囲攻撃
-async function dealDmgAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
-    for(let i=-radius; i<=radius; i++) {
-        if(y+i < 0 || y+i >= SIZEY) continue;
-        for(let j=-radius; j<=radius; j++) {
-            if(x+j < 0 || x+j >= SIZEX || map[y+i][x+j] == ID_MAP.none) continue;
-            if(!self_dmg_flg && x+j == who.x && y+i == who.y) continue;
-            const target = x+j == player.x && y+i == player.y ? player : getEnemy(x+j, y+i);
-            await dealDmg(who, target, dmg);
-            await checkKill(who);
-            updateMap();
-            drawMap();
-        }
-    }
 }
 
 function straightRecursive(x, y, direction, range) {
@@ -821,6 +837,8 @@ async function doEventSkill() {
     // サブイベント起動
     if(skill_using != undefined) {
         if(await doSubEventSkill()) {
+            await checkKill(player);
+
             // コスト支払い
             if(skill_using.cost_type == "hp") addHP(player, -skill_using.cost);
             else if(skill_using.cost_type == "fp") addFP(player, -skill_using.cost);
@@ -2004,7 +2022,7 @@ async function doEventEnemy(enemy) {
                 }
                 // スキル使用
                 if(check && await skill.func(enemy, target)) {
-                    checkKill(enemy);
+                    await checkKill(enemy);
 
                     // コスト消費
                     if(skill.cost_type == "hp") addHP(enemy, -skill.cost);
@@ -2021,7 +2039,7 @@ async function doEventEnemy(enemy) {
             let y = enemy.y + KEY_DIRECTION[d].y;
             if(x == target.x && y == target.y && canDiagonal(enemy.x, enemy.y, KEY_DIRECTION[d].x, KEY_DIRECTION[d].y)) {
                 await attack(enemy, target);
-                checkKill(enemy);
+                await checkKill(enemy);
                 return;
             }
         }
@@ -2030,7 +2048,7 @@ async function doEventEnemy(enemy) {
             let y = enemy.y + KEY_DIRECTION_DIAGONAL[d].y;
             if(x == target.x && y == target.y && canDiagonal(enemy.x, enemy.y, KEY_DIRECTION_DIAGONAL[d].x, KEY_DIRECTION_DIAGONAL[d].y)) {
                 await attack(enemy, target);
-                checkKill(enemy);
+                await checkKill(enemy);
                 return;
             }
         }
@@ -2647,13 +2665,13 @@ function canDiagonal(x, y, dir_x, dir_y) {
 
 // 掘削
 async function digWall(x, y, radius = 0) {
-    if(!safe_flag) return false;
+    if(safe_flag) return false;
     for(let i=-radius; i<=radius; i++) {
         if(y+i < 0 || y+i >= SIZEY) continue;
         for(let j=-radius; j<=radius; j++) {
             if(x+j < 0 || x+j >= SIZEX) continue;
-            if(map[y][x] == ID_MAP.none)
-                map[y][x] = ID_MAP.path;
+            if(map[y+i][x+j] == ID_MAP.none)
+                map[y+i][x+j] = ID_MAP.path;
         }
     }
 }

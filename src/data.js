@@ -215,7 +215,7 @@ let shop_flag = false;
 let upgrade_flag = false;
 let shot_flag = false;
 let throwing_flag = false;
-let magic_flag = false;
+let staff_flag = false;
 
 let turn_flag = false;    // ターン経過
 let safe_flag = false;    // 空腹度無効化
@@ -224,9 +224,6 @@ let bow_flag = false;
 
 const STATUS_LIST= ["str", "dex", "int", "fth"];
 const DEF_BASE = 0;
-const THROWING_RANGE = 5;
-const MAGIC_RANGE = 10;
-let magic_using = undefined;
 
 // プレイヤー
 let player = {
@@ -290,6 +287,10 @@ let skill = [];
 let skill_cursor = 0;
 let skill_using = undefined;
 let skill_draw_aim_flag = false;
+
+// staff etc
+const THROWING_RANGE = 5;
+let staff_using = undefined;
 
 // ui記憶用
 let remember_ui = "inventory";
@@ -586,7 +587,7 @@ const ITEM_DATA = [
             play_audio(audio_fire);
             await animSpread(dst.x, dst.y, 1, "火");
             
-            await dealDmgAOE(dst.x, dst.y, 1, who, 50);
+            await magicDmgAOE(dst.x, dst.y, 1, who, 50, true);
             return true;
         },
     },
@@ -602,10 +603,12 @@ const ITEM_DATA = [
         },
         func_throw: async function(who, dst) {
             play_audio(audio_explosion);
-            await animSpread(dst.x, dst.y, 1, "爆");
+            await animSpread(dst.x, dst.y, 1, "爆", true);
             
-            await dealDmgAOE(dst.x, dst.y, 1, who, 100);
+            await magicDmgAOE(dst.x, dst.y, 1, who, 100, true);
             await digWall(dst.x, dst.y, 1);
+            updateMap();
+            drawMap();
             return true;
         },
     },
@@ -900,14 +903,14 @@ const ITEM_DATA = [
                 return false;
             }
             addLog(player.name+" は "+this.name+" を構えた");
-            magic_flag = true;
-            magic_using = this.id;
+            staff_flag = true;
+            staff_using = this.id;
             return false;
         },
         func_cast: async function(dir) {
             addFP(player, -5);
             const skill = getSkillData(0x300);
-            const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
+            const target = straightRecursive(player.x, player.y, dir, SKILL_RANGE);
             return await skill.func(player, target);
         }
     },
@@ -924,165 +927,6 @@ const ITEM_DATA = [
             const skill = getSkillData(0x400);
 
             addFP(player, -8);
-            await skill.func(player, player);
-            return true;
-        },
-        func_cast: async function(dir) {}
-    },
-    {
-        id: 0x602,
-        name: "跳躍の杖",
-        type: "staff",
-        price: 254,
-        func: async function() {
-            if(player.fp < 7) {
-                addLog("FP が足りない");
-                return false;
-            }
-            addLog(this.name+" を構えた");
-            magic_flag = true;
-            magic_using = this.id;
-            return false;
-        },
-        func_cast: async function(dir) {
-            const skill = getSkillData(0x002);
-            skill.direction = dir;
-            skill.distance = 3;
-
-            addFP(player, -7);
-            await skill.func(player, undefined);
-            return true;
-        }
-    },
-    {
-        id: 0x603,
-        name: "フォースの聖印",
-        type: "staff",
-        price: 80,
-        func: async function() {
-            if(player.fp < 4) {
-                addLog("FP が足りない");
-                return false;
-            }
-            const skill = getSkillData(0x480);
-
-            addFP(player, -4);
-            await skill.func(player, undefined);
-            return true;
-        },
-        func_cast: async function(dir) {}
-    },
-    {
-        id: 0x604,
-        name: "火球の種火",
-        type: "staff",
-        price: 110,
-        func: async function() {
-            if(player.fp < 5) {
-                addLog("FP が足りない");
-                return false;
-            }
-            addLog(player.name+" は "+this.name+" を構えた");
-            magic_flag = true;
-            magic_using = this.id;
-            return false;
-        },
-        func_cast: async function(dir) {
-            addFP(player, -5);
-            const skill = getSkillData(0x500);
-            const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
-            return await skill.func(player, target);
-        }
-    },
-    {
-        id: 0x605,
-        name: "大火球の種火",
-        type: "staff",
-        price: 140,
-        func: async function() {
-            if(player.fp < 8) {
-                addLog("FP が足りない");
-                return false;
-            }
-            addLog(player.name+" は "+this.name+" を構えた");
-            magic_flag = true;
-            magic_using = this.id;
-            return false;
-        },
-        func_cast: async function(dir) {
-            addFP(player, -8);
-            const skill = getSkillData(0x501);
-            const target = straightRecursive(player.x, player.y, dir, MAGIC_RANGE);
-            return await skill.func(player, target);
-        }
-    },
-    {
-        id: 0x606,
-        name: "回復の聖鈴",
-        type: "staff",
-        price: 124,
-        func: async function() {
-            if(player.fp < 16) {
-                addLog("FP が足りない");
-                return false;
-            }
-            const skill = getSkillData(0x401);
-
-            addFP(player, -16);
-            await skill.func(player, player);
-            return true;
-        },
-        func_cast: async function(dir) {}
-    },
-    {
-        id: 0x607,
-        name: "大回復の聖鈴",
-        type: "staff",
-        price: 141,
-        func: async function() {
-            if(player.fp < 30) {
-                addLog("FP が足りない");
-                return false;
-            }
-            const skill = getSkillData(0x402);
-
-            addFP(player, -30);
-            await skill.func(player, player);
-            return true;
-        },
-        func_cast: async function(dir) {}
-    },
-    {
-        id: 0x608,
-        name: "王たる聖鈴",
-        type: "staff",
-        price: 187,
-        func: async function() {
-            if(player.fp < 45) {
-                addLog("FP が足りない");
-                return false;
-            }
-            const skill = getSkillData(0x403);
-
-            addFP(player, -45);
-            await skill.func(player, player);
-            return true;
-        },
-        func_cast: async function(dir) {}
-    },
-    {
-        id: 0x609,
-        name: "恵みの聖鈴",
-        type: "staff",
-        price: 103,
-        func: async function() {
-            if(player.fp < 13) {
-                addLog("FP が足りない");
-                return false;
-            }
-            const skill = getSkillData(0x404);
-
-            addFP(player, -13);
             await skill.func(player, player);
             return true;
         },
@@ -1810,7 +1654,7 @@ const SKILL_DATA = [
             let fth = from.fth ? from.fth : 10;
             let dmg = 30 + int * 2.5 + fth * 2.5;
             //await magic(from, dmg, getDirection(from, to));
-            await dealDmgAOE(to.x, to.y, 1, from, dmg);
+            await magicDmgAOE(to.x, to.y, 1, from, dmg);
             return true;
         }
     },
