@@ -53,7 +53,8 @@ function drawMap() {
                     ctx.fillStyle = color_yellow;
                 else if(map_draw[player.y+i][player.x+j]=="魂")
                     ctx.fillStyle = color_light_blue;
-                else if(map_draw[player.y+i][player.x+j]=="火")
+                else if(map_draw[player.y+i][player.x+j]=="火"
+                    || map_draw[player.y+i][player.x+j]=="爆")
                     ctx.fillStyle = color_orange;
                 else if(map_draw[player.y+i][player.x+j]=="光"
                     || map_draw[player.y+i][player.x+j]=="雷")

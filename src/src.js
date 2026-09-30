@@ -62,7 +62,7 @@ async function loadCookie() {
                 if(val !== "undefined") val = JSON.parse(val);
                 else val = undefined;
             }catch(err) {
-                console.log("loadCookie: JSON.parse: "+val);
+                console.warn("loadCookie: JSON.parse: "+val);
                 return false;
             }
             
@@ -398,6 +398,7 @@ function jump(who, direction, distance) {
 
 // 攻撃
 async function attack(from, to) {
+    if(!from.atk || !to.def || !to.condition) return false;
     addLog(from.name+" の攻撃");
 
     let dmg;
@@ -421,7 +422,7 @@ async function attack(from, to) {
     if("weapon" in from && from.weapon) await getItemData(from.weapon).func_attack(to);
     if("armor" in to && to.armor) await getItemData(to.armor).func_attacked(from);
 
-    return;
+    return true;
 }
 
 // 射撃イベント
@@ -666,7 +667,7 @@ async function magicDmg(from, to, value) {
 
 // ダメージ
 async function dealDmg(from, to, dmg) {
-    if(!from || !to) return;
+    if(!from || !to || !to.hp || !to.condition) return;
     dmg = Math.round(dmg);
 
     addHP(to, -dmg);
@@ -703,7 +704,7 @@ async function dealDmg(from, to, dmg) {
 }
 
 // 範囲攻撃
-async function doAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
+async function dealDmgAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
     for(let i=-radius; i<=radius; i++) {
         if(y+i < 0 || y+i >= SIZEY) continue;
         for(let j=-radius; j<=radius; j++) {
@@ -823,7 +824,7 @@ async function doEventSkill() {
             // コスト支払い
             if(skill_using.cost_type == "hp") addHP(player, -skill_using.cost);
             else if(skill_using.cost_type == "fp") addFP(player, -skill_using.cost);
-            else console.log("doEventSkill: cannot pay cost properly");
+            else console.warn("doEventSkill: cannot pay cost properly");
 
             skill_flag = false;
             skill_using = undefined;
@@ -953,7 +954,7 @@ async function preSkill(skill_cursor) {
             skill_using = s;
             return true;
         default:
-            console.log("preSkill: invalid skill target type: "+s.target_type);
+            console.warn("preSkill: invalid skill target type: "+s.target_type);
             return false;
     }
 }
@@ -1416,7 +1417,7 @@ async function setCondition(who, id, turn = -1) {
     // 重複判定
     for(let c of who.condition)
         if(c.id == id) {
-            console.log("setCondition: already have "+cond.name+".")
+            console.warn("setCondition: already have "+cond.name+".")
             return false;
         }
 
@@ -2008,7 +2009,7 @@ async function doEventEnemy(enemy) {
                     // コスト消費
                     if(skill.cost_type == "hp") addHP(enemy, -skill.cost);
                     else if(skill.cost_type == "fp") addFP(enemy, -skill.cost);
-                    else console.log("doEventEnemy: "+enemy.name+": "+skill.name+": cannot pay cost properly");
+                    else console.warn("doEventEnemy: "+enemy.name+": "+skill.name+": cannot pay cost properly");
                     return;
                 }
             }
@@ -2219,7 +2220,7 @@ function astarRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
         
     if(!next_node.x || !next_node.y) {
         // debug
-        //console.log("aster: cannot reach");
+        //console.warn("aster: cannot reach");
         return;
     }
     
@@ -2285,7 +2286,7 @@ function setNextTravelRoom(enemy) {
     enemy.travel_y = next_room_y;
 
     // debug
-    //console.log("setNextTravelRoom: "+enemy.name+" set next travel point.");
+    //console.warn("setNextTravelRoom: "+enemy.name+" set next travel point.");
     //map_draw[enemy.travel_y][enemy.travel_x] = "㊦";
 }
 
@@ -2645,7 +2646,14 @@ function canDiagonal(x, y, dir_x, dir_y) {
 }
 
 // 掘削
-async function digWall(x, y) {
-    if(map[y][x] == ID_MAP.none)
-        map[y][x] = ID_MAP.path;
+async function digWall(x, y, radius = 0) {
+    if(!safe_flag) return false;
+    for(let i=-radius; i<=radius; i++) {
+        if(y+i < 0 || y+i >= SIZEY) continue;
+        for(let j=-radius; j<=radius; j++) {
+            if(x+j < 0 || x+j >= SIZEX) continue;
+            if(map[y][x] == ID_MAP.none)
+                map[y][x] = ID_MAP.path;
+        }
+    }
 }

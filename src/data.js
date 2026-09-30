@@ -360,7 +360,7 @@ const ITEM_TABLE = [
         0x000, 0x000, 0x000, 0x000,
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
-        0x080, 0x080,
+        0x080, 0x080, 0x081,
         0x400, 0x401, 0x402,
         0x500,
         //0x603, 0x609,
@@ -371,7 +371,7 @@ const ITEM_TABLE = [
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
-        0x080, 0x080,
+        0x080, 0x080, 0x081,
         0x101, 0x201, 0x301,
         0x400, 0x401, 0x402, 0x403,
         0x500,
@@ -383,7 +383,7 @@ const ITEM_TABLE = [
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
-        0x080, 0x080,
+        0x080, 0x080, 0x081,
         0x101, 0x201, 0x301, 0x302,
         0x400, 0x401, 0x402, 0x403,
         0x500,
@@ -586,7 +586,26 @@ const ITEM_DATA = [
             play_audio(audio_fire);
             await animSpread(dst.x, dst.y, 1, "火");
             
-            await doAOE(dst.x, dst.y, 1, who, 50);
+            await dealDmgAOE(dst.x, dst.y, 1, who, 50);
+            return true;
+        },
+    },
+    {
+        id: 0x081,
+        name: "爆発石",
+        type: "consume",
+        price: 8,
+        remove_after_throw: true,
+        func: async function() {
+            addLog("投擲用のようだ")
+            return false;
+        },
+        func_throw: async function(who, dst) {
+            play_audio(audio_explosion);
+            await animSpread(dst.x, dst.y, 1, "爆");
+            
+            await dealDmgAOE(dst.x, dst.y, 1, who, 100);
+            await digWall(dst.x, dst.y, 1);
             return true;
         },
     },
@@ -1570,7 +1589,7 @@ const SKILL_DATA = [
         name: "受け流し",
         target_type: "self",
         cost_type: "hp",
-        cost: 10,
+        cost: 5,
         func: async function(from, to) {
             return setCondition(from, 0x80, 1);
         }
@@ -1599,8 +1618,7 @@ const SKILL_DATA = [
         cost_type: "hp",
         cost: 5,
         func: async function(from, to) {
-            await attack(from, to);
-            if(Math.floor(Math.random()+0.33))
+            if(await attack(from, to) && Math.floor(Math.random()+0.33))
                 await setCondition(to, 0x00);
             return true;
         }
@@ -1626,13 +1644,13 @@ const SKILL_DATA = [
     },
     {
         id: 0x005,
-        name: "突撃",
-        target_type: "range",
+        name: "掘削",
+        target_type: "next",
         cost_type: "hp",
-        cost: 15,
+        cost: 30,
         func: async function(from, to) {
-            addLog(from.name+" は突撃した");
-            
+            await attack(from, to);
+            await digWall(to.x, to.y);
             return true;
         }
     },
@@ -1792,7 +1810,7 @@ const SKILL_DATA = [
             let fth = from.fth ? from.fth : 10;
             let dmg = 30 + int * 2.5 + fth * 2.5;
             //await magic(from, dmg, getDirection(from, to));
-            await doAOE(to.x, to.y, 1, from, dmg);
+            await dealDmgAOE(to.x, to.y, 1, from, dmg);
             return true;
         }
     },
@@ -1865,7 +1883,7 @@ const CONDITION_DATA = [
     },
     {
         id: 0x04,
-        name: "眠", // 浅眠
+        name: "眠",
         turn: 0xffff,
         func_be: async function(who) {
             who.cannot_action_flag = true;

@@ -1,9 +1,10 @@
 ﻿id,name,target_type,cost_type,cost
 0x000,"射撃","range","hp",0,
-0x001,"受け流し","self","hp",10,
+0x001,"受け流し","self","hp",5,
 0x002,"クイックステップ","range","fp",15,
 0x003,"毒攻撃","next","hp",5,
 0x004,"突撃","range","hp",15,
+0x005,"掘削","next","hp",30,
 0x300,"ソウルの光","range","fp",5,
 0x400,"小回復","self","fp",8,
 0x401,"回復","self","fp",16,
