@@ -43,6 +43,9 @@ async function setCookie() {
     for(let i=0; i<player_skill.length; i++) {
         document.cookie = "skill_"+i+"="+encodeURIComponent(JSON.stringify(player_skill[i]))+age;
     }
+    for(let i=0; i<player_learning.length; i++) {
+        document.cookie = "learning_"+i+"="+encodeURIComponent(JSON.stringify(player_learning[i]))+age;
+    }
     for(let i=0; i<storage.length; i++) {
         document.cookie = "storage_"+i+"="+encodeURIComponent(JSON.stringify(storage[i]))+age;
     }
@@ -54,7 +57,7 @@ async function loadCookie() {
     const cookie = document.cookie;
     if(cookie.match(/player_.+=/)) {
         const data = decodeURIComponent(cookie).split("; ");
-        let read_flg = {player: false, inventory: false, skill: false, storage: false, date: false};
+        let read_flg = {player: false, inventory: false, skill: false, learning: false, storage: false, date: false};
         for(let idx in data) {
             let [key, val] = data[idx].split("=");
 
@@ -81,6 +84,10 @@ async function loadCookie() {
             else if(key.match(/skill_([0-9]*)/)) {
                 player_skill.push(Object.assign({}, getSkillData(val.id), val));
                 read_flg.skill = true;
+            }
+            else if(key.match(/learning_([0-9]*)/)) {
+                player_learning.push(Object.assign({}, val));
+                read_flg.learning = true;
             }
             else if(key.match(/storage_([0-9]*)/)) {
                 storage.push(Object.assign({}, getItemData(val.id), val));
