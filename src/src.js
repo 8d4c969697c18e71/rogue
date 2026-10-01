@@ -142,16 +142,12 @@ async function events() {
     else if(player.cannot_action_flag) {
         turn_flag = true;
     }
-    // 射撃
-    else if(shot_flag) {
-        turn_flag = await doEventShot();
-    }
     // 投擲
     else if(throwing_flag) {
         turn_flag = await doEventThrowing();
     }
     // スキル
-    else if(skill_flag) {
+    else if(skill_flag || skill_using) {
         turn_flag = await doEventSkill();
     }
     // インベントリ
@@ -168,11 +164,13 @@ async function events() {
     }
 
     // shotrange点滅制御
-    if((shot_flag || throwing_flag || skill_draw_aim_flag) && id_interval_sr == undefined)
-        id_interval_sr = setInterval(() => {
-            interval_sr_flag = interval_sr_flag ? false : true;
-            drawMap();
-        }, 300);
+    if(throwing_flag || skill_draw_aim_flag) {
+        if(id_interval_sr == undefined)
+            id_interval_sr = setInterval(() => {
+                interval_sr_flag = interval_sr_flag ? false : true;
+                drawMap();
+            }, 300);
+    }
     else {
         clearInterval(id_interval_sr);
         id_interval_sr = undefined;
@@ -281,19 +279,17 @@ async function doEventPlayer() {
     }
     // sub
     if(key_input.sub) {
-        if(!player.ammo) {
-            addLog("弾薬を装備していない");
-            play_audio(audio_cancel);
-        }
-        else if(bow_flag) {
-            addLog(player.name+" は "+player.weapon.name+" を構えた");
+        // お気に入りスキル
+        if(skill_favorite_idx >= 0 && await preSkill(skill_favorite_idx)) {
+            // コスト種別
+            let type = "";
+            if(skill_using.cost_type == "hp") type = "HP";
+            else if(skill_using.cost_type == "fp") type = "FP";
+            else if(skill_using.cost_type == "hung") type = "空腹度";
+
+            skill_draw_aim_flag = true;
             play_audio(audio_apply);
-            shot_flag = true;
-        }
-        else{
-            addLog(player.name+" は "+player.ammo.name+" を振り被った")
-            play_audio(audio_apply);
-            throwing_flag = true;
+            addLog(skill_using.name+"（使用コスト: "+type+" "+skill_using.cost+"）");
         }
         return false;
     }
@@ -434,37 +430,6 @@ async function attackAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
     }
 }
 
-// 射撃イベント
-async function doEventShot() {
-    let ammo = getItemInventory(player.ammo);
-
-    // 十字キー
-    let kd;
-    if(!key_input.ctrl) kd = KEY_DIRECTION;
-    else kd = KEY_DIRECTION_DIAGONAL;
-    for(let k in kd)
-        if(key_input[k]) {
-            shot_flag = false;
-            await shot(player, ammo, kd[k]);
-            await checkKill(player);
-            if(ammo.stack_num > 0) ammo.stack_num--;
-            if(ammo.stack_num <= 0) {
-                await equip(inventory.indexOf(ammo));
-                log_reserve.pop();
-                inventory.splice(inventory.indexOf(ammo), 1);
-            }
-            return true;
-        }
-    
-    // cancel
-    if(key_input.cancel) {
-        addLog("構えを解いた");
-        play_audio(audio_cancel);
-        shot_flag = false;
-        return false;
-    }
-}
-
 // 射撃
 async function shot(who, ammo, direction) {
     let dst = straightRecursive(who.x, who.y, direction, ammo.range);
@@ -479,14 +444,14 @@ async function shot(who, ammo, direction) {
         if("weapon" in who && who.weapon) await who.weapon.func_attack(enemy);
         if("ammo" in who && who.ammo) await who.ammo.func_attack(enemy);
         if("armor" in enemy && enemy.armor) await enemy.armor.func_attacked(who);
-        return enemy;
+        return true;
     }
     else if(dst.x == player.x && dst.y == player.y) {
         await shotDmg(who, player, ammo);
         if("weapon" in who && who.weapon) await who.weapon.func_attack(player);
         if("ammo" in who && who.ammo) await who.ammo.func_attack(player);
         if("armor" in player && player.armor) await player.armor.func_attacked(who);
-        return player;
+        return true;
     }
     else{// 外した
         if(who == player) {
@@ -500,11 +465,12 @@ async function shot(who, ammo, direction) {
                         if(canMove(px, py) && !isItem(px, py)) {
                             setItem(ammo.id, px, py);
                             //addLog(ammo.name+" は床に落ちた");
-                            return undefined;
+                            return true;
                         }
                     }
                 }
         }
+        return false;
     }
 }
 
@@ -889,6 +855,20 @@ async function doEventSkill() {
         skill_using = undefined;
         return false;
     }
+    // sub
+    if(key_input.sub) {
+        if(skill_favorite_idx != skill_cursor) {
+            skill_favorite_idx = skill_cursor;
+            play_audio(audio_apply);
+            addLog(player_skill[skill_cursor].name+" をショートカットに追加した");
+        }
+        else {
+            skill_favorite_idx = -1;
+            play_audio(audio_cancel);
+            addLog(player_skill[skill_cursor].name+" をショートカットから外した");
+        }
+        return false;
+    }
 }
 
 async function doSubEventSkill() {
@@ -928,22 +908,13 @@ async function doSubEventSkill() {
     }
 }
 
-function setSkill(id) {
-    if(player_skill.length > SKILL_SIZE) {
-        addLog("これ以上記憶できない");
-        return false;
-    }
-    player_skill.push(getSkillData(id));
-    addLog(player.name+" は "+getSkillData(id).name+" を習得した");
-    return true;
-}
-
 async function useSkill(skill_using, target) {
+    let ret = false;
     skill_draw_aim_flag = false;
     if(skill_using != undefined && skill_using.func != undefined) 
-        return await skill_using.func(player, target);
-    skill_draw_aim_flag = true;
-    return false;
+        ret = await skill_using.func(player, target);
+    if(!ret) skill_draw_aim_flag = true;
+    return ret;
 }
 
 async function preSkill(skill_cursor) {
@@ -975,11 +946,28 @@ async function preSkill(skill_cursor) {
     }
 }
 
+function setSkill(id) {
+    if(player_skill.length > SKILL_SIZE) {
+        addLog("これ以上記憶できない");
+        return false;
+    }
+    player_skill.push(getSkillData(id));
+    addLog(player.name+" は "+getSkillData(id).name+" を習得した");
+    return true;
+}
+
 function setSkillItem(skill, item) {
     skill_using = skill;
     skill_from_item = item;
     skill_flag = true;
     skill_draw_aim_flag = true;
+}
+
+function removeSkill(index) {
+    if(index < 0 || index > player_skill.length) return false;
+    if(skill_favorite_idx == index) skill_favorite_idx = -1;
+    player_skill.splice(index, 1);
+    return true;
 }
 
 function getSkillData(id) {

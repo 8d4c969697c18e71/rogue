@@ -213,13 +213,11 @@ let inventory_flag = false;
 let skill_flag = false;
 let shop_flag = false;
 let upgrade_flag = false;
-let shot_flag = false;
 let throwing_flag = false;
 
 let turn_flag = false;    // ターン経過
 let safe_flag = false;    // 空腹度無効化
 let clairvoyance_flag = false;    // 透視
-let bow_flag = false;
 
 const STATUS_LIST= ["str", "dex", "int", "fth"];
 const DEF_BASE = 0;
@@ -286,12 +284,14 @@ let player_skill = [];
 let skill_cursor = 0;
 let skill_using = undefined;
 let skill_draw_aim_flag = false;
+let skill_favorite_idx = -1;
 
 // learning
 let player_learning = []; // skill_id, cnt(n回以上とか用), chance
 
 // etc
 const THROWING_RANGE = 5;
+let bow_flag = false;
 let skill_from_item = undefined;
 
 // shop
@@ -1090,6 +1090,7 @@ const ITEM_DATA = [
                 for(let i=0; i<8; i++)
                     addItem(0x800);
                 addItem(0x010);
+                setSkill(0x000);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1128,10 +1129,9 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x102);
-                //addItem(0x600);
-                setSkill(0x300);
                 addItem(0x380);
                 addItem(0x020);
+                setSkill(0x300);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1170,10 +1170,9 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x104);
-                //addItem(0x601);
-                setSkill(0x400);
                 addItem(0x381);
                 addItem(0x020);
+                setSkill(0x400);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1212,10 +1211,9 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x103);
-                //addItem(0x604);
-                setSkill(0x500);
                 addItem(0x382);
                 addItem(0x020);
+                setSkill(0x500);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1426,15 +1424,21 @@ const SKILL_DATA = [
         target_type: "range",
         cost_type: "hung",
         cost: 0,
-        ammo: undefined,
+        ammo: 0x700,
         func: async function(from, to) {
-            let ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
-            let xy = straightRecursive(from.x, from.y, getDirection(from, to), ammo.range);
-            if(xy.x == to.x && xy.y == to.y) {
-                await shot(from, ammo, getDirection(from, to));
-                return true;
+            if(from == player) {
+                if(!bow_flag) {
+                    addLog("弓が必要だ");
+                    return false;
+                }
+                if(from.ammo == undefined) {
+                    addLog("矢が必要だ");
+                    return false;
+                }
+                this.ammo = from.ammo.id;
             }
-            return false;
+            const ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
+            return await shot(from, ammo, getDirection(from, to));
         },
     },
     {
@@ -1664,7 +1668,6 @@ const SKILL_DATA = [
             let int = from.int ? from.int : 10;
             let fth = from.fth ? from.fth : 10;
             let dmg = 30 + int * 2.5 + fth * 2.5;
-            //await magic(from, dmg, getDirection(from, to));
             await magicDmgAOE(to.x, to.y, 1, from, dmg);
             return true;
         }
@@ -1676,10 +1679,9 @@ const SKILL_DATA = [
         target_type: "range",
         cost_type: "hung",
         cost: 10,
-        direction: undefined,
-        distance: undefined,
+        distance: 3,
         func: async function(from, to) {
-            if(jump(from, this.direction, this.distance)) {
+            if(jump(from, getDirection(from, to), this.distance)) {
                 addLog(from.name+" は跳び退いた");
                 play_audio(audio_jump);
                 return true;

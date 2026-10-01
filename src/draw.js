@@ -177,8 +177,7 @@ function updateMap() {
     updateMDTrap();
     // 射撃・投擲・魔法
     initMap(map_shotrange, false);
-    if(shot_flag) updateShotRange(15);
-    else if(throwing_flag) updateShotRange(THROWING_RANGE);
+    if(throwing_flag) updateShotRange(THROWING_RANGE);
     else if(skill_draw_aim_flag && skill_using) {
         if(skill_using.target_type == "range") updateShotRange(SKILL_RANGE);
         else if(skill_using.target_type == "next") updateShotRange(1, 1);

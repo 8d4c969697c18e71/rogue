@@ -82,6 +82,8 @@ function drawInv() {
                 str += "＞\u2007";
             else
                 str += "　\u2007";
+            if(i == skill_favorite_idx)
+                str += "＊";
             if(i < player_skill.length) {
                 str += player_skill[i].name;
             }
