@@ -114,8 +114,9 @@ function drawShop() {
 
         shop.innerHTML = "";
         let header;
-        if(storage_flag) header = "STORAGE";
-        else if(upgrade_flag) header = "UPGRADE";
+        if(upgrade_flag) header = "UPGRADE";
+        else if(storage_flag) header = "STORAGE";
+        else if(learning_flag) header = "LEARNING";
         else header = "SHOP";
         shop.insertAdjacentHTML("beforeend", header + "<br>");
         for(let i=shop_start_offset; i<shop_using.item.length && i<shop_display_num+shop_start_offset; i++) {
@@ -133,6 +134,9 @@ function drawShop() {
                 if(shop_using.item[i].stack_num > 0)
                     str += "×"+shop_using.item[i].stack_num;
             }
+            else if(learning_flag) {
+                str += shop_using.item[i].name;
+            }
             else if(shop_using.item[i].price>=0) {
                 str += shop_using.item[i].name;
                 str += " : "+shop_using.item[i].price+"G";
@@ -143,6 +147,8 @@ function drawShop() {
             }
             shop.insertAdjacentHTML("beforeend", str + "<br>");
         }
+        if(shop_using.item.length <= 0)
+            shop.insertAdjacentHTML("beforeend", "--- なし ---");
     }
 }
 
@@ -250,7 +256,7 @@ function drawNote() {
     note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←↑↓→ TO "+colorUI("赤字", color_red)+"<br>");
     note.insertAdjacentHTML("beforeend", "- 待機: Z<br>");
     note.insertAdjacentHTML("beforeend", "- インベントリ: X<br>");
-    note.insertAdjacentHTML("beforeend", "- 射撃: C<br>");
+    note.insertAdjacentHTML("beforeend", "- 登録スキル: C<br>");
     note.insertAdjacentHTML("beforeend", "<br>");
     note.insertAdjacentHTML("beforeend", "INVENTORY<br>");
     note.insertAdjacentHTML("beforeend", "- 使う/装備: Z<br>");
@@ -258,6 +264,10 @@ function drawNote() {
     note.insertAdjacentHTML("beforeend", "- 投擲: C<br>");
     note.insertAdjacentHTML("beforeend", "- 項目切替: ← →<br>");
     note.insertAdjacentHTML("beforeend", "<br>");
+    note.insertAdjacentHTML("beforeend", "SKILL<br>");
+    note.insertAdjacentHTML("beforeend", "- 使う: Z<br>");
+    note.insertAdjacentHTML("beforeend", "- 戻る: X<br>");
+    note.insertAdjacentHTML("beforeend", "- スキル登録: C<br>");
 }
 
 // UI色

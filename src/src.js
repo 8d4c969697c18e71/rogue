@@ -46,6 +46,9 @@ async function setCookie() {
     for(let i=0; i<player_learning.length; i++) {
         document.cookie = "learning_"+i+"="+encodeURIComponent(JSON.stringify(player_learning[i]))+age;
     }
+    for(let i=0; i<can_learning.length; i++) {
+        document.cookie = "can_learning_"+i+"="+encodeURIComponent(JSON.stringify(can_learning[i]))+age;
+    }
     for(let i=0; i<storage.length; i++) {
         document.cookie = "storage_"+i+"="+encodeURIComponent(JSON.stringify(storage[i]))+age;
     }
@@ -57,7 +60,7 @@ async function loadCookie() {
     const cookie = document.cookie;
     if(cookie.match(/player_.+=/)) {
         const data = decodeURIComponent(cookie).split("; ");
-        let read_flg = {player: false, inventory: false, skill: false, learning: false, storage: false, date: false};
+        let read_flg = {player: false, inventory: false, skill: false, learning: false, can_learning: false, storage: false, date: false};
         for(let idx in data) {
             let [key, val] = data[idx].split("=");
 
@@ -87,6 +90,10 @@ async function loadCookie() {
             }
             else if(key.match(/learning_([0-9]*)/)) {
                 player_learning.push(Object.assign({}, val));
+                read_flg.learning = true;
+            }
+            else if(key.match(/can_learning_([0-9]*)/)) {
+                can_learning.push(Object.assign({}, val));
                 read_flg.learning = true;
             }
             else if(key.match(/storage_([0-9]*)/)) {
@@ -287,16 +294,22 @@ async function doEventPlayer() {
     // sub
     if(key_input.sub) {
         // お気に入りスキル
-        if(skill_favorite_idx >= 0 && await preSkill(skill_favorite_idx)) {
-            // コスト種別
+        if(skill_favorite_idx >= 0 && skill_favorite_idx < player_skill.length) {
+            // コストログ
+            const skill = player_skill[skill_favorite_idx];
             let type = "";
-            if(skill_using.cost_type == "hp") type = "HP";
-            else if(skill_using.cost_type == "fp") type = "FP";
-            else if(skill_using.cost_type == "hung") type = "空腹度";
+            if(skill.cost_type == "hp") type = "HP";
+            else if(skill.cost_type == "fp") type = "FP";
+            else if(skill.cost_type == "hung") type = "空腹度";
+            addLog(skill.name+"（使用コスト: "+type+" "+skill.cost+"）");
 
-            skill_draw_aim_flag = true;
-            play_audio(audio_apply);
-            addLog(skill_using.name+"（使用コスト: "+type+" "+skill_using.cost+"）");
+            // 使用前判定
+            if(await preSkill(skill_favorite_idx)) {
+                skill_draw_aim_flag = true;
+                play_audio(audio_apply);
+            }
+            else
+                play_audio(audio_cancel);
         }
         return false;
     }
@@ -403,6 +416,8 @@ async function attack(from, to) {
 
     let dmg;
     dmg = (from.atk+from.atk_offset)*(100-to.def-to.def_offset)/100;
+    // 弓の場合はdmg半減
+    if(from == player && bow_flag) dmg *= 0.5;
     let rand = Math.random() * dmg/4 - dmg/8;
     dmg += rand;
     dmg = Math.floor(dmg);
@@ -838,23 +853,26 @@ async function doEventSkill() {
         return await doEventInventory();
     }
     // apply
-    if(key_input.apply)
+    if(key_input.apply) {
         if(skill_cursor < player_skill.length) {
-            if(await preSkill(skill_cursor)) {
-                // コスト種別
-                let type = "";
-                if(skill_using.cost_type == "hp") type = "HP";
-                else if(skill_using.cost_type == "fp") type = "FP";
-                else if(skill_using.cost_type == "hung") type = "空腹度";
+            // コストログ
+            const skill = player_skill[skill_cursor];
+            let type = "";
+            if(skill.cost_type == "hp") type = "HP";
+            else if(skill.cost_type == "fp") type = "FP";
+            else if(skill.cost_type == "hung") type = "空腹度";
+            addLog(skill.name+"（使用コスト: "+type+" "+skill.cost+"）");
 
+            // 使用前判定
+            if(await preSkill(skill_cursor)) {
                 skill_draw_aim_flag = true;
                 play_audio(audio_apply);
-                addLog(skill_using.name+"（使用コスト: "+type+" "+skill_using.cost+"）");
             }
             else
                 play_audio(audio_cancel);
-            return false;
         }
+        return false;
+    }
     // cancel
     if(key_input.cancel) {
         play_audio(audio_cancel);
@@ -867,12 +885,12 @@ async function doEventSkill() {
         if(skill_favorite_idx != skill_cursor) {
             skill_favorite_idx = skill_cursor;
             play_audio(audio_apply);
-            addLog(player_skill[skill_cursor].name+" をショートカットに追加した");
+            addLog(player_skill[skill_cursor].name+" を登録した（ｃで使用）");
         }
         else {
             skill_favorite_idx = -1;
             play_audio(audio_cancel);
-            addLog(player_skill[skill_cursor].name+" をショートカットから外した");
+            addLog(player_skill[skill_cursor].name+" を登録から外した");
         }
         return false;
     }
@@ -1005,10 +1023,19 @@ async function learning(skill_id) {
     if(learning_data.cnt <= learning_start_cnt)
         return;
 
-    // 習得
+    // 習得可能キュー追加
     if(Math.floor(Math.random() + learning_data.chance)) {
-        setSkill(skill_id);
+        can_learning.push(skill_id);
         player_learning.splice(player_learning.indexOf(learning_data), 1);
+        addLog(player.name+" は新しい技能を習得できるようになった");
+        play_audio(audio_lvup);
+    }
+}
+
+function setLearningList(item_list) {
+    item_list.length = 0;
+    for(let sid of can_learning) {
+        item_list.push(Object.assign({id: sid, name:getSkillData(sid).name}));
     }
 }
 
@@ -1021,7 +1048,7 @@ async function doEventShop() {
     if(key_input.up) {
         if(shop_cursor > 0)
             shop_cursor--;
-        else
+        else if(shop_using.item.length > 1)
             shop_cursor = shop_using.item.length - 1;
         return false;
     }
@@ -1060,6 +1087,21 @@ async function doEventShop() {
         // 保管庫
         else if(storage_flag) {
             if(fromStorage(shop_cursor)) {
+                shop_using.func_buy();
+                if(shop_using && shop_using.item.length > 0
+                && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
+                    shop_cursor--;
+                play_audio(audio_apply);
+                return false;
+            }
+            play_audio(audio_cancel);
+            return false;
+        }
+        // スキル習得
+        else if(learning_flag) {
+            const skill_id = shop_using.item[shop_cursor].id;
+            if(setSkill(skill_id)) {
+                can_learning.splice(can_learning.find(v=>v.id==skill_id), 1);
                 shop_using.func_buy();
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
@@ -1197,6 +1239,7 @@ function setNotUseShop() {
 }
 
 function setSellList(item_list) {
+    item_list.length = 0;
     for(let item of inventory) {
         if(item_list.length == 0 || !item_list.find(v=>v.id==item.id)) {
             item_list.push(Object.assign({}, item, {price: -(item.price)}));
@@ -1218,7 +1261,7 @@ function getInvCursorFromShopCursor(shop_cursor) {
 function setUpgradeList(item_list) {
     item_list.length = 0;
     for(let inv_idx in inventory) {
-        item = inventory[inv_idx];
+        const item = inventory[inv_idx];
         if(UPGRADE_TYPE.includes(item.type) && item.level < 10) {
             const cost = Math.floor(item.price * 1.5 ** (item.level + 1));
             item_list.push(Object.assign({}, item, {upgrade_cost: cost}));

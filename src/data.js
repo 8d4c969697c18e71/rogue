@@ -212,7 +212,6 @@ let gameover_flag = false;
 let inventory_flag = false;
 let skill_flag = false;
 let shop_flag = false;
-let upgrade_flag = false;
 let throwing_flag = false;
 
 let turn_flag = false;    // ターン経過
@@ -288,11 +287,14 @@ let skill_favorite_idx = -1;
 
 // learning
 let player_learning = []; // skill_id, cnt(n回以上とか用), chance
+let can_learning = [];
+let learning_flag = false;
 
 // etc
 const THROWING_RANGE = 5;
 let bow_flag = false;
 let skill_from_item = undefined;
+let upgrade_flag = false;
 
 // shop
 let shop_cursor = -1;
@@ -705,7 +707,7 @@ const ITEM_DATA = [
         id: 0x200,
         name: "狩猟弓",
         type: "weapon",
-        base_dmg: 25,
+        base_dmg: 30,
         price: 36,
         level: 0,
         func_equip: async function() {
@@ -724,7 +726,7 @@ const ITEM_DATA = [
         id: 0x201,
         name: "ロングボウ",
         type: "weapon",
-        base_dmg: 35,
+        base_dmg: 40,
         price: 45,
         level: 0,
         func_equip: async function() {
@@ -1264,7 +1266,7 @@ const ENEMY_DATA = [
         exp:2,
         func_spawn: async function(me) {
             await setCondition(me, 0x03, 1000);
-            log_reserve.splice(log_reserve.length-1, 1);
+            log_reserve.pop();
         },
         func_died: async function() {},
         skill: [
@@ -1787,6 +1789,22 @@ const CONDITION_DATA = [
             who.cannot_action_flag = false;
         },
     },
+    {
+        id: 0x05,
+        name: "衰",
+        turn: 10,
+        value: 50,
+        func_be: async function(who) {
+            this.value = Math.floor(who.atk * 0.33);
+            who.atk_offset -= this.value;
+            addLog(who.name+" は腕に力が入らない");
+        },
+        func_during: async function(who) {},
+        func_recovery: async function(who) {
+            who.atk_offset += this.value;
+            addLog(who.name+" の腕力が回復した");
+        },
+    },
     // バフ 0x80~
     {
         id: 0x80,
@@ -1883,29 +1901,22 @@ const TRAP_DATA = [
 const NPC_DATA = [
     {
         id: 0x00,
-        name: "案内人",
-        char: "案",
+        name: "",
+        char: "",
         loop: true,
-        dialogue: [
-            "左が商店、右が職安、正面が迷宮だ",
-            "迷宮の入り口には治癒士もいるぞ",
-        ],
+        dialogue: [],
         dialogue_cnt: 0,
         func_before: async function() {},
         func_after: async function() {},
     },
     {
         id: 0x01,
-        name: "薪のメルナ",
-        char: "メ",
+        name: "",
+        char: "",
         loop: true,
-        dialogue: [
-            "今の貴方の能力を教える<br>tmp",
-        ],
+        dialogue: [],
         dialogue_cnt: 0,
-        func_before: async function() {
-            this.dialogue[0] = "今の貴方の能力を教える<br>"+"STR: "+player.str+", DEX: "+player.dex+", INT: "+player.int+", FTH: "+player.fth;
-        },
+        func_before: async function() {},
         func_after: async function() {},
     },
     {
@@ -2002,17 +2013,12 @@ const NPC_DATA = [
 const SHOP_DATA = [
     {
         id: 0x00,
-        name: "薬屋",
-        char: "薬",
-        dialogue_intro: "いらっしゃい",
-        dialogue_outro: "またどうぞ",
+        name: "",
+        char: "",
+        dialogue_intro: "",
+        dialogue_outro: "",
         random_flag: false,
-        item_table: [
-            {id: 0x010},
-            {id: 0x011},
-            {id: 0x020},
-            {id: 0x030},
-        ],
+        item_table: [],
         func_before: async function() {},
         func_buy: async function() {},
         func_after: async function() {},
@@ -2188,6 +2194,25 @@ const SHOP_DATA = [
             upgrade_flag = false;
         },
     },
+    {
+        id: 0x09,
+        name: "教導士クレーナ",
+        char: "教",
+        dialogue_intro: "お前の経験から技能を教えてやる",
+        dialogue_outro: "よし、いってこい",
+        random_flag: false,
+        item_table: [],
+        func_before: async function() {
+            learning_flag = true;
+            setLearningList(this.item);
+        },
+        func_buy: async function() {
+            setLearningList(this.item);
+        },
+        func_after: async function() {
+            learning_flag = false;
+        },
+    },
 ];
  
 //==================================================UNIQUE MAP==================================================
@@ -2274,8 +2299,8 @@ let unique_map = [    // 固有マップ
         "01111111110111110",
         "00001111110111110",
         "01111111110111110",
-        "01111111110111110",
         "01111111112111110",
+        "01111111110111110",
         "01111111110111110",
         "00000000000000000",
         ],
@@ -2290,7 +2315,8 @@ let unique_map = [    // 固有マップ
             setShop(0x07, 1+x_offset, 8);
             setShop(0x08, 9+x_offset, 8);
             // 右の部屋
-            setNPC(0x03, 15+x_offset, 12);
+            setNPC(0x03, 15+x_offset, 11);
+            setShop(0x09, 12+x_offset, 13);
             setEnemy(0xfff, 12+x_offset, 6);
             setEnemy(0xfff, 13+x_offset, 6);
             setEnemy(0xfff, 14+x_offset, 6);

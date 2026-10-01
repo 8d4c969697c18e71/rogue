@@ -227,7 +227,7 @@ function setCanvasSizePC() {
     ctx.textBaseline = "top";
 
     // note
-    note.style.fontSize = FONT_SIZE+"px";
+    note.style.fontSize = FONT_SIZE*0.75+"px";
     note.style.width = NOTE_WIDTH+"px";
     note.style.paddingRight = PADDING+"px";
     // info

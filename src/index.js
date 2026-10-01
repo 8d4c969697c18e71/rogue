@@ -3,6 +3,7 @@ window.addEventListener("resize", loadCanvas);
 
 async function loadCanvas() {
     if(isPhone()) {
+        FONT_SIZE = 18;
         note.style.display = "none";
         info.style.display = "none";
         inv.style.display = "none";
