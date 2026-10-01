@@ -82,8 +82,8 @@ function drawInv() {
                 str += "＞\u2007";
             else
                 str += "　\u2007";
-            if(i < skill.length) {
-                str += skill[i].name;
+            if(i < player_skill.length) {
+                str += player_skill[i].name;
             }
             else
                 str += "　------　";

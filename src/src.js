@@ -40,8 +40,8 @@ async function setCookie() {
     for(let i=0; i<inventory.length; i++) {
         document.cookie = "inventory_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+age;
     }
-    for(let i=0; i<skill.length; i++) {
-        document.cookie = "skill_"+i+"="+encodeURIComponent(JSON.stringify(skill[i]))+age;
+    for(let i=0; i<player_skill.length; i++) {
+        document.cookie = "skill_"+i+"="+encodeURIComponent(JSON.stringify(player_skill[i]))+age;
     }
     for(let i=0; i<storage.length; i++) {
         document.cookie = "storage_"+i+"="+encodeURIComponent(JSON.stringify(storage[i]))+age;
@@ -79,7 +79,7 @@ async function loadCookie() {
                 read_flg.inventory = true;
             }
             else if(key.match(/skill_([0-9]*)/)) {
-                skill.push(Object.assign({}, getSkillData(val.id), val));
+                player_skill.push(Object.assign({}, getSkillData(val.id), val));
                 read_flg.skill = true;
             }
             else if(key.match(/storage_([0-9]*)/)) {
@@ -408,10 +408,9 @@ async function attack(from, to) {
     // 受け流し
     for(let cond of to.condition)
         if(cond.id == 0x80) {
-            to.condition.splice(to.condition.indexOf(cond), 1);
-            to.cannot_action_flag = false;
             addLog(to.name+" は攻撃を受け流し 反撃した");
             await dealDmg(to, from, dmg);
+            if(from == player) learning(0x001);
             return;
         }
 
@@ -519,6 +518,14 @@ async function shotDmg(from, to, ammo) {
     dmg += rand;
     dmg = Math.floor(dmg);
     if(dmg < 0) dmg = 0;
+    
+    // 受け流し
+    for(let cond of to.condition)
+        if(cond.id == 0x80) {
+            addLog(to.name+" は飛んできた "+ammo.name+" を受け流した");
+            if(from == player) learning(0x001);
+            return;
+        }
 
     await dealDmg(from, to, dmg);
 }
@@ -605,7 +612,7 @@ async function throwing(who, item, direction) {
     }
     
     // 投擲後の固有処理(あれば)
-    if(item.func_throw) item.func_throw(who, dst);
+    if(item.func_throw) await item.func_throw(who, dst);
     return hit;
 }
 
@@ -621,6 +628,14 @@ async function throwDmg(from, to, item) {
     else
         dmg = Math.round(Math.random() * 10) + 10;
     if(dmg < 0) dmg = 0;
+
+    // 受け流し
+    for(let cond of to.condition)
+        if(cond.id == 0x80) {
+            addLog(to.name+" は飛んできた "+item.name+" を受け流した");
+            if(from == player) learning(0x001);
+            return;
+        }
 
     await dealDmg(from, to, dmg);
 }
@@ -686,6 +701,7 @@ async function dealDmg(from, to, dmg) {
             log_reserve.pop();
             addLog(to.name+" は受け流しに失敗した");
             await dealDmg(from, to, Math.round(dmg*1.5));
+            if(from == player) learning(0x001);
             return;
         }
     }
@@ -850,7 +866,7 @@ async function doEventSkill() {
     }
     // apply
     if(key_input.apply)
-        if(skill_cursor < skill.length) {
+        if(skill_cursor < player_skill.length) {
             if(await preSkill(skill_cursor)) {
                 // コスト種別
                 let type = "";
@@ -912,12 +928,13 @@ async function doSubEventSkill() {
     }
 }
 
-async function setSkill(id) {
-    if(skill.length > SKILL_SIZE) {
+function setSkill(id) {
+    if(player_skill.length > SKILL_SIZE) {
         addLog("これ以上記憶できない");
         return false;
     }
-    skill.push(getSkillData(id));
+    player_skill.push(getSkillData(id));
+    addLog(player.name+" は "+getSkillData(id).name+" を習得した");
     return true;
 }
 
@@ -930,7 +947,7 @@ async function useSkill(skill_using, target) {
 }
 
 async function preSkill(skill_cursor) {
-    const s = skill[skill_cursor];
+    const s = player_skill[skill_cursor];
     // コスト
     if(s.cost_type == "hp" && player.hp <= s.cost) {
         addLog("HP が足りない");
@@ -967,6 +984,37 @@ function setSkillItem(skill, item) {
 
 function getSkillData(id) {
     return SKILL_DATA.find(v=>v.id == id);
+}
+
+// スキル学習
+async function learning(skill_id) {
+    // 習得済み
+    if(player_skill.find(v=>v.id == skill_id)) {
+        return;
+    }
+
+    let learning_data = player_learning.find(v=>v.skill_id == skill_id);
+    const skill_data = getSkillData(skill_id);
+    // 初回
+    if(learning_data == undefined) {
+        const chance = skill_data.learning_chance ? skill_data.learning_chance : 0.5;
+        learning_data = Object.assign({}, {skill_id: skill_id, cnt: 0, chance: chance});
+        player_learning.push(learning_data);
+    }
+    // 2回目以降
+    else
+        learning_data.cnt++;
+
+    // 習得条件判定
+    const learning_start_cnt = skill_data.learning_start_cnt ? skill_data.learning_start_cnt : 1;
+    if(learning_data.cnt <= learning_start_cnt)
+        return;
+
+    // 習得
+    if(Math.floor(Math.random() + learning_data.chance)) {
+        setSkill(skill_id);
+        player_learning.splice(player_learning.indexOf(learning_data), 1);
+    }
 }
 
 // ショップイベント
@@ -1387,7 +1435,8 @@ function initStatusAll() {
     initStatus();
     player.gold = 15;
     player.job = 0xf00;
-    skill = [];
+    player_skill = [];
+    player_learning = [];
     backLv();
 }
 

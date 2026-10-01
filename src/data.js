@@ -171,7 +171,7 @@ const CHAR_MAP = {
     gold: "＄",
     potion: "！",
     food: "：",
-    consume: "。",
+    consume: "・",
     weapon: "）",
     armor: "［",
     ring: "＝",
@@ -200,7 +200,7 @@ let interval_sr_flag = true;
 let stair_pos = {x:undefined, y:undefined};
 let portal_pos = {x:undefined, y:undefined};
 
-//==================================================INFO==================================================
+//==================================================PLAYER INFO==================================================
 
 let room_num;
 let turn_cnt = 1;
@@ -282,21 +282,24 @@ let inv_cursor = 0;
 // skill
 const SKILL_SIZE = 10;
 const SKILL_RANGE = 20;
-let skill = [];
+let player_skill = [];
 let skill_cursor = 0;
 let skill_using = undefined;
 let skill_draw_aim_flag = false;
+
+// learning
+let player_learning = []; // skill_id, cnt(n回以上とか用), chance
 
 // etc
 const THROWING_RANGE = 5;
 let skill_from_item = undefined;
 
-// ui記憶用
-let remember_ui = "inventory";
-
 // shop
 let shop_cursor = -1;
 let shop_using = undefined; // 利用中のショップ
+
+// ui記憶用
+let remember_ui = "inventory"; // or "storage"
 
 // storage
 const STORAGE_SIZE = 60;
@@ -314,9 +317,9 @@ let shop_group = [];
 
 // item
 const EQUIP_TYPE = ["weapon", "armor", "ring", "ammo"];
+const UPGRADE_TYPE = ["weapon"];
 const STACK_TYPE = ["ammo"];
 const STACK_MAX = 32;
-const UPGRADE_TYPE = ["weapon"];
 
 // enemy
 const enemy_sleep_chance = 0.3;
@@ -340,7 +343,7 @@ const ITEM_TABLE = [
     [
         0x000, 0x000, 0x000, 0x000,
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
+        0x011, 0x011,
         0x080, 0x080,
         0x400, 
         0x500,
@@ -350,7 +353,7 @@ const ITEM_TABLE = [
     [
         0x000, 0x000, 0x000, 0x000,
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
+        0x011, 0x011,
         0x080, 0x080,
         0x400, 0x401, 0x402,
         0x500,
@@ -361,7 +364,7 @@ const ITEM_TABLE = [
         0x000, 0x000, 0x000, 0x000,
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
-        0x080, 0x080, 0x081,
+        0x080, 0x080, 0x081, 0x081,
         0x400, 0x401, 0x402,
         0x500,
         0x600,
@@ -372,7 +375,7 @@ const ITEM_TABLE = [
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
-        0x080, 0x080, 0x081,
+        0x080, 0x080, 0x081, 0x081,
         0x101, 0x201, 0x301,
         0x400, 0x401, 0x402, 0x403,
         0x500,
@@ -384,7 +387,7 @@ const ITEM_TABLE = [
         0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
-        0x080, 0x080, 0x081,
+        0x080, 0x080, 0x081, 0x081,
         0x101, 0x201, 0x301, 0x302,
         0x400, 0x401, 0x402, 0x403,
         0x500,
@@ -588,6 +591,8 @@ const ITEM_DATA = [
             await animSpread(dst.x, dst.y, 1, "火");
             
             await magicDmgAOE(dst.x, dst.y, 1, who, 50, true);
+            if(killed_group.length > 0) learning(0x500);
+            if(killed_group.length > 1) learning(0x501);
             return true;
         },
     },
@@ -609,6 +614,8 @@ const ITEM_DATA = [
             await digWall(dst.x, dst.y, 1);
             updateMap();
             drawMap();
+            if(killed_group.length > 0) learning(0x500);
+            if(killed_group.length > 1) learning(0x501);
             return true;
         },
     },
@@ -1436,6 +1443,8 @@ const SKILL_DATA = [
         target_type: "self",
         cost_type: "hung",
         cost: 5,
+        learning_start_cnt: 10,
+        learning_chance: 0.33,
         func: async function(from, to) {
             return setCondition(from, 0x80, 1);
         }
@@ -1522,6 +1531,7 @@ const SKILL_DATA = [
             let value = 30 + fth * 2;
             addHP(from, value);
             addLog("淡い光が "+from.name+" を包む　HPが "+value+" 回復した");
+            if(value > 75) learning(0x401);
             return true;
         }
     },
@@ -1531,6 +1541,8 @@ const SKILL_DATA = [
         target_type: "self",
         cost_type: "fp",
         cost: 16,
+        learning_start_cnt: 10,
+        learning_chance: 1.0,
         func: async function(from, to) {
             play_audio(audio_heal);
 
@@ -1538,6 +1550,7 @@ const SKILL_DATA = [
             let value = 40 + fth * 3;
             addHP(from, value);
             addLog("光が "+from.name+" を包む　HPが "+value+" 回復した");
+            if(value > 150) learning(0x402);
             return true;
         }
     },
@@ -1547,6 +1560,8 @@ const SKILL_DATA = [
         target_type: "self",
         cost_type: "fp",
         cost: 30,
+        learning_start_cnt: 10,
+        learning_chance: 1.0,
         func: async function(from, to) {
             play_audio(audio_heal);
 
@@ -1554,6 +1569,7 @@ const SKILL_DATA = [
             let value = 60 + fth * 4;
             addHP(from, value);
             addLog("眩い光が "+from.name+" を包む　HPが "+value+" 回復した");
+            if(value > 225) learning(0x403);
             return true;
         }
     },
@@ -1563,6 +1579,8 @@ const SKILL_DATA = [
         target_type: "self",
         cost_type: "fp",
         cost: 45,
+        learning_start_cnt: 10,
+        learning_chance: 1.0,
         func: async function(from, to) {
             play_audio(audio_heal);
 
