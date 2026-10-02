@@ -38,6 +38,7 @@ const audio_jump = new Audio("sound/jump.wav");
 const audio_lvup = new Audio("sound/lvup.wav");
 const audio_poison = new Audio("sound/poison.wav");
 const audio_portal = new Audio("sound/portal.wav");
+const audio_powerup = new Audio("sound/powerup.wav");
 const audio_ray = new Audio("sound/ray.wav");
 const audio_shot = new Audio("sound/shot.wav");
 const audio_smith = new Audio("sound/smith.wav");
@@ -361,20 +362,22 @@ const ITEM_TABLE = [
         0x500,
         0x600,
         0x800, 0x800, 0x801,
+        0xe00, 0xe01,
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x080, 0x080, 0x081, 0x081,
         0x400, 0x401, 0x402,
         0x500,
         0x600,
         0x800, 0x800, 0x801,
+        0xe00, 0xe01,
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080, 0x081, 0x081,
@@ -382,11 +385,12 @@ const ITEM_TABLE = [
         0x400, 0x401, 0x402, 0x403,
         0x500,
         0x600, 0x601,
-        0x800, 0x800, 0x801, 0x801,
+        0x800, 0x801, 0x801,
+        0xe00, 0xe01,
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x010, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080, 0x081, 0x081,
@@ -394,7 +398,8 @@ const ITEM_TABLE = [
         0x400, 0x401, 0x402, 0x403,
         0x500,
         0x600, 0x601,
-        0x800, 0x800, 0x801, 0x801,
+        0x800, 0x801, 0x801,
+        0xe00, 0xe01,
     ],
 ];
 const ENEMY_TABLE = [
@@ -585,7 +590,7 @@ const ITEM_DATA = [
         price: 8,
         remove_after_throw: true,
         func: async function() {
-            addLog("投擲用のようだ")
+            addLog("投擲用のようだ");
             return false;
         },
         func_throw: async function(who, dst) {
@@ -605,7 +610,7 @@ const ITEM_DATA = [
         price: 8,
         remove_after_throw: true,
         func: async function() {
-            addLog("投擲用のようだ")
+            addLog("投擲用のようだ");
             return false;
         },
         func_throw: async function(who, dst) {
@@ -632,7 +637,7 @@ const ITEM_DATA = [
         level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.25, this.base_dmg);
@@ -648,7 +653,7 @@ const ITEM_DATA = [
         level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.3, this.base_dmg);
@@ -664,7 +669,7 @@ const ITEM_DATA = [
         level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.0, this.base_dmg);
@@ -680,7 +685,7 @@ const ITEM_DATA = [
         level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.1, this.base_dmg);
@@ -696,7 +701,7 @@ const ITEM_DATA = [
         level: 0,
         func_equip: async function() {},
         func_unequip: async function() {},
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.35, this.base_dmg);
@@ -716,7 +721,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             bow_flag = false;
         },
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("dex", 1.1, this.base_dmg);
@@ -735,7 +740,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             bow_flag = false;
         },
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
         func_recalc: async function() {
             player.atk += this.base_dmg;
             calcAtkFromStatus("str", 1.0, this.base_dmg);
@@ -754,7 +759,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             player.def_offset -= 10;
         },
-        func_attacked: async function(from) {},
+        func_attacked: async function(from, to) {},
         func_recalc: async function() {},
     },
     {
@@ -768,7 +773,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             player.def_offset -= 12;
         },
-        func_attacked: async function(from) {},
+        func_attacked: async function(from, to) {},
         func_recalc: async function() {},
     },
     {
@@ -782,7 +787,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             player.def_offset -= 14;
         },
-        func_attacked: async function(from) {},
+        func_attacked: async function(from, to) {},
         func_recalc: async function() {},
     },
     {
@@ -796,7 +801,7 @@ const ITEM_DATA = [
         func_unequip: async function() {
             player.fp_max_offset -= 3;
         },
-        func_attacked: async function(from) {},
+        func_attacked: async function(from, to) {},
         func_recalc: async function() {},
     },
     {
@@ -812,7 +817,7 @@ const ITEM_DATA = [
             player.hp_regen_rate_offset -= 1;
             player.fp_max_offset -= 2;
         },
-        func_attacked: async function(from) {},
+        func_attacked: async function(from, to) {},
         func_recalc: async function() {},
     },
     {
@@ -828,7 +833,7 @@ const ITEM_DATA = [
             player.def_offset -= 3;
             player.fp_max_offset -= 2;
         },
-        func_attacked: async function(from) {},
+        func_attacked: async function(from, to) {},
         func_recalc: async function() {},
     },
     // 指輪 0x4XX
@@ -919,6 +924,7 @@ const ITEM_DATA = [
             if(this.least < 0 && Math.floor(Math.random() + 0.2)) {
                 inventory.splice(inventory.indexOf(this), 1);
                 addLog(this.name+" が壊れた");
+                setCanLearning(0x005);
             }
         },
     },
@@ -951,7 +957,7 @@ const ITEM_DATA = [
         price: 1,
         dmg: 20,
         range: 10,
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
     },
     {
         id: 0x701,
@@ -960,7 +966,7 @@ const ITEM_DATA = [
         price: 2,
         dmg: 30,
         range: 8,
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
     },
     {
         id: 0x7f0,
@@ -969,7 +975,7 @@ const ITEM_DATA = [
         price: 1,
         dmg: 10,
         range: 2,
-        func_attack: async function(to) {},
+        func_attack: async function(from, to) {},
     },
     // スタックアイテム 0x8XX
     {
@@ -988,7 +994,35 @@ const ITEM_DATA = [
         item_id: 0x701,
         num: 8,
     },
-    // ユニーク 0xfXX
+    // スキル習得 0xeXX
+    {
+        id: 0xe00,
+        name: "初学のスクロール",
+        type: "unique",
+        price: 150,
+        func: async function() {
+            addLog(player.name+" は "+this.name+" を読んだ");
+            setCanLearning(0x300);
+            addLog(player.name+" は新しい技能を習得できるようになった");
+            play_audio(audio_lvup);
+            return false;
+        },
+    },
+    {
+        id: 0xe01,
+        name: "白教の聖典",
+        type: "unique",
+        price: 150,
+        func: async function() {
+            addLog(player.name+" は "+this.name+" を読んだ");
+            setCanLearning(0x400);
+            setCanLearning(0x480);
+            addLog(player.name+" は新しい技能を習得できるようになった");
+            play_audio(audio_lvup);
+            return false;
+        },
+    },
+    // 初期素性 0xfXX
     {
         id: 0xf00,
         name: "持たざる者の追憶",
@@ -1049,8 +1083,12 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x100);
-                addItem(0x300);
+                addItem(0x301);
                 addItem(0x011);
+                setCanLearning(0x007);
+                setCanLearning(0x008);
+                setSkill(0x007);
+                setSkill(0x008);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1089,10 +1127,14 @@ const ITEM_DATA = [
                 backLv();
 
                 addItem(0x200);
+                addItem(0x300);
                 for(let i=0; i<8; i++)
                     addItem(0x800);
                 addItem(0x010);
+                setCanLearning(0x000);
+                setCanLearning(0x002);
                 setSkill(0x000);
+                setSkill(0x002);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1133,6 +1175,7 @@ const ITEM_DATA = [
                 addItem(0x102);
                 addItem(0x380);
                 addItem(0x020);
+                setCanLearning(0x300);
                 setSkill(0x300);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
@@ -1174,6 +1217,7 @@ const ITEM_DATA = [
                 addItem(0x104);
                 addItem(0x381);
                 addItem(0x020);
+                setCanLearning(0x400);
                 setSkill(0x400);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
@@ -1215,6 +1259,7 @@ const ITEM_DATA = [
                 addItem(0x103);
                 addItem(0x382);
                 addItem(0x020);
+                setCanLearning(0x500);
                 setSkill(0x500);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
@@ -1437,6 +1482,15 @@ const SKILL_DATA = [
                     addLog("矢が必要だ");
                     return false;
                 }
+
+                // 矢数消費
+                if(from.ammo.stack_num > 0) from.ammo.stack_num--;
+                if(from.ammo.stack_num <= 0) {
+                    await equip(inventory.indexOf(from.ammo));
+                    log_reserve.pop();
+                    inventory.splice(inventory.indexOf(from.ammo), 1);
+                }
+
                 this.ammo = from.ammo.id;
             }
             const ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
@@ -1452,16 +1506,24 @@ const SKILL_DATA = [
         learning_start_cnt: 10,
         learning_chance: 0.33,
         func: async function(from, to) {
-            return setCondition(from, 0x80, 1);
+            return await setCondition(from, 0x80, 1);
         }
     },
     {
         id: 0x002,
-        name: "",
+        name: "クイックステップ",
         target_type: "range",
         cost_type: "hung",
         cost: 10,
-        func: async function(from, to) {}
+        distance: 3,
+        func: async function(from, to) {
+            if(jump(from, getDirection(from, to), this.distance)) {
+                addLog(from.name+" は跳び退いた");
+                play_audio(audio_jump);
+                return true;
+            }
+            return false;
+        }
     },
     {
         id: 0x003,
@@ -1500,10 +1562,58 @@ const SKILL_DATA = [
         target_type: "next",
         cost_type: "hung",
         cost: 15,
+        learning_start_cnt: 5,
+        learning_chance: 0.3,
         func: async function(from, to) {
             await attack(from, to);
             await digWall(to.x, to.y);
             return true;
+        }
+    },
+    {
+        id: 0x006,
+        name: "瞑想",
+        target_type: "range",
+        cost_type: "hung",
+        cost: 30,
+        value: undefined,
+        func: async function(from, to) {
+            const value = this.value ? value : who.fp + who.fp_max;
+            addFP(who, value);
+
+            addLog(from.name+" の魔力がみるみる回復する");
+            play_audio(audio_heal);
+            return true;
+        }
+    },
+    {
+        id: 0x007,
+        name: "攻撃体勢",
+        target_type: "self",
+        cost_type: "hung",
+        cost: 7,
+        func: async function(from, to) {
+            const turn_max = 15;
+            if(await setCondition(from, 0x82, turn_max)) {
+                play_audio(audio_powerup);
+                return true;
+            }
+            return false;
+        }
+    },
+    {
+        id: 0x008,
+        name: "防御体勢",
+        target_type: "self",
+        cost_type: "hung",
+        cost: 7,
+        func: async function(from, to) {
+            const turn_max = 15;
+            if(await setCondition(from, 0x83, turn_max)) {
+                play_audio(audio_powerup);
+                return true;
+            }
+            return false;
         }
     },
     // int由来 0x3XX
@@ -1606,7 +1716,7 @@ const SKILL_DATA = [
         func: async function(from, to) {
             play_audio(audio_heal);
 
-            setCondition(from, 0x81);
+            await setCondition(from, 0x81);
             return true;
         }
     },
@@ -1675,38 +1785,6 @@ const SKILL_DATA = [
         }
     },
     // util 0xfXX
-    {
-        id: 0xf00,
-        name: "クイックステップ",
-        target_type: "range",
-        cost_type: "hung",
-        cost: 10,
-        distance: 3,
-        func: async function(from, to) {
-            if(jump(from, getDirection(from, to), this.distance)) {
-                addLog(from.name+" は跳び退いた");
-                play_audio(audio_jump);
-                return true;
-            }
-            return false;
-        }
-    },
-    {
-        id: 0xf01,
-        name: "瞑想",
-        target_type: "range",
-        cost_type: "hung",
-        cost: 30,
-        value: undefined,
-        func: async function(from, to) {
-            const value = this.value ? value : who.fp + who.fp_max;
-            addFP(who, value);
-
-            addLog(from.name+" の魔力がみるみる回復する");
-            play_audio(audio_heal);
-            return true;
-        }
-    },
 ];
 
 //==================================================CONDITION==================================================
@@ -1793,16 +1871,32 @@ const CONDITION_DATA = [
         id: 0x05,
         name: "衰",
         turn: 10,
-        value: 50,
+        value: 0,
         func_be: async function(who) {
-            this.value = Math.floor(who.atk * 0.33);
+            this.value = this.value != 0 ? this.value : Math.floor((who.atk + who.atk_offset) * 0.3);
             who.atk_offset -= this.value;
-            addLog(who.name+" は腕に力が入らない");
+            addLog(who.name+" は衰弱している");
         },
         func_during: async function(who) {},
         func_recovery: async function(who) {
             who.atk_offset += this.value;
-            addLog(who.name+" の腕力が回復した");
+            addLog(who.name+" は衰弱から快復した");
+        },
+    },
+    {
+        id: 0x06,
+        name: "脆",
+        turn: 10,
+        value: 0,
+        func_be: async function(who) {
+            this.value = this.value != 0 ? this.value : Math.floor((who.def + who.def_offset) * 0.4);
+            who.def_offset -= this.value;
+            addLog(who.name+" は脆化している");
+        },
+        func_during: async function(who) {},
+        func_recovery: async function(who) {
+            who.def_offset += this.value;
+            addLog(who.name+" は脆化から快復した");
         },
     },
     // バフ 0x80~
@@ -1835,6 +1929,38 @@ const CONDITION_DATA = [
             addHP(who, this.value);
         },
         func_recovery: async function(who) {},
+    },
+    {
+        id: 0x082,
+        name: "攻",
+        turn: 10,
+        value: 0,
+        func_be: async function(who) {
+            this.value = this.value != 0 ? this.value : Math.floor((who.atk + who.atk_offset) * 0.2);
+            who.atk_offset += this.value;
+            addLog(who.name+" は攻勢の構えだ");
+        },
+        func_during: async function(who) {},
+        func_recovery: async function(who) {
+            who.atk_offset -= this.value;
+            addLog(who.name+" は攻勢の構えを解いた");
+        },
+    },
+    {
+        id: 0x083,
+        name: "守",
+        turn: 10,
+        value: 0,
+        func_be: async function(who) {
+            this.value = this.value != 0 ? this.value : Math.floor((who.def + who.def_offset) * 0.3);
+            who.def_offset += this.value;
+            addLog(who.name+" は守勢の構えだ");
+        },
+        func_during: async function(who) {},
+        func_recovery: async function(who) {
+            who.def_offset -= this.value;
+            addLog(who.name+" は守勢の構えを解いた");
+        },
     },
 ];
 
@@ -1937,6 +2063,7 @@ const NPC_DATA = [
             "広範囲の攻撃は壁を貫通することがあるよ",
             "迷宮で倒れると金貨だけ持ち帰れるよ",
             "最初に持ってた装備だけは支給するよ",
+            "迷宮での行動によって新しい技能を習得できるようになるよ",
             // 職業
             "職業毎に能力の成長率が違うよ",
             "戦士は耐久力が高く、筋技がバランス良く伸びるよ",
@@ -1954,6 +2081,7 @@ const NPC_DATA = [
             "リーシュは君のこれまでの功績を記録してくれるよ",
             "石碑には記録した日付が記されるよ",
             "アンドレは武器を強化してくれるよ",
+            "クレーナは技能を学ばせてくれるよ",
             "とっておきたいものは保管庫に入れるといいよ",
             "ポータル部屋にいるガヴァは物を買ってくれるよ",
         ],
@@ -2204,6 +2332,7 @@ const SHOP_DATA = [
         item_table: [],
         func_before: async function() {
             learning_flag = true;
+            remember_ui = "skill";
             setLearningList(this.item);
         },
         func_buy: async function() {

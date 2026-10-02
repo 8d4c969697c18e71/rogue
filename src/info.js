@@ -135,7 +135,10 @@ function drawShop() {
                     str += "×"+shop_using.item[i].stack_num;
             }
             else if(learning_flag) {
-                str += shop_using.item[i].name;
+                if(player_skill.find(v=>v.id==shop_using.item[i].id))
+                    str += "["+shop_using.item[i].name+"]";
+                else
+                    str += shop_using.item[i].name;
             }
             else if(shop_using.item[i].price>=0) {
                 str += shop_using.item[i].name;
