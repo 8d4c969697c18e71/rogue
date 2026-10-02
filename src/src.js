@@ -145,7 +145,7 @@ function initGroups() {
 
 // イベント
 async function events() {
-    exeEventsFlg = true;
+    exe_event_flag = true;
     // ゲームオーバー
     if(gameover_flag) {
         await gameoverEvent();
@@ -204,7 +204,7 @@ async function events() {
     // 描画
     if(!gameover_flag) drawAll();
 
-    exeEventsFlg = false;
+    exe_event_flag = false;
 }
 
 // プレイヤーイベント

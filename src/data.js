@@ -8,9 +8,9 @@ const note = document.getElementById("note");
 const shop = document.getElementById("shop");
 const sub3 = document.getElementById("sub3");
 const button = document.getElementById("button");
-const btn_z = document.getElementById("btn_z");
-const btn_x = document.getElementById("btn_x");
-const btn_c = document.getElementById("btn_c");
+const btn_apply = document.getElementById("btn_z");
+const btn_cancel = document.getElementById("btn_x");
+const btn_sub = document.getElementById("btn_c");
 const arrow = document.getElementById("arrow");
 const btn_left = document.getElementById("btn_left");
 const btn_up = document.getElementById("btn_up");
@@ -208,7 +208,7 @@ let turn_cnt = 1;
 let floor_cnt;
 
 // イベント遷移フラグ
-let exeEventsFlg = false;
+let exe_event_flag = false;
 let gameover_flag = false;
 let inventory_flag = false;
 let skill_flag = false;

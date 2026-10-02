@@ -1,11 +1,11 @@
+// キーボード
 document.body.addEventListener("keydown", e=>{e.preventDefault()});
 document.addEventListener("keydown", async (e) =>{
     toggleKeyInput(e);
-    if(!exeEventsFlg) await events();
+    if(!exe_event_flag) await events();
 });
-
 function toggleKeyInput(e) {
-    if(!exeEventsFlg) {
+    if(!exe_event_flag) {
         if(e.key==KEY_CODE.left) key_input.left = true;
         if(e.key==KEY_CODE.right) key_input.right = true;
         if(e.key==KEY_CODE.up) key_input.up = true;
@@ -22,7 +22,6 @@ function toggleKeyInput(e) {
     if(e.key==KEY_CODE.shift) key_input.shift = true;
     if(e.key==KEY_CODE.ctrl) key_input.ctrl = true;
 }
-
 document.addEventListener("keyup", e=>{
     if(e.key==KEY_CODE.left) key_input.left = false;
     if(e.key==KEY_CODE.right) key_input.right = false;
@@ -40,136 +39,120 @@ document.addEventListener("keyup", e=>{
     if(e.key==KEY_CODE.esc) key_input.esc = false;
 });
 
-// ボタン
-btn_z.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_z);
-    if(!exeEventsFlg) {
-        key_input.apply = true;
+// スマホ用ボタン
+let timeout_id_btn = undefined;
+let interval_id_btn = undefined;
+const LONGPRESS_START_MS = 300;
+const LONGPRESS_INTERVAL_MS = 50;
+btn_left.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_left, "left");
+});
+btn_left.addEventListener("touchend", async () => {
+    await touchendEL(btn_left, "left");
+});
+btn_right.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_right, "right");
+});
+btn_right.addEventListener("touchend", async () => {
+    await touchendEL(btn_right, "right");
+});
+btn_up.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_up, "up");
+});
+btn_up.addEventListener("touchend", async () => {
+    await touchendEL(btn_up, "up");
+});
+btn_down.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_down, "down");
+});
+btn_down.addEventListener("touchend", async () => {
+    await touchendEL(btn_down, "down");
+});
+btn_upleft.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_upleft, "up_left");
+});
+btn_upleft.addEventListener("touchend", async () => {
+    await touchendEL(btn_upleft, "up_left");
+});
+btn_upright.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_upright, "up_right");
+});
+btn_upright.addEventListener("touchend", async () => {
+    await touchendEL(btn_upright, "up_right");
+});
+btn_downleft.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_downleft, "down_left");
+});
+btn_downleft.addEventListener("touchend", async () => {
+    await touchendEL(btn_downleft, "down_left");
+});
+btn_downright.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_downright, "down_right");
+});
+btn_downright.addEventListener("touchend", async () => {
+    await touchendEL(btn_downright, "down_right");
+});
+btn_apply.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_apply, "apply");
+});
+btn_apply.addEventListener("touchend", async () => {
+    await touchendEL(btn_apply, "apply");
+});
+btn_cancel.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_cancel, "cancel");
+});
+btn_cancel.addEventListener("touchend", async () => {
+    await touchendEL(btn_cancel, "cancel");
+});
+btn_sub.addEventListener("touchstart", async () => {
+    await touchstartEL(btn_sub, "sub");
+});
+btn_sub.addEventListener("touchend", async () => {
+    await touchendEL(btn_sub, "sub");
+});
+// イベントリスナー
+async function touchstartEL(btn, input) {
+    setButtonPressed(btn);
+    await exeEventButton(input);
+
+    clearButtonTI();
+    timeout_id_btn = setTimeout(async () => {
+        interval_id_btn = setInterval(async () => {
+            await exeEventButton(input);
+        }, LONGPRESS_INTERVAL_MS);
+    }, LONGPRESS_START_MS);
+}
+async function touchendEL(btn, input) {
+    setButtonNotPressed(btn);
+    if(["up_left", "up_right", "down_left", "down_right"].includes(input))
+        key_input.ctrl = false;
+    key_input[input] = false;
+    clearButtonTI();
+}
+async function exeEventButton(input) {
+    if(!exe_event_flag) {
+        if(["up_left", "up_right", "down_left", "down_right"].includes(input))
+            key_input.ctrl = true;
+        key_input[input] = true;
         await events();
     }
-});
-btn_z.addEventListener("touchend", () =>{
-    key_input.apply = false;
-    setButtonNotPressed(btn_z);
-});
-btn_x.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_x);
-    if(!exeEventsFlg) {
-        key_input.cancel = true;
-        await events();
-    }
-});
-btn_x.addEventListener("touchend", () =>{
-    key_input.cancel = false;
-    setButtonNotPressed(btn_x);
-});
-btn_c.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_c);
-    if(!exeEventsFlg) {
-        key_input.sub = true;
-        await events();
-    }
-});
-btn_c.addEventListener("touchend", () =>{
-    key_input.sub = false;
-    setButtonNotPressed(btn_c);
-});
-btn_left.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_left);
-    if(!exeEventsFlg) {
-        key_input.left = true;
-        await events();
-    }
-});
-btn_left.addEventListener("touchend", () =>{
-    key_input.left = false;
-    setButtonNotPressed(btn_left);
-});
-btn_up.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_up);
-    if(!exeEventsFlg) {
-        key_input.up = true;
-        await events();
-    }
-});
-btn_up.addEventListener("touchend", () =>{
-    key_input.up = false;
-    setButtonNotPressed(btn_up);
-});
-btn_down.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_down);
-    if(!exeEventsFlg) {
-        key_input.down = true;
-        await events();
-    }
-});
-btn_down.addEventListener("touchend", () =>{
-    key_input.down = false;
-    setButtonNotPressed(btn_down);
-});
-btn_right.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_right);
-    if(!exeEventsFlg) {
-        key_input.right = true;
-        await events();
-    }
-});
-btn_right.addEventListener("touchend", () =>{
-    key_input.right = false;
-    setButtonNotPressed(btn_right);
-});
-btn_upleft.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_upleft);
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.up_left = true;
-        await events();
-    }
-});
-btn_upleft.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.up_left = false;
-    setButtonNotPressed(btn_upleft);
-});
-btn_downleft.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_downleft);
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.down_left = true;
-        await events();
-    }
-});
-btn_downleft.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.down_left = false;
-    setButtonNotPressed(btn_downleft);
-});
-btn_upright.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_upright);
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.up_right = true;
-        await events();
-    }
-});
-btn_upright.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.up_right = false;
-    setButtonNotPressed(btn_upright);
-});
-btn_downright.addEventListener("touchstart", async () =>{
-    setButtonPressed(btn_downright);
-    if(!exeEventsFlg) {
-        key_input.ctrl = true;
-        key_input.down_right = true;
-        await events();
-    }
-});
-btn_downright.addEventListener("touchend", () =>{
-    key_input.ctrl = false;
-    key_input.down_right = false;
-    setButtonNotPressed(btn_downright);
-});
+}
+function clearButtonTI() {
+    clearTimeout(timeout_id_btn);
+    clearInterval(interval_id_btn);
+    timeout_id_btn = undefined;
+    interval_id_btn = undefined;
+}
+function setButtonNotPressed(button) {
+    button.style.backgroundColor = "black";
+    button.style.border = "solid 1px "+color_white;
+    button.style.color = color_white;
+}
+function setButtonPressed(button) {
+    button.style.backgroundColor = color_white;
+    button.style.border = "solid 1px "+"black";
+    button.style.color = "black";
+}
 
 // wait
 const wait = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -337,16 +320,4 @@ function dispButton() {
     btn_upright.style.right = arrow_size*4+"px";
     btn_downright.style.top = arrow_size+"px";
     btn_downright.style.right = arrow_size*5+"px";
-}
-
-function setButtonNotPressed(button) {
-    button.style.backgroundColor = "black";
-    button.style.border = "solid 1px "+color_white;
-    button.style.color = color_white;
-}
-
-function setButtonPressed(button) {
-    button.style.backgroundColor = color_white;
-    button.style.border = "solid 1px "+"black";
-    button.style.color = "black";
 }
