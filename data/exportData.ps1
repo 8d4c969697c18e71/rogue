@@ -22,17 +22,17 @@ foreach ($line in $file) {
     }
     if($item_flg){
         if($line | Select-String -Pattern " id: ") {
-            $line_tmp = $line.Substring($line.IndexOf("0"))
+            $line_t = $line.Substring($line.IndexOf("0"))
         }
         elseif($line | Select-String -Pattern " name: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " type: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " price: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf(': ')+2)
-            $line_tmp | Add-Content $item_path -Encoding utf8
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+            $line_t | Add-Content $item_path -Encoding utf8
         }
         elseif($line | Select-String -Pattern "^];") {
             $item_flg = $false
@@ -41,19 +41,53 @@ foreach ($line in $file) {
 
     # enemy
     if($line.Contains("const ENEMY_DATA")) {
-        Add-Content $enemy_path "id,name,char," -Encoding utf8
+        Add-Content $enemy_path "id,name,char,hp,fp,atk,def,speed,sight_range,escape_flag,distance,group_spawn_flag,berserk_flag,exp," -Encoding utf8
         $enemy_flg = $true
     }
     if($enemy_flg){
         if($line | Select-String -Pattern " id: ") {
-            $line_tmp = $line.Substring($line.IndexOf("0"))
+            $line_t = $line.Substring($line.IndexOf("0"))
         }
         elseif($line | Select-String -Pattern " name: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " char: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
-            $line_tmp | Add-Content $enemy_path -Encoding utf8
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
+        }
+        elseif($line | Select-String -Pattern " hp: ") {
+            $line_tt = $line.Substring($line.IndexOf(': ')+2)
+            $line_t = $line_t + ($line_tt[0..$line_tt.IndexOf(',')] -join '')
+        }
+        elseif($line | Select-String -Pattern " fp: ") {
+            $line_tt = $line.Substring($line.IndexOf(': ')+2)
+            $line_t = $line_t + ($line_tt[0..$line_tt.IndexOf(',')] -join '')
+        }
+        elseif($line | Select-String -Pattern " atk: ") {
+            $line_tt = $line.Substring($line.IndexOf(': ')+2)
+            $line_t = $line_t + ($line_tt[0..$line_tt.IndexOf(',')] -join '')
+            $line_t = $line_t + $line_tt.Substring($line_tt.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " speed: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " sight_range: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " escape_flag: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " distance: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " group_spawn_flag: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " berserk_flag: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+        }
+        elseif($line | Select-String -Pattern " exp: ") {
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+            $line_t | Add-Content $enemy_path -Encoding utf8
         }
         elseif($line | Select-String -Pattern "^];") {
             $enemy_flg = $false
@@ -67,20 +101,20 @@ foreach ($line in $file) {
     }
     if($skill_flg){
         if($line | Select-String -Pattern " id: ") {
-            $line_tmp = $line.Substring($line.IndexOf("0"))
+            $line_t = $line.Substring($line.IndexOf("0"))
         }
         elseif($line | Select-String -Pattern " name: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " target_type: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " cost_type: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " cost: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf(': ')+2)
-            $line_tmp | Add-Content $skill_path -Encoding utf8
+            $line_t = $line_t + $line.Substring($line.IndexOf(': ')+2)
+            $line_t | Add-Content $skill_path -Encoding utf8
         }
         elseif($line | Select-String -Pattern "^];") {
             $skill_flg = $false
@@ -94,14 +128,14 @@ foreach ($line in $file) {
     }
     if($condition_flg){
         if($line | Select-String -Pattern " id: ") {
-            $line_tmp = $line.Substring($line.IndexOf("0"))
+            $line_t = $line.Substring($line.IndexOf("0"))
         }
         elseif($line | Select-String -Pattern " name: ") {
-            $line_tmp = $line_tmp + $line.Substring($line.IndexOf('"'))
+            $line_t = $line_t + $line.Substring($line.IndexOf('"')).Replace('"', '')
         }
         elseif($line | Select-String -Pattern " turn: ") {
-            $line_tmp = $line_tmp + $line.Substring(14)
-            $line_tmp | Add-Content $condition_path -Encoding utf8
+            $line_t = $line_t + $line.Substring(14)
+            $line_t | Add-Content $condition_path -Encoding utf8
         }
         elseif($line | Select-String -Pattern "^];") {
             $condition_flg = $false

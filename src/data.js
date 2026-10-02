@@ -95,7 +95,7 @@ const KATAKANA = [
     ["ナ","ニ","ヌ","ネ","ノ","ワ","　","ヲ","　","ン",],
     ["ッ","ャ","ュ","ョ","゛","゜","　","消","ｶﾅ","終",],
 ];
-let input_name_pos = {x:0, y:0};
+let input_name_pos = {x: 0, y: 0};
 let name_max_length = 6;
 let syllabary = HIRAGANA;
 
@@ -121,16 +121,16 @@ let key_input = {
     esc: false,
 };
 const KEY_DIRECTION = {
-    up: {x:0,y:-1},
-    down: {x:0,y:1},
-    left: {x:-1,y:0},
-    right: {x:1,y:0},
+    up: {x: 0,y: -1},
+    down: {x: 0,y: 1},
+    left: {x: -1,y: 0},
+    right: {x: 1,y: 0},
 };
 const KEY_DIRECTION_DIAGONAL = {
-    up_left: {x:-1,y:-1},
-    up_right: {x:1,y:-1},
-    down_left: {x:-1,y:1},
-    down_right: {x:1,y:1},
+    up_left: {x: -1,y: -1},
+    up_right: {x: 1,y: -1},
+    down_left: {x: -1,y: 1},
+    down_right: {x: 1,y: 1},
 };
 const KEY_CODE={
     left: "ArrowLeft",
@@ -198,8 +198,8 @@ let map_draw = []; // 描画用
 let map_shotrange = []; // 射撃・投擲・スキルの範囲
 let id_interval_sr = undefined; // shotrangeの点滅インターバルID
 let interval_sr_flag = true;
-let stair_pos = {x:undefined, y:undefined};
-let portal_pos = {x:undefined, y:undefined};
+let stair_pos = {x: undefined, y: undefined};
+let portal_pos = {x: undefined, y: undefined};
 
 //==================================================PLAYER INFO==================================================
 
@@ -230,22 +230,22 @@ let player = {
     lv: 0,
     job: undefined,
     job_name: "",
-    exp:0, next_exp:0,
-    hp:0, hp_max:0, hp_max_offset:0,
-    fp:0, fp_max:0, fp_max_offset:0,
+    exp: 0, next_exp: 0,
+    hp: 0, hp_max: 0, hp_max_offset: 0,
+    fp: 0, fp_max: 0, fp_max_offset: 0,
     
-    str:0,
-    dex:0,
-    int:0,
-    fth:0,
+    str: 0,
+    dex: 0,
+    int: 0,
+    fth: 0,
     
     // 装備要因
-    atk:0, def:0,
+    atk: 0, def: 0,
 
     // 一時変化
-    atk_offset:0, def_offset:0,
+    atk_offset: 0, def_offset: 0,
 
-    hung:0, hung_max:0, hung_max_offset: 0,
+    hung: 0, hung_max: 0, hung_max_offset: 0,
     hung_rate: 0, hung_rate_offset: 0, // 空腹度の減り具合 /turn
     hp_regen_rate: 0, hp_regen_rate_offset: 0,
     fp_regen_rate: 0, fp_regen_rate_offset: 0,
@@ -325,9 +325,13 @@ const STACK_TYPE = ["ammo"];
 const STACK_MAX = 32;
 
 // enemy
-const enemy_sleep_chance = 0.3;
+const ENEMY_SLEEP_CHANCE = 0.3;
 
 //==================================================TABLE==================================================
+
+const ITEM_TABLE_FREQ = 3;
+const ENEMY_TABLE_FREQ = 2;
+const TRAP_TABLE_FREQ = 3;
 
 const ITEM_TABLE = [
     [
@@ -404,13 +408,13 @@ const ITEM_TABLE = [
 ];
 const ENEMY_TABLE = [
     [
-        0x000, 0x000, 0x001,
+        0x000, 0x001,
     ],
     [
-        0x000, 0x000, 0x002, 0x003,
+        0x000,  0x001, 0x002, 0x003,
     ],
     [
-        0x002, 0x002, 0x002, 0x003, 0x004,
+        0x002, 0x003, 0x004,
     ],
     [
         0x002, 0x004, 0x005,
@@ -419,7 +423,7 @@ const ENEMY_TABLE = [
         0x002, 0x004, 0x005, 0x006,
     ],
     [
-        0x002, 0x003, 0x004, 0x005, 0x006,
+        0x002, 0x004, 0x005, 0x006,
     ],
 ];
 const TRAP_TABLE = [
@@ -1279,17 +1283,17 @@ const ENEMY_DATA = [
         id: 0x000,
         name: "亡者",
         char: "亡",
-        lv:1,
-        hp:80, hp_max:80, 
-        fp:0, fp_max:0, 
-        atk:30, def:10,
-        speed:1,
-        sight_range:3,
+        lv: 1,
+        hp: 80, hp_max: 80, 
+        fp: 0, fp_max: 0, 
+        atk: 30, def: 10,
+        speed: 1,
+        sight_range: 3,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp:3,
+        exp: 3,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [],
@@ -1298,17 +1302,17 @@ const ENEMY_DATA = [
         id: 0x001,
         name: "ミランダフラワー",
         char: "花",
-        lv:1,
-        hp:50, hp_max:50, 
-        fp:0, fp_max:0, 
-        atk:20, def:5,
-        speed:1,
-        sight_range:2,
+        lv: 1,
+        hp: 50, hp_max: 50, 
+        fp: 0, fp_max: 0, 
+        atk: 20, def: 5,
+        speed: 1,
+        sight_range: 2,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: true,
         berserk_flag: false,
-        exp:2,
+        exp: 2,
         func_spawn: async function(me) {
             await setCondition(me, 0x03, 1000);
             log_reserve.pop();
@@ -1326,17 +1330,17 @@ const ENEMY_DATA = [
         id: 0x002,
         name: "亡者兵士",
         char: "兵",
-        lv:1,
-        hp:120, hp_max:120,
-        fp:0, fp_max:0,
-        atk:50, def:15,
-        speed:1,
-        sight_range:4,
+        lv: 1,
+        hp: 120, hp_max: 120,
+        fp: 0, fp_max: 0,
+        atk: 50, def: 15,
+        speed: 1,
+        sight_range: 4,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp:5,
+        exp: 5,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [],
@@ -1345,17 +1349,17 @@ const ENEMY_DATA = [
         id: 0x003,
         name: "亡者弓兵",
         char: "弓",
-        lv:1,
-        hp:80, hp_max:80, 
-        fp:15, fp_max:15,
-        atk:40, def:10,
-        speed:1,
-        sight_range:5,
+        lv: 1,
+        hp: 80, hp_max: 80, 
+        fp: 15, fp_max: 15,
+        atk: 40, def: 10,
+        speed: 1,
+        sight_range: 5,
         escape_flag: false,
-        distance:3,
+        distance: 3,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp:7,
+        exp: 7,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1370,22 +1374,22 @@ const ENEMY_DATA = [
         id: 0x004,
         name: "スケルトン",
         char: "骨",
-        lv:1,
-        hp:150, hp_max:150,
-        fp:5, fp_max:5,
-        atk:60, def:5,
-        speed:1,
-        sight_range:4,
+        lv: 1,
+        hp: 150, hp_max: 150,
+        fp: 5, fp_max: 5,
+        atk: 60, def: 5,
+        speed: 1,
+        sight_range: 4,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp:7,
+        exp: 7,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
             {
-                id:0x001,
+                id: 0x001,
                 chance: 0.33,
             },
         ],
@@ -1394,17 +1398,17 @@ const ENEMY_DATA = [
         id: 0x005,
         name: "腐犬",
         char: "犬",
-        lv:1,
-        hp:90, hp_max:90,
-        fp:3, fp_max:3,
-        atk:20, def:5,
-        speed:2,
-        sight_range:8,
+        lv: 1,
+        hp: 90, hp_max: 90,
+        fp: 3, fp_max: 3,
+        atk: 20, def: 5,
+        speed: 2,
+        sight_range: 8,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: true,
         berserk_flag: false,
-        exp:5,
+        exp: 5,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1419,17 +1423,17 @@ const ENEMY_DATA = [
         id: 0x006,
         name: "車輪骸骨",
         char: "車",
-        lv:1,
-        hp:150, hp_max:150,
-        fp:5, fp_max:5,
-        atk:40, def:7,
-        speed:1,
-        sight_range:5,
+        lv: 1,
+        hp: 150, hp_max: 150,
+        fp: 5, fp_max: 5,
+        atk: 40, def: 7,
+        speed: 1,
+        sight_range: 5,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp:8,
+        exp: 8,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1443,17 +1447,17 @@ const ENEMY_DATA = [
         id: 0xfff,
         name: "練習用人形兵",
         char: "練",
-        lv:1,
-        hp:0xffff, hp_max:0xffff,
-        fp:0, fp_max:0,
-        atk:0, def:10,
-        speed:0,
-        sight_range:0,
+        lv: 1,
+        hp: 0xffff, hp_max: 0xffff,
+        fp: 0, fp_max: 0,
+        atk: 0, def: 10,
+        speed: 0,
+        sight_range: 0,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp:0,
+        exp: 0,
         func_spawn: async function(me) {},
         func_died: async function() {
             await setEnemy(0xfff, this.x, this.y);
@@ -1493,8 +1497,7 @@ const SKILL_DATA = [
 
                 this.ammo = from.ammo.id;
             }
-            const ammo = Object.assign({}, ITEM_DATA.find(v=>v.id==this.ammo));
-            return await shot(from, ammo, getDirection(from, to));
+            return await shot(from, getItemData(this.ammo), getDirection(from, to));
         },
     },
     {
@@ -1738,7 +1741,7 @@ const SKILL_DATA = [
                 for(let j=-range; j<=range; j++) {
                     if(from.x+j < 0 || from.x+j >= SIZEX) continue;
                     let enemy = getEnemy(from.x+j, from.y+i);
-                    if(enemy) jump(enemy, {x:j, y:i}, 1);
+                    if(enemy) jump(enemy, {x: j, y: i}, 1);
                 }
             }
             updateMap();

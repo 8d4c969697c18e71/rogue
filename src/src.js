@@ -455,13 +455,13 @@ async function attackAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
 // 射撃
 async function shot(who, ammo, direction) {
     let dst = straightRecursive(who.x, who.y, direction, ammo.range);
-
-    addLog(who.name+" は "+ammo.name+" を放った");
-    play_audio(audio_shot);
-    await animShot(who, dst, direction);
-
     let enemy = getEnemy(dst.x, dst.y);
+    
     if(enemy != undefined) {
+        addLog(who.name+" は "+ammo.name+" を放った");
+        play_audio(audio_shot);
+        await animShot(who, dst, direction);
+
         await shotDmg(who, enemy, ammo);
         if("weapon" in who && who.weapon) await who.weapon.func_attack(who, enemy);
         if("ammo" in who && who.ammo) await who.ammo.func_attack(who, enemy);
@@ -469,31 +469,34 @@ async function shot(who, ammo, direction) {
         return true;
     }
     else if(dst.x == player.x && dst.y == player.y) {
+        addLog(who.name+" は "+ammo.name+" を放った");
+        play_audio(audio_shot);
+        await animShot(who, dst, direction);
+
         await shotDmg(who, player, ammo);
         if("weapon" in who && who.weapon) await who.weapon.func_attack(who, player);
         if("ammo" in who && who.ammo) await who.ammo.func_attack(who, player);
         if("armor" in player && player.armor) await player.armor.func_attacked(who, player);
         return true;
     }
-    else{// 外した
-        if(who == player) {
-            for(let s=0; s<SIZEX; s++)
-                for(let k=0; k<=s; k++) {
-                    const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
-                    const unique_arr = Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
-                    for(let elm of unique_arr) {
-                        const px = dst.x+elm[0];
-                        const py = dst.y+elm[1];
-                        if(canMove(px, py) && !isItem(px, py)) {
-                            setItem(ammo.id, px, py);
-                            //addLog(ammo.name+" は床に落ちた");
-                            return true;
-                        }
+    // 外した
+    if(who == player) {
+        for(let s=0; s<SIZEX; s++)
+            for(let k=0; k<=s; k++) {
+                const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
+                const unique_arr = Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
+                for(let elm of unique_arr) {
+                    const px = dst.x+elm[0];
+                    const py = dst.y+elm[1];
+                    if(canMove(px, py) && !isItem(px, py)) {
+                        setItem(ammo.id, px, py);
+                        //addLog(ammo.name+" は床に落ちた");
+                        return true;
                     }
                 }
-        }
-        return false;
+            }
     }
+    return false;
 }
 
 async function shotDmg(from, to, ammo) {
@@ -1760,10 +1763,11 @@ function setItemGroup() {
     let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
     let table = [];
     
-    if(Math.floor((floor_cnt-1)/3) in ITEM_TABLE)
-        table = ITEM_TABLE[Math.floor((floor_cnt-1)/3)];
+    let idx = Math.floor((floor_cnt - 1) / ITEM_TABLE_FREQ);
+    if(idx in ITEM_TABLE)
+        table = ITEM_TABLE[idx];
     else
-        table = ITEM_TABLE[0];
+        table = ITEM_TABLE[ITEM_TABLE.length - 1];
     if(table.length==0) return;
 
     for(let i=0; i<num; i++) {
@@ -1849,8 +1853,8 @@ async function doEventEnv() {
 
         // 死亡判定
         await isDead(enemy);
-        killed_group = [];
     }
+    killed_group = [];
 
     await isDead(player);
 
@@ -1997,10 +2001,11 @@ function setTrapGroup() {
     let num = Math.floor(Math.random() * (room_num*2 - 1) + 1);
     let table = [];
     
-    if(Math.floor((floor_cnt-1)/3) in TRAP_TABLE)
-        table = TRAP_TABLE[Math.floor((floor_cnt-1)/3)];
+    let idx = Math.floor((floor_cnt - 1) / TRAP_TABLE_FREQ);
+    if(idx in TRAP_TABLE)
+        table = TRAP_TABLE[idx];
     else
-        table = TRAP_TABLE[0];
+        table = TRAP_TABLE[TRAP_TABLE.length - 1];
     if(table.length==0) return;
 
     for(let i=0; i<num; i++) {
@@ -2457,13 +2462,13 @@ async function setEnemy(id, x, y) {
 }
 
 // エネミーグループ
-// 3階層毎にテーブル変更
 async function setEnemyGroup() {
     let num = Math.floor(Math.random() * (room_num*1.5 - room_num*1) + room_num*1);
     let table = [];
 
-    if(Math.floor((floor_cnt-1)/3) in ENEMY_TABLE)
-        table = ENEMY_TABLE[Math.floor((floor_cnt-1)/3)];
+    let idx = Math.floor((floor_cnt-1)/ENEMY_TABLE_FREQ);
+    if(idx in ENEMY_TABLE)
+        table = ENEMY_TABLE[idx];
     else{
         table = ENEMY_TABLE[0];
         console.warn("setEnemyGroup: enemy_table of this floor not found");
@@ -2482,7 +2487,7 @@ async function setEnemyGroup() {
             let enemy_set = await setEnemy(enemy_id, x, y);
             
             // 眠り付与
-            if(Math.floor(Math.random() + enemy_sleep_chance)) {
+            if(Math.floor(Math.random() + ENEMY_SLEEP_CHANCE)) {
                 initMap(enemy_set.map_sight, false);
                 getSight(enemy_set);
                 setCondition(enemy_set, 0x04);
