@@ -454,7 +454,7 @@ async function attackAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
 
 // 射撃
 async function shot(who, ammo, direction) {
-    let dst = straightRecursive(who.x, who.y, direction, ammo.range);
+    let dst = getStraightRecursive(who.x, who.y, direction, ammo.range);
     let enemy = getEnemy(dst.x, dst.y);
     
     if(enemy != undefined) {
@@ -566,20 +566,24 @@ async function doEventThrowing() {
 
 // 投擲
 async function throwing(who, item, direction) {
-    let dst = straightRecursive(who.x, who.y, direction, THROWING_RANGE);
+    let dst = getStraightRecursive(who.x, who.y, direction, THROWING_RANGE);
+    let char = CHAR_MAP[item.type] ? CHAR_MAP[item.type] : CHAR_MAP.ammo;
+    let enemy = getEnemy(dst.x, dst.y);
     let hit = undefined;
 
-    play_audio(audio_shot);
-    addLog(who.name+" は "+item.name+" を投擲した");
-    let char = CHAR_MAP[item.type] ? CHAR_MAP[item.type] : CHAR_MAP.ammo;
-    await animShot(who, dst, direction, char, 100);
+    if(enemy != undefined) {
+        play_audio(audio_shot);
+        addLog(who.name+" は "+item.name+" を投擲した");
+        await animShot(who, dst, direction, char, 100);
 
-    if(getEnemy(dst.x, dst.y)) {
-        let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await throwDmg(who, enemy, item);
         hit = enemy;
     }
     else if(dst.x == player.x && dst.y == player.y) {
+        play_audio(audio_shot);
+        addLog(who.name+" は "+item.name+" を投擲した");
+        await animShot(who, dst, direction, char, 100);
+
         await throwDmg(who, player, item);
         hit = player;
     }
@@ -633,7 +637,7 @@ async function throwDmg(from, to, item) {
 
 // 魔法
 async function magic(who, value, direction) {
-    let dst = straightRecursive(who.x, who.y, direction, SKILL_RANGE);
+    let dst = getStraightRecursive(who.x, who.y, direction, SKILL_RANGE);
     if(getEnemy(dst.x, dst.y)) {
         let enemy = enemy_group.find(v=>(v.x==dst.x && v.y==dst.y));
         await magicDmg(who, enemy, value);
@@ -709,7 +713,7 @@ async function dealDmg(from, to, dmg) {
     await isDead(to);
 }
 
-function straightRecursive(x, y, direction, range) {
+function getStraightRecursive(x, y, direction, range) {
     const range_next = --range;
     if(!canMove(x+direction.x, y+direction.y)
     || range <= 0
@@ -717,10 +721,10 @@ function straightRecursive(x, y, direction, range) {
     ) {
         return {x:x+direction.x, y:y+direction.y};
     }
-    return straightRecursive(x+direction.x, y+direction.y, direction, range_next);
+    return getStraightRecursive(x+direction.x, y+direction.y, direction, range_next);
 }
 
-function straightRecursiveDiagonal(x, y, direction, range) {
+function getStraightRecursiveDiagonal(x, y, direction, range) {
     const range_next = --range;
     if(!canMove(x+direction.x, y+direction.y)
     || !canDiagonal(x, y, direction.x, direction.y)
@@ -729,22 +733,36 @@ function straightRecursiveDiagonal(x, y, direction, range) {
     ) {
         return {x:x+direction.x, y:y+direction.y};
     }
-    return straightRecursiveDiagonal(x+direction.x, y+direction.y, direction, range_next);
+    return getStraightRecursiveDiagonal(x+direction.x, y+direction.y, direction, range_next);
 }
 
-function straightRecursiveAllMap(x, y, direction) {
+function getStraightRecursiveAllMap(x, y, direction) {
     if(!canMove(x+direction.x, y+direction.y)) {
         return {x:x+direction.x, y:y+direction.y};
     }
-    return straightRecursiveAllMap(x+direction.x, y+direction.y, direction);
+    return getStraightRecursiveAllMap(x+direction.x, y+direction.y, direction);
+}
+
+function isStraight(from, to) {
+    let d_x = Math.abs(to.x - from.x);
+    let d_y = Math.abs(to.y - from.y);
+    if(d_x == 0 || d_y == 0 || d_x == d_y)
+        return true;
+    return false;
 }
 
 function getDirection(from, to) {
-    let dir_x = to.x-from.x;
-    let dir_y = to.y-from.y;
+    let dir_x = to.x - from.x;
+    let dir_y = to.y - from.y;
     if(dir_x != 0) dir_x = dir_x / Math.abs(dir_x);
     if(dir_y != 0) dir_y = dir_y / Math.abs(dir_y);
-    return {x:dir_x, y:dir_y};
+    return {x: dir_x, y: dir_y};
+}
+
+function getDistanceMax(from, to) {
+    let d_x = Math.abs(to.x - from.x);
+    let d_y = Math.abs(to.y - from.y);
+    return d_x > d_y ? d_x : d_y;
 }
 
 // UIイベント
@@ -907,7 +925,7 @@ async function doSubEventSkill() {
         else kd = KEY_DIRECTION_DIAGONAL;
         for(let k in kd)
             if(key_input[k]) {
-                const target = straightRecursive(player.x, player.y, kd[k], SKILL_RANGE);
+                const target = getStraightRecursive(player.x, player.y, kd[k], SKILL_RANGE);
                 return await useSkill(skill_using, target);
             }
     }
@@ -918,7 +936,7 @@ async function doSubEventSkill() {
         else kd = KEY_DIRECTION_DIAGONAL;
         for(let k in kd)
             if(key_input[k]) {
-                const target = straightRecursive(player.x, player.y, kd[k], 1);
+                const target = getStraightRecursive(player.x, player.y, kd[k], 1);
                 return await useSkill(skill_using, target);
             }
     }
@@ -2105,8 +2123,8 @@ async function doEventEnemy(enemy) {
             // 使用
             if(enemy.map_sight[target.y][target.x]) {
                 let check = false; // 使用判定
-                if(skill.target_type == "range") {
-                    const xy = straightRecursive(enemy.x, enemy.y, getDirection(enemy, target), SKILL_RANGE);
+                if(skill.target_type == "range" && isStraight(enemy, target)) {
+                    const xy = getStraightRecursive(enemy.x, enemy.y, getDirection(enemy, target), getDistanceMax(enemy, target));
                     check = xy.x == target.x && xy.y == target.y;
                 }
                 else if(skill.target_type == "next") {
@@ -2163,9 +2181,6 @@ async function doEventEnemy(enemy) {
             await moveEnemyTravel(enemy);
         }
     }
-
-    // 標的更新
-    updateTarget(enemy);
 }
 
 // 標的情報更新
@@ -2298,7 +2313,7 @@ function astarRecursive(node, x, y, dst_x, dst_y, distance, escape_flag) {
                 movement_cost = 64;
             else if(x+j == dst_x || y+i == dst_y)
                 movement_cost = 1;
-            else if({x:dst_x, y:dst_y} == straightRecursiveAllMap(x, y, {x:j, y:i}))
+            else if({x:dst_x, y:dst_y} == getStraightRecursiveAllMap(x, y, {x:j, y:i}))
                 movement_cost = 1;
             else
                 movement_cost = 3;

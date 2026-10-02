@@ -1340,7 +1340,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp: 5,
+        exp: 8,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [],
@@ -1359,7 +1359,7 @@ const ENEMY_DATA = [
         distance: 3,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp: 7,
+        exp: 9,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1384,7 +1384,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp: 7,
+        exp: 12,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1408,7 +1408,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: true,
         berserk_flag: false,
-        exp: 5,
+        exp: 10,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1433,7 +1433,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp: 8,
+        exp: 15,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
