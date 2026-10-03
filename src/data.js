@@ -187,6 +187,7 @@ const color_red = "#ff5555";
 const color_green = "#55ff55";
 const color_blue = "#5555ff";
 const color_orange = "#ff8800";
+const color_purple = "#8800ff";
 const color_light_blue = "#66aaff";
 const color_yellow = "#ffff00";
 const color_light_yellow = "#ffffaa";
@@ -601,7 +602,10 @@ const ITEM_DATA = [
             play_audio(audio_fire);
             await animSpread(dst.x, dst.y, 1, "火");
             
-            await magicDmgAOE(dst.x, dst.y, 1, who, 50, true);
+            const targets = getTargetsInRectangleAOE(dst.x, dst.y, 1, who, true);
+            for(let target of targets)
+                await magicDmg(who, target, 50);
+            
             if(killed_group.length > 0) learning(0x500);
             if(killed_group.length > 1) learning(0x501);
             return true;
@@ -621,10 +625,14 @@ const ITEM_DATA = [
             play_audio(audio_explosion);
             await animSpread(dst.x, dst.y, 1, "爆", true);
             
-            await magicDmgAOE(dst.x, dst.y, 1, who, 100, true);
+            const targets = getTargetsInRectangleAOE(dst.x, dst.y, 1, who, true);
+            for(let target of targets)
+                await magicDmg(who, target, 100);
+
             await digWall(dst.x, dst.y, 1);
             updateMap();
             drawMap();
+
             if(killed_group.length > 0) learning(0x500);
             if(killed_group.length > 1) learning(0x501);
             return true;
@@ -1266,7 +1274,9 @@ const ITEM_DATA = [
                 addItem(0x382);
                 addItem(0x020);
                 setCanLearning(0x500);
+                setCanLearning(0x503);
                 setSkill(0x500);
+                setSkill(0x503);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }
@@ -1785,7 +1795,47 @@ const SKILL_DATA = [
             let int = from.int ? from.int : 10;
             let fth = from.fth ? from.fth : 10;
             let dmg = 30 + int * 2.5 + fth * 2.5;
-            await magicDmgAOE(to.x, to.y, 1, from, dmg);
+            const targets = getTargetsInRectangleAOE(to.x, to.y, 1, from);
+            for(let target of targets)
+                await magicDmg(from, target, dmg);
+            return true;
+        }
+    },
+    {
+        id: 0x502,
+        name: "封じられた太陽",
+        target_type: "range",
+        cost_type: "fp",
+        cost: 25,
+        func: async function(from, to) {
+            play_audio(audio_fire);
+            addLog(from.name+" は小さな太陽を投げつけた");
+            await animShot(from, to, getDirection(from, to), "火");
+            await animSpread(to.x, to.y, 2, "火");
+
+            let int = from.int ? from.int : 10;
+            let fth = from.fth ? from.fth : 10;
+            let dmg = 70 + int * 3.5 + fth * 3.5;
+            const targets = getTargetsInRectangleAOE(to.x, to.y, 2, from);
+            for(let target of targets)
+                await magicDmg(from, target, dmg);
+            return true;
+        }
+    },
+    {
+        id: 0x503,
+        name: "毒の霧",
+        target_type: "range",
+        cost_type: "fp",
+        cost: 8,
+        func: async function(from, to) {
+            play_audio(audio_poison);
+            addLog(from.name+" から毒の霧が漂い出した");
+            await animLine(from.x, from.y, getDirection(from, to), 5, 2, "毒", false, 30);
+
+            const targets = getTargetsInLineAOE(getDirection(from, to), 5, 2, from)
+            for(let target of targets)
+                await setCondition(target, 0x00);
             return true;
         }
     },

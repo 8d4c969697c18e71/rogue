@@ -439,19 +439,6 @@ async function attack(from, to) {
     return true;
 }
 
-// 範囲攻撃
-async function attackAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
-    for(let i=-radius; i<=radius; i++) {
-        if(y+i < 0 || y+i >= SIZEY) continue;
-        for(let j=-radius; j<=radius; j++) {
-            if(x+j < 0 || x+j >= SIZEX) continue;
-            if(!self_dmg_flg && x+j == who.x && y+i == who.y) continue;
-            const target = x+j == player.x && y+i == player.y ? player : getEnemy(x+j, y+i);
-            await attack(who, target, dmg);
-        }
-    }
-}
-
 // 射撃
 async function shot(who, ammo, direction) {
     let dst = getStraightRecursive(who.x, who.y, direction, ammo.range);
@@ -481,6 +468,10 @@ async function shot(who, ammo, direction) {
     }
     // 外した
     if(who == player) {
+        addLog(who.name+" は "+ammo.name+" を放った");
+        play_audio(audio_shot);
+        await animShot(who, dst, direction);
+
         for(let s=0; s<SIZEX; s++)
             for(let k=0; k<=s; k++) {
                 const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
@@ -589,6 +580,10 @@ async function throwing(who, item, direction) {
     }
     // アイテム化
     else if(!item.remove_after_throw) {
+        play_audio(audio_shot);
+        addLog(who.name+" は "+item.name+" を投擲した");
+        await animShot(who, dst, direction, char, 100);
+
         let placed_flg = false;
         for(let s=0; s<SIZEX && !placed_flg; s++)
             for(let k=0; k<=s && !placed_flg; k++) {
@@ -659,18 +654,6 @@ async function magicDmg(from, to, value) {
     if(dmg < 0) dmg = 0;
     
     await dealDmg(from, to, dmg);
-}
-
-async function magicDmgAOE(x, y, radius, who, dmg, self_dmg_flg = false) {
-    for(let i=-radius; i<=radius; i++) {
-        if(y+i < 0 || y+i >= SIZEY) continue;
-        for(let j=-radius; j<=radius; j++) {
-            if(x+j < 0 || x+j >= SIZEX) continue;
-            if(!self_dmg_flg && x+j == who.x && y+i == who.y) continue;
-            const target = x+j == player.x && y+i == player.y ? player : getEnemy(x+j, y+i);
-            await magicDmg(who, target, dmg);
-        }
-    }
 }
 
 // ダメージ
@@ -759,10 +742,76 @@ function getDirection(from, to) {
     return {x: dir_x, y: dir_y};
 }
 
+function getVerticalDirection(dir) {
+    let vertical_dir;
+    if(dir.x == KEY_DIRECTION.up.x && dir.y == KEY_DIRECTION.up.y
+    || dir.x == KEY_DIRECTION.down.x && dir.y == KEY_DIRECTION.down.y)
+        vertical_dir = [{x: KEY_DIRECTION.left.x, y: KEY_DIRECTION.left.y}, {x: KEY_DIRECTION.right.x, y: KEY_DIRECTION.right.y}];
+    else if(dir.x == KEY_DIRECTION.left.x && dir.y == KEY_DIRECTION.left.y
+    || dir.x == KEY_DIRECTION.right.x && dir.y == KEY_DIRECTION.right.y)
+        vertical_dir = [{x: KEY_DIRECTION.up.x, y: KEY_DIRECTION.up.y}, {x: KEY_DIRECTION.down.x, y: KEY_DIRECTION.down.y}];
+    else if(dir.x == KEY_DIRECTION_DIAGONAL.up_left.x && dir.y == KEY_DIRECTION_DIAGONAL.up_left.y)
+        vertical_dir = [{x: KEY_DIRECTION.down.x, y: KEY_DIRECTION.down.y}, {x: KEY_DIRECTION.right.x, y: KEY_DIRECTION.right.y}];
+    else if(dir.x == KEY_DIRECTION_DIAGONAL.up_right.x && dir.y == KEY_DIRECTION_DIAGONAL.up_right.y)
+        vertical_dir = [{x: KEY_DIRECTION.down.x, y: KEY_DIRECTION.down.y}, {x: KEY_DIRECTION.left.x, y: KEY_DIRECTION.left.y}];
+    else if(dir.x == KEY_DIRECTION_DIAGONAL.down_left.x && dir.y == KEY_DIRECTION_DIAGONAL.down_left.y)
+        vertical_dir = [{x: KEY_DIRECTION.up.x, y: KEY_DIRECTION.up.y}, {x: KEY_DIRECTION.right.x, y: KEY_DIRECTION.right.y}];
+    else if(dir.x == KEY_DIRECTION_DIAGONAL.down_right.x && dir.y == KEY_DIRECTION_DIAGONAL.down_right.y)
+        vertical_dir = [{x: KEY_DIRECTION.up.x, y: KEY_DIRECTION.up.y}, {x: KEY_DIRECTION.left.x, y: KEY_DIRECTION.left.y}];
+    return vertical_dir;
+}
+
 function getDistanceMax(from, to) {
     let d_x = Math.abs(to.x - from.x);
     let d_y = Math.abs(to.y - from.y);
     return d_x > d_y ? d_x : d_y;
+}
+
+// AOE
+function getTargetsInRectangleAOE(x, y, radius, who, self_dmg_flg = false) {
+    let targets = [];
+    for(let i=-radius; i<=radius; i++) {
+        const dy = y + i;
+        if(dy < 0 || dy >= SIZEY) continue;
+
+        for(let j=-radius; j<=radius; j++) {
+            const dx = x + j;
+            if(dx < 0 || dx >= SIZEX) continue;
+            if(!self_dmg_flg && dx == who.x && dy == who.y) continue;
+
+            const target = dx == player.x && dy == player.y ? player : getEnemy(dx, dy);
+            if(target) targets.push(target);
+        }
+    }
+
+    return targets;
+}
+
+function getTargetsInLineAOE(dir, range, width, who) {
+    let targets = [];
+    const dst = getStraightRecursive(who.x, who.y, dir, range);
+    const vertical_dir = getVerticalDirection(dir);
+    if(!vertical_dir) return;
+
+    for(let i=1; i<=range; i++) {
+        const hx = who.x + dir.x * i;
+        const hy = who.y + dir.y * i;
+
+        for(let j=0; j<width; j++) {
+            for(let vxy of vertical_dir) {
+                const dx = hx + vxy.x * j;
+                const dy = hy + vxy.y * j;
+                if(dx < 0 || dx >= SIZEX) continue;
+                if(dy < 0 || dy >= SIZEY) continue;
+
+                const target = dx == player.x && dy == player.y ? player : getEnemy(dx, dy);
+                if(target) targets.push(target);
+            }
+        }
+        if(hx == dst.x && hy == dst.y) break;
+    }
+
+    return targets;
 }
 
 // UIイベント
@@ -1535,10 +1584,7 @@ function initStatus() {
 // 状態異常追加
 async function setCondition(who, id, turn = -1) {
     const cond = CONDITION_DATA.find(v=>v.id==id);
-    if(!cond || !("condition" in who)) {
-        console.warn("setCondition: id or who.condtion not found");
-        return false;
-    }
+    if(!who || !cond || !("condition" in who)) return false;
     const turn_use = turn < 0 ? cond.turn : turn;
     
     // 重複判定

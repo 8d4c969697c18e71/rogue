@@ -59,6 +59,8 @@ function drawMap() {
                 else if(map_draw[player.y+i][player.x+j]=="光"
                     || map_draw[player.y+i][player.x+j]=="雷")
                     ctx.fillStyle = color_light_yellow;
+                else if(map_draw[player.y+i][player.x+j]=="毒")
+                    ctx.fillStyle = color_purple;
                 else{
                     ctx.fillStyle = color_red;
 
