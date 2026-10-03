@@ -196,6 +196,7 @@ async function events() {
 
     // ターン経過
     if(turn_flag) {
+        await doEventEnvPlayer();
         await doEventEnemies();
         await doEventEnv();
         turn_cnt++;
@@ -334,6 +335,7 @@ async function sprint(direction, not_diagonal) {
 
     // 移動
     await move(player, direction);
+    await doEventEnvPlayer();
     await doEventEnemies();
     await doEventEnv();
     turn_cnt++;
@@ -1874,8 +1876,8 @@ function isEquiped(inv_cursor) {
 
 //==================================================ENVIRONMENT==================================================
 
-// 環境イベント
-async function doEventEnv() {
+// 環境イベント（プレイヤー）
+async function doEventEnvPlayer() {
     // 自然回復
     if(turn_cnt % (player.hp_regen_rate - player.hp_regen_rate_offset) == 0)
         addHP(player, 10);
@@ -1883,13 +1885,13 @@ async function doEventEnv() {
         addFP(player, 2);
 
     // 空腹度
-    if(player.hung <= 0) {
-        addLog("飢えが "+player.name+" を蝕む");
-        await dealDmg(undefined, player, -15);
-        play_audio(audio_hit);
-    }
-    if(!safe_flag && turn_cnt % player.hung_rate == 0) {
-        if(player.hung > 0) {
+    if(!safe_flag) {
+        if(player.hung <= 0) {
+            addLog("飢えが "+player.name+" を蝕む");
+            addHP(player, -1);
+            play_audio(audio_hit);
+        }
+        else if(turn_cnt % player.hung_rate == 0) {
             addHung(-1);
             if(player.hung == 25)
                 addLog("空腹を感じる");
@@ -1909,8 +1911,11 @@ async function doEventEnv() {
     await progressCondition(player);
 
     // 死亡判定
-    await isDead(player)
+    await isDead(player);
+}
 
+// 環境イベント（プレイヤー以外）
+async function doEventEnv() {
     // エネミー
     for(let enemy of enemy_group) {
         // 状態異常
@@ -1923,11 +1928,11 @@ async function doEventEnv() {
 
     await isDead(player);
 
-    // 階段に乗ってる
+    // 階段
     if(isStair(player.x, player.y)) {
         addLog("階段 (降りる:z)");
     }
-    // ポータルに乗ってる
+    // ポータル
     if(isPortal(player.x, player.y)) {
         addLog("帰還ポータル (入る:z)");
     }
