@@ -1964,13 +1964,15 @@ async function nextFloor() {
     // TODO: テスト用
     //await generateUniqueMap(unique_map.find(v=>v.id=="test"));return;
 
-    if(um = unique_map.find(v=>v.id==floor_cnt)) { // 固有マップ
+    // 固有マップ
+    if(um = unique_map.find(v=>v.id==floor_cnt)) {
         await generateUniqueMap(um);
         
         if(um.safe_flag) safe_flag = true;
         else safe_flag = false;
     }
-    else if(floor_cnt%10 == 0) {    // 帰還ポータル階
+    // 帰還ポータル階
+    else if(PORTAL_FLOOR.includes(floor_cnt)) {
         await generateUniqueMap(unique_map.find(v=>v.id=="return"));
         safe_flag = true;
     }
