@@ -1742,23 +1742,36 @@ const SKILL_DATA = [
         cost_type: "fp",
         cost: 5,
         func: async function(from, to) {
-            const range = 2;
+            const range = 1;
+            const distance = 2
 
             play_audio(audio_force);
             addLog(from.name+" から衝撃波が迸る");
             await animSpread(from.x, from.y, range, "光");
             
             for(let i=-range; i<=range; i++){
-                if(from.y+i < 0 || from.y+i >= SIZEY) continue;
+                const dy = from.y + i;
+                if(dy < 0 || dy >= SIZEY) continue;
+
                 for(let j=-range; j<=range; j++) {
-                    if(from.x+j < 0 || from.x+j >= SIZEX) continue;
-                    let enemy = getEnemy(from.x+j, from.y+i);
-                    if(enemy) jump(enemy, {x: j, y: i}, 1);
+                    const dx = from.x + j;
+                    if(dx < 0 || dx >= SIZEX) continue;
+
+                    const dir_x = j == 0 ? j : j / Math.abs(j);
+                    const dir_y = i == 0 ? i : i / Math.abs(i);
+                    const dir = {x: dir_x, y: dir_y};
+                    const target = dx == player.x && dy == player.y ? player : getEnemy(dx, dy);
+                    const stun_turn = from == player ? 0 : 1;
+                    if(target && target != from) {
+                        for(let k=1; k<=distance; k++) {
+                            jump(target, dir, 1);
+                            await setCondition(target, 0x03, stun_turn);
+                        }
+                    }
                 }
             }
             updateMap();
             drawMap();
-            await wait(200);
             return true;
         }
     },

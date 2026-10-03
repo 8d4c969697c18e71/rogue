@@ -216,6 +216,8 @@ async function doEventPlayer() {
     else kd = KEY_DIRECTION_DIAGONAL;
     for(let k in kd)
         if(key_input[k]) {
+            if(player.cannot_move_flag) return true;
+
             let x = player.x + kd[k].x;
             let y = player.y + kd[k].y;
             if(getEnemy(x, y) && canDiagonal(player.x, player.y, kd[k].x, kd[k].y)) {
@@ -253,13 +255,12 @@ async function doEventPlayer() {
                 npc.func_after();
                 return true;
             }
-            else if(!player.cannot_move_flag) {
-                if(!key_input.shift)
-                    return await move(player, kd[k]);
-                else{
+            else {
+                if(key_input.shift) {
                     await sprint(kd[k], kd == KEY_DIRECTION);
                     return false;
                 }
+                return await move(player, kd[k]);
             }
         }
     
@@ -346,7 +347,7 @@ async function sprint(direction, not_diagonal) {
         return;
     if(not_diagonal && !canMove(player.x+direction.x, player.y+direction.y))
         return;
-    if(!not_diagonal && !canDiagonal(player.x, player.y, direction.x, direction.y))
+    if(!not_diagonal && (!canMove(player.x+direction.x, player.y+direction.y) || !canDiagonal(player.x, player.y, direction.x, direction.y)))
         return;
     if(isDoor(player.x+direction.x, player.y+direction.y))
         return;
