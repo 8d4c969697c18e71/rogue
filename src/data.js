@@ -337,20 +337,20 @@ const TRAP_TABLE_FREQ = 3;
 const ITEM_TABLE = [
     [
         0x000, 0x000, 0x000,
-        0x010, 0x020, 0x030,
+        0x010, 0x015, 0x020, 0x030,
         0x080,
         0x800,
     ],
     [
         0x000, 0x000, 0x000,
-        0x010, 0x020, 0x030,
+        0x010, 0x015, 0x020, 0x030,
         0x080,
         0x600,
         0x800,
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x010, 0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011,
         0x080, 0x080,
         0x400, 
@@ -360,7 +360,7 @@ const ITEM_TABLE = [
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x010, 0x020, 0x020, 0x030, 0x030,
+        0x010, 0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011,
         0x080, 0x080,
         0x400, 0x401, 0x402,
@@ -371,7 +371,7 @@ const ITEM_TABLE = [
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x020, 0x020, 0x030, 0x030,
+        0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
         0x011, 0x011, 0x021, 0x021,
         0x080, 0x080, 0x081, 0x081,
         0x400, 0x401, 0x402,
@@ -382,8 +382,8 @@ const ITEM_TABLE = [
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
+        0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x016, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080, 0x081, 0x081,
         0x101, 0x201, 0x301,
@@ -395,8 +395,8 @@ const ITEM_TABLE = [
     ],
     [
         0x000, 0x000, 0x000, 0x000,
-        0x010, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x021, 0x021,
+        0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x016, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080, 0x081, 0x081,
         0x101, 0x201, 0x301, 0x302,
@@ -527,6 +527,49 @@ const ITEM_DATA = [
             addHung(5);
             addLog(this.name+" を飲んだ　HP が "+value+" 回復した");
             play_audio(audio_heal);
+            inventory.splice(inventory.indexOf(this), 1);
+            return true;
+        },
+    },
+    {
+        id: 0x015,
+        name: "雫石",
+        type: "potion",
+        price: 7,
+        func: async function() {
+            await setCondition(player, 0x81);
+            learning(0x404);
+
+            addLog(this.name+" を砕いた");
+            inventory.splice(inventory.indexOf(this), 1);
+            return true;
+        },
+    },
+    {
+        id: 0x016,
+        name: "輝雫石",
+        type: "potion",
+        price: 7,
+        func: async function() {
+            if(await setCondition(player, 0x81))
+                player.condition.find(v=v.id==0x81).value = 10;
+            learning(0x405);
+            
+            addLog(this.name+" を砕いた");
+            inventory.splice(inventory.indexOf(this), 1);
+            return true;
+        },
+    },
+    {
+        id: 0x017,
+        name: "古びた輝雫石",
+        type: "potion",
+        price: 7,
+        func: async function() {
+            if(await setCondition(player, 0x81))
+                player.condition.find(v=v.id==0x81).value = 20;
+            
+            addLog(this.name+" を砕いた");
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },
@@ -1029,6 +1072,19 @@ const ITEM_DATA = [
             addLog(player.name+" は "+this.name+" を読んだ");
             setCanLearning(0x400);
             setCanLearning(0x480);
+            addLog(player.name+" は新しい技能を習得できるようになった");
+            play_audio(audio_lvup);
+            return false;
+        },
+    },
+    {
+        id: 0xe0f,
+        name: "太陽の書",
+        type: "unique",
+        price: 500,
+        func: async function() {
+            addLog(player.name+" は "+this.name+" を読んだ");
+            setCanLearning(0x502);
             addLog(player.name+" は新しい技能を習得できるようになった");
             play_audio(audio_lvup);
             return false;
@@ -1549,6 +1605,8 @@ const SKILL_DATA = [
         func: async function(from, to) {
             if(await attack(from, to) && Math.floor(Math.random() + 0.33))
                 await setCondition(to, 0x00);
+
+            if(to == player) learning(0x503);
             return true;
         }
     },
@@ -1728,10 +1786,28 @@ const SKILL_DATA = [
         target_type: "self",
         cost_type: "fp",
         cost: 13,
+        learning_start_cnt: 10,
+        learning_chance: 0.1,
         func: async function(from, to) {
             play_audio(audio_heal);
 
             await setCondition(from, 0x81);
+            return true;
+        }
+    },
+    {
+        id: 0x405,
+        name: "溢れ出る恵み",
+        target_type: "self",
+        cost_type: "fp",
+        cost: 13,
+        learning_start_cnt: 10,
+        learning_chance: 0.1,
+        func: async function(from, to) {
+            play_audio(audio_heal);
+
+            if(await setCondition(player, 0x81))
+                player.condition.find(v=v.id==0x81).value = 10;
             return true;
         }
     },
@@ -1782,6 +1858,8 @@ const SKILL_DATA = [
         target_type: "range",
         cost_type: "fp",
         cost: 5,
+        learning_start_cnt: 5,
+        learning_chance: 0.1,
         func: async function(from, to) {
             play_audio(audio_fire);
             addLog(from.name+" は火球を投げた");
@@ -1789,7 +1867,9 @@ const SKILL_DATA = [
 
             let int = from.int ? from.int : 10;
             let fth = from.fth ? from.fth : 10;
-            await magic(from, 20 + int * 2 + fth * 2, getDirection(from, to));
+            let dmg = 20 + int * 2 + fth * 2;
+            await magic(from, dmg, getDirection(from, to));
+            if(dmg > 100) learning(0x501);
             return true;
         }
     },
@@ -1799,6 +1879,8 @@ const SKILL_DATA = [
         target_type: "range",
         cost_type: "fp",
         cost: 10,
+        learning_start_cnt: 10,
+        learning_chance: 0.1,
         func: async function(from, to) {
             play_audio(audio_fire);
             addLog(from.name+" は大きな火球を投げた");
@@ -1841,6 +1923,8 @@ const SKILL_DATA = [
         target_type: "range",
         cost_type: "fp",
         cost: 8,
+        learning_start_cnt: 3,
+        learning_chance: 0.2,
         func: async function(from, to) {
             play_audio(audio_poison);
             addLog(from.name+" から毒の霧が漂い出した");
@@ -1987,7 +2071,7 @@ const CONDITION_DATA = [
     {
         id: 0x81,
         name: "癒",
-        turn: 20,
+        turn: 10,
         value: 5,
         func_be: async function(who) {
             addLog("温かい光が "+who.name+" の体を包む");

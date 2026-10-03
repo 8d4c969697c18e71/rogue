@@ -1584,18 +1584,18 @@ function initStatus() {
 
 // 状態異常追加
 async function setCondition(who, id, turn = -1) {
-    const cond = CONDITION_DATA.find(v=>v.id==id);
-    if(!who || !cond || !("condition" in who)) return false;
-    const turn_use = turn < 0 ? cond.turn : turn;
+    const cond_data = CONDITION_DATA.find(v=>v.id==id);
+    if(!who || !cond_data || !("condition" in who)) return false;
+    const turn_use = turn < 0 ? cond_data.turn : turn;
     
     // 重複判定
-    for(let c of who.condition)
-        if(c.id == id) {
-            console.warn("setCondition: already have "+cond.name+".")
-            return false;
-        }
-
-    let c = Object.assign({}, cond, {turn: turn_use});
+    let cond = who.condition.find(v=>v.id == id);
+    if(cond) {
+        c.turn = turn_use;
+        return false;
+    }
+    
+    let c = Object.assign({}, cond_data, {turn: turn_use});
     who.condition.push(c);
     await who.condition[who.condition.length-1].func_be(who);
     return true;
