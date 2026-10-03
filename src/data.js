@@ -1222,7 +1222,9 @@ const ITEM_DATA = [
                 addItem(0x381);
                 addItem(0x020);
                 setCanLearning(0x400);
+                setCanLearning(0x480);
                 setSkill(0x400);
+                setSkill(0x480);
                 inventory.splice(inventory.indexOf(this), 1);
                 return true;
             }

@@ -1,6 +1,7 @@
+const nodata_flg = new URLSearchParams(location.search).get("nodata") !== null;
+
 window.addEventListener("load", loadCanvas);
 window.addEventListener("resize", loadCanvas);
-
 async function loadCanvas() {
     if(isPhone()) {
         FONT_SIZE = 18;
@@ -19,14 +20,17 @@ async function events() {
         window.location.replace("./name.html");
     }
     else if(key_input.cancel) {
-        play_audio(audio_apply);
-        await wait(60);
-        window.location.replace("./main.html");
+        if(!nodata_flg) {
+            play_audio(audio_apply);
+            await wait(60);
+            window.location.replace("./main.html");
+            return;
+        }
+        play_audio(audio_cancel);
     }
 }
 
 function drawTitle() {
-    const nodata_flg = new URLSearchParams(location.search).get("nodata") !== null
     const title_fig = [
         "",
         "Rogueっぽいやつ",

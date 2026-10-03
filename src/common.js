@@ -44,10 +44,17 @@ let timeout_id_btn = undefined;
 let interval_id_btn = undefined;
 const LONGPRESS_START_MS = 300;
 const LONGPRESS_INTERVAL_MS = 50;
+document.body.addEventListener("touchstart", e => {e.preventDefault();});
+document.body.addEventListener("touchend", e => {e.preventDefault();});
+document.body.addEventListener("touchmove", e => {e.preventDefault();});
+document.body.addEventListener("touchcancel", e => {e.preventDefault();});
 btn_left.addEventListener("touchstart", async () => {
     await touchstartEL(btn_left, "left");
 });
 btn_left.addEventListener("touchend", async () => {
+    await touchendEL(btn_left, "left");
+});
+btn_left.addEventListener("touchcancel", async () => {
     await touchendEL(btn_left, "left");
 });
 btn_right.addEventListener("touchstart", async () => {
@@ -56,10 +63,16 @@ btn_right.addEventListener("touchstart", async () => {
 btn_right.addEventListener("touchend", async () => {
     await touchendEL(btn_right, "right");
 });
+btn_right.addEventListener("touchcancel", async () => {
+    await touchendEL(btn_right, "right");
+});
 btn_up.addEventListener("touchstart", async () => {
     await touchstartEL(btn_up, "up");
 });
 btn_up.addEventListener("touchend", async () => {
+    await touchendEL(btn_up, "up");
+});
+btn_up.addEventListener("touchcancel", async () => {
     await touchendEL(btn_up, "up");
 });
 btn_down.addEventListener("touchstart", async () => {
@@ -68,10 +81,16 @@ btn_down.addEventListener("touchstart", async () => {
 btn_down.addEventListener("touchend", async () => {
     await touchendEL(btn_down, "down");
 });
+btn_down.addEventListener("touchcancel", async () => {
+    await touchendEL(btn_down, "down");
+});
 btn_upleft.addEventListener("touchstart", async () => {
     await touchstartEL(btn_upleft, "up_left");
 });
 btn_upleft.addEventListener("touchend", async () => {
+    await touchendEL(btn_upleft, "up_left");
+});
+btn_upleft.addEventListener("touchcancel", async () => {
     await touchendEL(btn_upleft, "up_left");
 });
 btn_upright.addEventListener("touchstart", async () => {
@@ -80,10 +99,16 @@ btn_upright.addEventListener("touchstart", async () => {
 btn_upright.addEventListener("touchend", async () => {
     await touchendEL(btn_upright, "up_right");
 });
+btn_upright.addEventListener("touchcancel", async () => {
+    await touchendEL(btn_upright, "up_right");
+});
 btn_downleft.addEventListener("touchstart", async () => {
     await touchstartEL(btn_downleft, "down_left");
 });
 btn_downleft.addEventListener("touchend", async () => {
+    await touchendEL(btn_downleft, "down_left");
+});
+btn_downleft.addEventListener("touchcancel", async () => {
     await touchendEL(btn_downleft, "down_left");
 });
 btn_downright.addEventListener("touchstart", async () => {
@@ -92,10 +117,16 @@ btn_downright.addEventListener("touchstart", async () => {
 btn_downright.addEventListener("touchend", async () => {
     await touchendEL(btn_downright, "down_right");
 });
+btn_downright.addEventListener("touchcancel", async () => {
+    await touchendEL(btn_downright, "down_right");
+});
 btn_apply.addEventListener("touchstart", async () => {
     await touchstartEL(btn_apply, "apply");
 });
 btn_apply.addEventListener("touchend", async () => {
+    await touchendEL(btn_apply, "apply");
+});
+btn_apply.addEventListener("touchcancel", async () => {
     await touchendEL(btn_apply, "apply");
 });
 btn_cancel.addEventListener("touchstart", async () => {
@@ -104,10 +135,16 @@ btn_cancel.addEventListener("touchstart", async () => {
 btn_cancel.addEventListener("touchend", async () => {
     await touchendEL(btn_cancel, "cancel");
 });
+btn_cancel.addEventListener("touchcancel", async () => {
+    await touchendEL(btn_cancel, "cancel");
+});
 btn_sub.addEventListener("touchstart", async () => {
     await touchstartEL(btn_sub, "sub");
 });
 btn_sub.addEventListener("touchend", async () => {
+    await touchendEL(btn_sub, "sub");
+});
+btn_sub.addEventListener("touchcancel", async () => {
     await touchendEL(btn_sub, "sub");
 });
 // イベントリスナー
