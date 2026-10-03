@@ -40,131 +40,65 @@ document.addEventListener("keyup", e=>{
 });
 
 // スマホ用ボタン
-let timeout_id_btn = undefined;
-let interval_id_btn = undefined;
 const LONGPRESS_START_MS = 300;
 const LONGPRESS_INTERVAL_MS = 50;
-document.body.addEventListener("touchstart", e => {e.preventDefault();});
-document.body.addEventListener("touchend", e => {e.preventDefault();});
-document.body.addEventListener("touchmove", e => {e.preventDefault();});
-document.body.addEventListener("touchcancel", e => {e.preventDefault();});
-btn_left.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_left, "left");
-});
-btn_left.addEventListener("touchend", async () => {
-    await touchendEL(btn_left, "left");
-});
-btn_left.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_left, "left");
-});
-btn_right.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_right, "right");
-});
-btn_right.addEventListener("touchend", async () => {
-    await touchendEL(btn_right, "right");
-});
-btn_right.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_right, "right");
-});
-btn_up.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_up, "up");
-});
-btn_up.addEventListener("touchend", async () => {
-    await touchendEL(btn_up, "up");
-});
-btn_up.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_up, "up");
-});
-btn_down.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_down, "down");
-});
-btn_down.addEventListener("touchend", async () => {
-    await touchendEL(btn_down, "down");
-});
-btn_down.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_down, "down");
-});
-btn_upleft.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_upleft, "up_left");
-});
-btn_upleft.addEventListener("touchend", async () => {
-    await touchendEL(btn_upleft, "up_left");
-});
-btn_upleft.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_upleft, "up_left");
-});
-btn_upright.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_upright, "up_right");
-});
-btn_upright.addEventListener("touchend", async () => {
-    await touchendEL(btn_upright, "up_right");
-});
-btn_upright.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_upright, "up_right");
-});
-btn_downleft.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_downleft, "down_left");
-});
-btn_downleft.addEventListener("touchend", async () => {
-    await touchendEL(btn_downleft, "down_left");
-});
-btn_downleft.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_downleft, "down_left");
-});
-btn_downright.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_downright, "down_right");
-});
-btn_downright.addEventListener("touchend", async () => {
-    await touchendEL(btn_downright, "down_right");
-});
-btn_downright.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_downright, "down_right");
-});
-btn_apply.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_apply, "apply");
-});
-btn_apply.addEventListener("touchend", async () => {
-    await touchendEL(btn_apply, "apply");
-});
-btn_apply.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_apply, "apply");
-});
-btn_cancel.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_cancel, "cancel");
-});
-btn_cancel.addEventListener("touchend", async () => {
-    await touchendEL(btn_cancel, "cancel");
-});
-btn_cancel.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_cancel, "cancel");
-});
-btn_sub.addEventListener("touchstart", async () => {
-    await touchstartEL(btn_sub, "sub");
-});
-btn_sub.addEventListener("touchend", async () => {
-    await touchendEL(btn_sub, "sub");
-});
-btn_sub.addEventListener("touchcancel", async () => {
-    await touchendEL(btn_sub, "sub");
-});
+const repeatTimers = new Map();
+document.body.addEventListener("pointerdown", e => {e.preventDefault();});
+document.body.addEventListener("pointerup", e => {e.preventDefault();});
+document.body.addEventListener("pointercancel", e => {e.preventDefault();});
+document.body.addEventListener("pointerleave", e => {e.preventDefault();});
+setupKeyRepeat(btn_left, "left");
+setupKeyRepeat(btn_right, "right");
+setupKeyRepeat(btn_up, "up");
+setupKeyRepeat(btn_down, "down");
+setupKeyRepeat(btn_upleft, "up_left");
+setupKeyRepeat(btn_upright, "up_right");
+setupKeyRepeat(btn_downleft, "down_left");
+setupKeyRepeat(btn_downright, "down_right");
+setupKeyRepeat(btn_apply, "apply");
+setupKeyRepeat(btn_cancel, "cancel");
+setupKeyRepeat(btn_sub, "sub");
 // イベントリスナー
-async function touchstartEL(btn, input) {
-    setButtonPressed(btn);
-    await exeEventButton(input);
+function setupKeyRepeat(button, input) {
+    let stopped = false;
 
-    clearButtonTI();
-    timeout_id_btn = setTimeout(async () => {
-        interval_id_btn = setInterval(async () => {
+    const stop = () => {
+        stopped = true;
+
+        const timer = repeatTimers.get(button);
+        if (timer !== undefined) {
+            clearTimeout(timer);
+            repeatTimers.delete(button);
+        }
+    };
+
+    button.addEventListener("pointerdown", async () => {
+        stop();
+        stopped = false;
+
+        // 押した瞬間に1回実行
+        await exeEventButton(input);
+
+        if (stopped) return;
+
+        // 長押し開始
+        const startTimer = setTimeout(async function repeat() {
+            if (stopped) return;
+
             await exeEventButton(input);
-        }, LONGPRESS_INTERVAL_MS);
-    }, LONGPRESS_START_MS);
-}
-async function touchendEL(btn, input) {
-    setButtonNotPressed(btn);
-    if(["up_left", "up_right", "down_left", "down_right"].includes(input))
-        key_input.ctrl = false;
-    key_input[input] = false;
-    clearButtonTI();
+
+            if (stopped) return;
+
+            const timer = setTimeout(repeat, LONGPRESS_INTERVAL_MS);
+            repeatTimers.set(button, timer);
+        }, LONGPRESS_START_MS);
+
+        repeatTimers.set(button, startTimer);
+    });
+
+    button.addEventListener("pointerup", stop);
+    button.addEventListener("pointercancel", stop);
+    button.addEventListener("pointerleave", stop);
 }
 async function exeEventButton(input) {
     if(!exe_event_flag) {
@@ -173,12 +107,6 @@ async function exeEventButton(input) {
         key_input[input] = true;
         await events();
     }
-}
-function clearButtonTI() {
-    clearTimeout(timeout_id_btn);
-    clearInterval(interval_id_btn);
-    timeout_id_btn = undefined;
-    interval_id_btn = undefined;
 }
 function setButtonNotPressed(button) {
     button.style.backgroundColor = "black";
