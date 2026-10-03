@@ -64,6 +64,7 @@ function setupKeyRepeat(button, input) {
 
     const stop = () => {
         stopped = true;
+        disableKeyInput(input);
 
         const timer = repeatTimers.get(button);
         if (timer !== undefined) {
@@ -107,6 +108,11 @@ async function exeEventButton(input) {
         key_input[input] = true;
         await events();
     }
+}
+async function disableKeyInput(input) {
+    if(["up_left", "up_right", "down_left", "down_right"].includes(input))
+        key_input.ctrl = false;
+    key_input[input] = false;
 }
 function setButtonNotPressed(button) {
     button.style.backgroundColor = "black";
