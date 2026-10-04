@@ -1593,12 +1593,12 @@ async function setCondition(who, id, turn = -1) {
     // 重複判定
     let cond = who.condition.find(v=>v.id == id);
     if(cond) {
-        c.turn = turn_use;
+        cond.turn = turn_use;
         return false;
     }
     
-    let c = Object.assign({}, cond_data, {turn: turn_use});
-    who.condition.push(c);
+    cond = Object.assign({}, cond_data, {turn: turn_use});
+    who.condition.push(cond);
     await who.condition[who.condition.length-1].func_be(who);
     return true;
 }
