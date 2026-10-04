@@ -26,6 +26,7 @@ const btn_arrow = document.getElementsByClassName("btn_arrow");
 // audio
 const audio_apply = new Audio("sound/apply.wav");
 const audio_attack = new Audio("sound/attack.wav");
+const audio_break = new Audio("sound\break.wav");
 const audio_cancel = new Audio("sound/cancel.wav");
 const audio_coin = new Audio("sound/coin.wav");
 const audio_death = new Audio("sound/death.wav");
@@ -551,6 +552,7 @@ const ITEM_DATA = [
         price: 7,
         func: async function() {
             addLog(this.name+" を砕いた");
+            play_audio(audio_break);
 
             await setCondition(player, 0x81);
             learning(0x404);
@@ -566,6 +568,7 @@ const ITEM_DATA = [
         price: 7,
         func: async function() {
             addLog(this.name+" を砕いた");
+            play_audio(audio_break);
             
             if(await setCondition(player, 0x81))
                 player.condition.find(v=v.id==0x81).value = 10;
@@ -582,6 +585,7 @@ const ITEM_DATA = [
         price: 7,
         func: async function() {
             addLog(this.name+" を砕いた");
+            play_audio(audio_break);
 
             if(await setCondition(player, 0x81))
                 player.condition.find(v=v.id==0x81).value = 20;

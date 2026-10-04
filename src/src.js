@@ -582,26 +582,28 @@ async function throwing(who, item, direction) {
         hit = player;
     }
     // アイテム化
-    else if(!item.remove_after_throw) {
+    else {
         play_audio(audio_shot);
         addLog(who.name+" は "+item.name+" を投擲した");
         await animShot(who, dst, direction, char, 100);
 
-        let placed_flg = false;
-        for(let s=0; s<SIZEX && !placed_flg; s++)
-            for(let k=0; k<=s && !placed_flg; k++) {
-                const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
-                const unique_arr = Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
-                for(let elm of unique_arr) {
-                    const px = dst.x+elm[0];
-                    const py = dst.y+elm[1];
-                    if(canMove(px, py) && !isItem(px, py)) {
-                        setItem(item.id, px, py);
-                        placed_flg = true;
-                        break;
+        if(!item.remove_after_throw) {
+            let placed_flg = false;
+            for(let s=0; s<SIZEX && !placed_flg; s++)
+                for(let k=0; k<=s && !placed_flg; k++) {
+                    const arr = [[k,s], [k,-s], [-k,s], [-k,-s], [s,k], [s,-k], [-s,k], [-s,-k]];
+                    const unique_arr = Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
+                    for(let elm of unique_arr) {
+                        const px = dst.x+elm[0];
+                        const py = dst.y+elm[1];
+                        if(canMove(px, py) && !isItem(px, py)) {
+                            setItem(item.id, px, py);
+                            placed_flg = true;
+                            break;
+                        }
                     }
                 }
-            }
+        }
     }
     
     // 投擲後の固有処理(あれば)
