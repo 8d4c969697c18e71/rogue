@@ -8,7 +8,7 @@ body{
     justify-content: center;
     user-select: none;
     overflow: hidden;
-    touch-action: manipulation;
+    touch-action: none;
     white-space: nowrap;
 }
 .sub1{
