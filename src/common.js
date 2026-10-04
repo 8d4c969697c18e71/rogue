@@ -47,6 +47,10 @@ document.body.addEventListener("pointerdown", e => {e.preventDefault();});
 document.body.addEventListener("pointerup", e => {e.preventDefault();});
 document.body.addEventListener("pointercancel", e => {e.preventDefault();});
 document.body.addEventListener("pointerleave", e => {e.preventDefault();});
+document.body.addEventListener("touchstart", e => {e.preventDefault();});
+document.body.addEventListener("touchend", e => {e.preventDefault();});
+document.body.addEventListener("touchcancel", e => {e.preventDefault();});
+document.body.addEventListener("touchmove", e => {e.preventDefault();});
 setupKeyRepeat(btn_left, "left");
 setupKeyRepeat(btn_right, "right");
 setupKeyRepeat(btn_up, "up");
@@ -65,6 +69,7 @@ function setupKeyRepeat(button, input) {
     const stop = () => {
         stopped = true;
         disableKeyInput(input);
+        setButtonNotPressed(button);
 
         const timer = repeatTimers.get(button);
         if (timer !== undefined) {
@@ -78,6 +83,7 @@ function setupKeyRepeat(button, input) {
         stopped = false;
 
         // 押した瞬間に1回実行
+        setButtonPressed(button);
         await exeEventButton(input);
 
         if (stopped) return;
