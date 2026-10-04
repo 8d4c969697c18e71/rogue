@@ -1863,7 +1863,7 @@ const SKILL_DATA = [
         cost_type: "fp",
         cost: 5,
         learning_start_cnt: 5,
-        learning_chance: 0.1,
+        learning_chance: 0.2,
         func: async function(from, to) {
             play_audio(audio_fire);
             addLog(from.name+" は火球を投げた");
@@ -1884,7 +1884,7 @@ const SKILL_DATA = [
         cost_type: "fp",
         cost: 10,
         learning_start_cnt: 10,
-        learning_chance: 0.1,
+        learning_chance: 0.3,
         func: async function(from, to) {
             play_audio(audio_fire);
             addLog(from.name+" は大きな火球を投げた");

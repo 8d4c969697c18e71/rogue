@@ -88,12 +88,12 @@ async function loadCookie() {
                 player_skill.push(Object.assign({}, getSkillData(val.id), val));
                 read_flg.skill = true;
             }
-            else if(key.match(/learning_([0-9]*)/)) {
-                player_learning.push(Object.assign({}, val));
-                read_flg.learning = true;
-            }
             else if(key.match(/can_learning_([0-9]*)/)) {
                 can_learning.push(Object.assign({}, val));
+                read_flg.learning = true;
+            }
+            else if(key.match(/learning_([0-9]*)/)) {
+                player_learning.push(Object.assign({}, val));
                 read_flg.learning = true;
             }
             else if(key.match(/storage_([0-9]*)/)) {
