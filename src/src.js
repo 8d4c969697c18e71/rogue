@@ -1078,7 +1078,7 @@ function getSkillData(id) {
 }
 
 // スキル学習
-async function learning(skill_id) {
+function learning(skill_id) {
     // 習得済み
     if(player_skill.find(v=>v.id == skill_id)) {
         return;
@@ -2172,7 +2172,9 @@ async function doEventEnemy(enemy) {
                 continue;
             else if(skill.cost_type == "fp" && enemy.fp < skill.cost)
                 continue;
-            // hungは消費なし
+            // hungはfpで代用
+            else if(skill.cost_type == "hung" && enemy.fp < skill.cost)
+                continue;
 
             // 使用
             if(enemy.map_sight[target.y][target.x]) {
@@ -2194,7 +2196,7 @@ async function doEventEnemy(enemy) {
                     // コスト消費
                     if(skill.cost_type == "hp") addHP(enemy, -skill.cost);
                     else if(skill.cost_type == "fp") addFP(enemy, -skill.cost);
-                    else if(skill.cost_type == "hung") ;
+                    else if(skill.cost_type == "hung") addFP(enemy, -skill.cost);
                     else console.warn("doEventEnemy: "+enemy.name+": "+skill.name+": cannot pay cost properly");
                     return;
                 }

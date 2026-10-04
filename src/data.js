@@ -413,19 +413,31 @@ const ENEMY_TABLE = [
         0x000, 0x001,
     ],
     [
-        0x000,  0x001, 0x002, 0x003,
+        0x000,  0x001, 0x002, 0x003, 0x007,
     ],
     [
         0x002, 0x003, 0x004,
     ],
     [
-        0x002, 0x004, 0x005,
+        0x002, 0x004, 0x005, 0x007,
     ],
     [
-        0x002, 0x004, 0x005, 0x006,
+        0x004, 0x005, 0x006,
     ],
     [
-        0x002, 0x004, 0x005, 0x006,
+        0x004, 0x005, 0x006, 0x007, 0x009,
+    ],
+    [
+        0x005, 0x00a,
+    ],
+    [
+        0x005, 0x00a, 0x00b, 0x007,
+    ],
+    [
+        0x005, 0x00a, 0x00b, 0x009,
+    ],
+    [
+        0x002, 0x008, 0x009,
     ],
 ];
 const TRAP_TABLE = [
@@ -1407,7 +1419,7 @@ const ENEMY_DATA = [
         fp: 0, fp_max: 0,
         atk: 50, def: 15,
         speed: 1,
-        sight_range: 4,
+        sight_range: 3,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
@@ -1424,9 +1436,9 @@ const ENEMY_DATA = [
         lv: 1,
         hp: 80, hp_max: 80, 
         fp: 15, fp_max: 15,
-        atk: 40, def: 10,
+        atk: 30, def: 10,
         speed: 1,
-        sight_range: 5,
+        sight_range: 4,
         escape_flag: false,
         distance: 3,
         group_spawn_flag: false,
@@ -1497,10 +1509,10 @@ const ENEMY_DATA = [
         char: "車",
         lv: 1,
         hp: 150, hp_max: 150,
-        fp: 5, fp_max: 5,
+        fp: 20, fp_max: 20,
         atk: 40, def: 7,
         speed: 1,
-        sight_range: 5,
+        sight_range: 4,
         escape_flag: false,
         distance: 0,
         group_spawn_flag: false,
@@ -1512,6 +1524,133 @@ const ENEMY_DATA = [
             {
                 id: 0x004,
                 chance: 0.75,
+            }
+        ],
+    },
+    {
+        id: 0x007,
+        name: "大ヒル",
+        char: "蛭",
+        lv: 1,
+        hp: 120, hp_max: 120,
+        fp: 2, fp_max: 2,
+        atk: 20, def: 12,
+        speed: 1,
+        sight_range: 2,
+        escape_flag: false,
+        distance: 0,
+        group_spawn_flag: false,
+        berserk_flag: false,
+        exp: 12,
+        func_spawn: async function(me) {},
+        func_died: async function() {},
+        skill: [
+            {
+                id: 0x003,
+                chance: 1,
+                cost: 0,
+            }
+        ],
+    },
+    {
+        id: 0x008,
+        name: "重鉄兵",
+        char: "鉄",
+        lv: 1,
+        hp: 150, hp_max: 150,
+        fp: 0, fp_max: 0,
+        atk: 50, def: 20,
+        speed: 1,
+        sight_range: 3,
+        escape_flag: false,
+        distance: 0,
+        group_spawn_flag: false,
+        berserk_flag: false,
+        exp: 18,
+        func_spawn: async function(me) {},
+        func_died: async function() {},
+        skill: [
+            {
+                id: 0x008,
+                chance: 0.2,
+            }
+        ],
+    },
+    {
+        id: 0x009,
+        name: "異形の影",
+        char: "影",
+        lv: 1,
+        hp: 100, hp_max: 100,
+        fp: 20, fp_max: 20,
+        atk: 30, def: 5,
+        speed: 1,
+        sight_range: 4,
+        escape_flag: false,
+        distance: 0,
+        group_spawn_flag: false,
+        berserk_flag: false,
+        exp: 18,
+        func_spawn: async function(me) {},
+        func_died: async function() {
+            learning(0x002);
+        },
+        skill: [
+            {
+                id: 0x002,
+                chance: 0.5,
+            }
+        ],
+    },
+    {
+        id: 0x00a,
+        name: "亜人",
+        char: "亜",
+        lv: 1,
+        hp: 100, hp_max: 100,
+        fp: 2, fp_max: 2,
+        atk: 30, def: 5,
+        speed: 1,
+        sight_range: 4,
+        escape_flag: false,
+        distance: 0,
+        group_spawn_flag: true,
+        berserk_flag: false,
+        exp: 11,
+        func_spawn: async function(me) {},
+        func_died: async function() {},
+        skill: [
+            {
+                id: 0xf00,
+                chance: 0.3,
+            }
+        ],
+    },
+    {
+        id: 0x00b,
+        name: "亜人の術師",
+        char: "亜",
+        lv: 1,
+        hp: 90, hp_max: 90,
+        fp: 15, fp_max: 15,
+        atk: 20, def: 5,
+        speed: 1,
+        sight_range: 5,
+        escape_flag: false,
+        distance: 3,
+        group_spawn_flag: true,
+        berserk_flag: false,
+        exp: 13,
+        func_spawn: async function(me) {},
+        func_died: async function() {},
+        skill: [
+            {
+                id: 0x300,
+                chance: 0.5,
+            },
+            {
+                id: 0xf00,
+                chance: 0.2,
             }
         ],
     },
@@ -1941,6 +2080,17 @@ const SKILL_DATA = [
         }
     },
     // util 0xfXX
+    {
+        id: 0xf00,
+        name: "様子を見る",
+        target_type: "self",
+        cost_type: "hp",
+        cost: 0,
+        func: async function(from, to) {
+            addLog(from.name+" は様子を見ている");
+            return true;
+        }
+    },
 ];
 
 //==================================================CONDITION==================================================
