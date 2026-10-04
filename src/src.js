@@ -89,7 +89,7 @@ async function loadCookie() {
                 read_flg.skill = true;
             }
             else if(key.match(/can_learning_([0-9]*)/)) {
-                can_learning.push(Object.assign({}, val));
+                can_learning.push(val);
                 read_flg.learning = true;
             }
             else if(key.match(/learning_([0-9]*)/)) {
