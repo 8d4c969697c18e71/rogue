@@ -26,10 +26,11 @@ const btn_arrow = document.getElementsByClassName("btn_arrow");
 // audio
 const audio_apply = new Audio("sound/apply.wav");
 const audio_attack = new Audio("sound/attack.wav");
-const audio_break = new Audio("sound\break.wav");
+const audio_break = new Audio("sound/break.wav");
 const audio_cancel = new Audio("sound/cancel.wav");
 const audio_coin = new Audio("sound/coin.wav");
 const audio_death = new Audio("sound/death.wav");
+const audio_eat = new Audio("sound/eat.wav");
 const audio_explosion = new Audio("sound/explosion.wav");
 const audio_fire = new Audio("sound/fire.wav");
 const audio_force = new Audio("sound/force.wav");
@@ -645,7 +646,7 @@ const ITEM_DATA = [
             let value = 30;
             addHung(value);
             addLog(this.name+" を食べた　空腹度 が "+value+" 回復した");
-            play_audio(audio_heal);
+            play_audio(audio_eat);
             inventory.splice(inventory.indexOf(this), 1);
             return true;
         },

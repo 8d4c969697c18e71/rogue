@@ -848,15 +848,12 @@ async function doEventInventory() {
     // apply
     if(key_input.apply)
         if(inv_cursor<inventory.length && await useItem(inv_cursor)) {
-            play_audio(audio_apply);
-            //inv_cursor = -1;
             inventory_flag = false;
             return true;
         }
     // cancel
     if(key_input.cancel) {
         play_audio(audio_cancel);
-        //inv_cursor = -1;
         inventory_flag = false;
         return false;
     }
