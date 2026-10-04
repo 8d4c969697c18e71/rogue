@@ -2141,6 +2141,9 @@ async function doEventEnemies() {
 }
 
 async function doEventEnemy(enemy) {
+    // fp回復
+    if(turn_cnt % 2 == 0) addFP(enemy, 1);
+
     // 標的更新
     updateTarget(enemy)
 
