@@ -87,11 +87,11 @@ async function loadCookie() {
             else if(key.match(/player_skill_([0-9]*)/)) {
                 player_skill.push(Object.assign({}, getSkillData(val.id), val));
             }
-            else if(key.match(/can_learning_([0-9]*)/)) {
-                can_learning.push(val);
-            }
             else if(key.match(/player_learning_([0-9]*)/)) {
                 player_learning.push(Object.assign({}, val));
+            }
+            else if(key.match(/can_learning_([0-9]*)/)) {
+                can_learning.push(val);
             }
             else if(key.match(/skill_favorite_idx/)) {
                 skill_favorite_idx = val;
@@ -1042,12 +1042,12 @@ async function preSkill(skill_cursor) {
 }
 
 function setSkill(id) {
-    if(player_skill.length > SKILL_SIZE) {
-        addLog("これ以上記憶できない");
-        return false;
-    }
     if(player_skill.find(v=>v.id==id)) {
         console.warn("setSkill: already learned");
+        return false;
+    }
+    if(player_skill.length > SKILL_SIZE) {
+        addLog("これ以上記憶できない");
         return false;
     }
 
@@ -1084,7 +1084,7 @@ function getSkillData(id) {
 // スキル学習
 function learning(skill_id) {
     // 習得済み
-    if(player_skill.find(v=>v.id == skill_id)) {
+    if(can_learning.includes(skill_id)) {
         return;
     }
 
@@ -1114,14 +1114,17 @@ function learning(skill_id) {
 }
 
 function setCanLearning(skill_id) {
-    if(can_learning.find(v=>v.id==id)) {
+    if(can_learning.includes(skill_id)) {
         console.warn("setCanLearning: can already learn");
         return false;
     }
 
+    // 学習済みリスト追加
+    can_learning.push(skill_id);
+
+    // 学習中リスト削除
     const learning_data = player_learning.find(v=>v.skill_id == skill_id);
     if(learning_data) {
-        can_learning.push(skill_id);
         player_learning.splice(player_learning.indexOf(learning_data), 1);
     }
 }
