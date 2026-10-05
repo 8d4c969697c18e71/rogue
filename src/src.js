@@ -1230,8 +1230,8 @@ async function doEventShop() {
         }
         // sell
         else{
-            if(getItemInventory(shop_using.item[shop_cursor].id)) {
-                let item_sell = getItemInventory(shop_using.item[shop_cursor].id);
+            let item_sell = getItemInventoryLast(shop_using.item[shop_cursor].id);
+            if(item_sell) {
                 if(item_sell.equip_flag) {
                     play_audio(audio_cancel);
                     addLog("装備中だ");
@@ -1693,6 +1693,10 @@ function getItemData(id) {
 
 function getItemInventory(id) {
     return inventory.find(v=>v.id == id);
+}
+
+function getItemInventoryLast(id) {
+    return inventory.findLast(v=>v.id == id);
 }
 
 // アイテム使用

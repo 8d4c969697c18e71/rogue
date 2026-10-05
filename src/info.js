@@ -163,7 +163,7 @@ function drawLog() {
     const body_padding = parseInt(window.getComputedStyle(document.body).paddingTop);
     const body_margin = parseInt(window.getComputedStyle(document.body).marginTop);
     let content_height = window.innerHeight-body_padding-body_margin-canvas.clientHeight-arrow_size*3;
-    if(isPhone()) content_height /= 2;
+    if(isPhone() && shop_flag) content_height /= 2;
     log_display_num = Math.floor(content_height/log.clientHeight) - 2;
 
     log.innerHTML = "";

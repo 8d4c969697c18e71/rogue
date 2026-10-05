@@ -1116,7 +1116,7 @@ const ITEM_DATA = [
         id: 0xf00,
         name: "持たざる者の追憶",
         type: "unique",
-        price: 0,
+        price: 0xffff,
         st: {
             hp: 100,
             hp_max: 100,
@@ -1147,7 +1147,7 @@ const ITEM_DATA = [
         id: 0xf01,
         name: "戦士の追憶",
         type: "unique",
-        price: 0,
+        price: 0xffff,
         st: {
             hp: 175,
             hp_max: 175,
@@ -1191,7 +1191,7 @@ const ITEM_DATA = [
         id: 0xf02,
         name: "弓兵の追憶",
         type: "unique",
-        price: 0,
+        price: 0xffff,
         st: {
             hp: 130,
             hp_max: 130,
@@ -1237,7 +1237,7 @@ const ITEM_DATA = [
         id: 0xf03,
         name: "魔術師の追憶",
         type: "unique",
-        price: 0,
+        price: 0xffff,
         st: {
             hp: 110,
             hp_max: 110,
@@ -1279,7 +1279,7 @@ const ITEM_DATA = [
         id: 0xf04,
         name: "聖職者の追憶",
         type: "unique",
-        price: 0,
+        price: 0xffff,
         st: {
             hp: 140,
             hp_max: 140,
@@ -1323,7 +1323,7 @@ const ITEM_DATA = [
         id: 0xf05,
         name: "呪術師の追憶",
         type: "unique",
-        price: 0,
+        price: 0xffff,
         st: {
             hp: 120,
             hp_max: 120,
@@ -2506,7 +2506,6 @@ const SHOP_DATA = [
             }
         },
         func_buy: async function() {
-            this.item.length = 0;
             setSellList(this.item);
             if(this.item.length <= 0) {
                 setNotUseShop();
@@ -2556,18 +2555,13 @@ const SHOP_DATA = [
         item_table: [],
         func_before: async function() {
             setSellList(this.item);
-            if(this.item.length <= 0) {
-                setNotUseShop();
-                addLog(this.name+"「モノ　ナイ...」");
-            }
+            this.item.unshift(getItemData(0x800));
+            this.item.unshift(getItemData(0x030));
         },
         func_buy: async function() {
-            this.item.length = 0;
             setSellList(this.item);
-            if(this.item.length <= 0) {
-                setNotUseShop();
-                addLog(this.name+"「"+this.dialogue_outro+"」");
-            }
+            this.item.unshift(getItemData(0x800));
+            this.item.unshift(getItemData(0x030));
         },
         func_after: async function() {},
     },
@@ -2691,9 +2685,9 @@ let unique_map = [    // 固有マップ
             addItem(0x603);
             addItem(0x604);
             addItem(0x605);
-            await setEnemy(0x001, 11+x_offset, 2);
-            await setEnemy(0x001, 11+x_offset, 3);
-            await setEnemy(0x001, 11+x_offset, 4);
+            //await setEnemy(0x001, 11+x_offset, 2);
+            //await setEnemy(0x001, 11+x_offset, 3);
+            //await setEnemy(0x001, 11+x_offset, 4);
             clairvoyance();
         }
     },
@@ -2778,6 +2772,7 @@ let unique_map = [    // 固有マップ
         "000000000",
         ],
         func: async function(x_offset) {
+            fullRecovery(player);
             setShop(0x05, 6+x_offset, 4);
             setStair(4+x_offset, 1);
             setPortal(2+x_offset, 4);
