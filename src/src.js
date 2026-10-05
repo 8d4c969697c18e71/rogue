@@ -330,7 +330,7 @@ async function move(who, direction) {
 
 // 高速移動
 async function sprint(direction, not_diagonal) {
-    let log_before = log_reserve[log_reserve.length-1];
+    let log_before = log_reserve[0];
 
     // 移動
     await move(player, direction);
@@ -344,7 +344,7 @@ async function sprint(direction, not_diagonal) {
     drawAll();
 
     // 停止
-    if(log_reserve[log_reserve.length-1] != log_before)
+    if(log_reserve[0] != log_before)
         return;
     if(not_diagonal && !canMove(player.x+direction.x, player.y+direction.y))
         return;
@@ -386,7 +386,7 @@ function isFrontObj(who, direction) {
 }
 
 function isAnyObj(x, y) {
-    if(isItem(x, y) || getEnemy(x, y) || isNPC(x, y) || isShop(x, y))
+    if(isItem(x, y) || getEnemy(x, y) || isNPC(x, y) || isShop(x, y) || isDoor(x, y))
         return true;
     return false;
 }
@@ -680,7 +680,7 @@ async function dealDmg(from, to, dmg) {
         // 受け流し失敗
         if(cond.id == 0x80) {
             removeCondition(to, cond);
-            log_reserve.pop();
+            log_reserve.removeLogLatest();
             addLog(to.name+" は受け流しに失敗した");
             await dealDmg(from, to, Math.round(dmg*1.5));
             if(from == player) learning(0x001);
@@ -1631,7 +1631,7 @@ async function removeCondition(who, cond = "all") {
     else {
         while(who.condition.length > 0) {
             await who.condition[0].func_recovery(who);
-            log_reserve.pop();
+            removeLogLatest();
             who.condition.shift();
         }
     }
@@ -1783,7 +1783,7 @@ function addItem(id) {
         if(inventory.length < INVENTORY_SIZE) {
             for(let i=0; i<item.num; i++) {
                 addItem(item.item_id);
-                log_reserve.pop();
+                removeLogLatest();
             }
             addLog(item.name+" を入手");
             return true;
@@ -1793,7 +1793,7 @@ function addItem(id) {
                 if(i.stack_num + item.num <= STACK_MAX) {
                     for(let i=0; i<item.num; i++) {
                         addItem(item.item_id);
-                        log_reserve.pop();
+                        removeLogLatest();
                     }
                     addLog(item.name+" を入手");
                     return true;

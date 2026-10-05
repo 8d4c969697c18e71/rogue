@@ -242,6 +242,10 @@ function addLogSameLine(text) {
     drawLog();
 }
 
+function removeLogLatest() {
+    log_reserve.shift();
+}
+
 //=========================NOTE=========================
 
 function drawNote() {

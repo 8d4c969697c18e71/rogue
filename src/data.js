@@ -1135,7 +1135,7 @@ const ITEM_DATA = [
             lvup: {hp_max: 30, fp_max: 3, str: 2, dex: 2, fth: 3},
         },
         func: async function() {
-            log_reserve.pop();
+            removeLogLatest();
             player.job = this.id;
             backLv();
 
@@ -1167,7 +1167,7 @@ const ITEM_DATA = [
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
-                log_reserve.pop();
+                removeLogLatest();
                 player.job = this.id;
                 backLv();
 
@@ -1211,7 +1211,7 @@ const ITEM_DATA = [
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 5) {
-                log_reserve.pop();
+                removeLogLatest();
                 player.job = this.id;
                 backLv();
 
@@ -1257,7 +1257,7 @@ const ITEM_DATA = [
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
-                log_reserve.pop();
+                removeLogLatest();
                 player.job = this.id;
                 backLv();
 
@@ -1299,7 +1299,7 @@ const ITEM_DATA = [
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
-                log_reserve.pop();
+                removeLogLatest();
                 player.job = this.id;
                 backLv();
 
@@ -1343,7 +1343,7 @@ const ITEM_DATA = [
         },
         func: async function() {
             if(INVENTORY_SIZE-inventory.length >= 3) {
-                log_reserve.pop();
+                removeLogLatest();
                 player.job = this.id;
                 backLv();
 
@@ -1404,7 +1404,7 @@ const ENEMY_DATA = [
         exp: 2,
         func_spawn: async function(me) {
             await setCondition(me, 0x03, 1000);
-            log_reserve.pop();
+            removeLogLatest();
         },
         func_died: async function() {},
         skill: [
@@ -1731,7 +1731,7 @@ const SKILL_DATA = [
                 if(from.ammo.stack_num > 0) from.ammo.stack_num--;
                 if(from.ammo.stack_num <= 0) {
                     await equip(inventory.indexOf(from.ammo));
-                    log_reserve.pop();
+                    removeLogLatest();
                     inventory.splice(inventory.indexOf(from.ammo), 1);
                 }
 
