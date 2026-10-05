@@ -1116,7 +1116,7 @@ const ITEM_DATA = [
         id: 0xf00,
         name: "持たざる者の追憶",
         type: "unique",
-        price: 0xffff,
+        price: 0,
         st: {
             hp: 100,
             hp_max: 100,
@@ -1147,7 +1147,7 @@ const ITEM_DATA = [
         id: 0xf01,
         name: "戦士の追憶",
         type: "unique",
-        price: 0xffff,
+        price: 0,
         st: {
             hp: 175,
             hp_max: 175,
@@ -1191,7 +1191,7 @@ const ITEM_DATA = [
         id: 0xf02,
         name: "弓兵の追憶",
         type: "unique",
-        price: 0xffff,
+        price: 0,
         st: {
             hp: 130,
             hp_max: 130,
@@ -1237,7 +1237,7 @@ const ITEM_DATA = [
         id: 0xf03,
         name: "魔術師の追憶",
         type: "unique",
-        price: 0xffff,
+        price: 0,
         st: {
             hp: 110,
             hp_max: 110,
@@ -1279,7 +1279,7 @@ const ITEM_DATA = [
         id: 0xf04,
         name: "聖職者の追憶",
         type: "unique",
-        price: 0xffff,
+        price: 0,
         st: {
             hp: 140,
             hp_max: 140,
@@ -1323,7 +1323,7 @@ const ITEM_DATA = [
         id: 0xf05,
         name: "呪術師の追憶",
         type: "unique",
-        price: 0xffff,
+        price: 0,
         st: {
             hp: 120,
             hp_max: 120,

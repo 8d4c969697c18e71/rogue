@@ -55,6 +55,10 @@ function drawInv() {
             let str = "";
             if(i == inv_cursor)
                 str += "＞\u2007";
+            else if(i == inv_start_offset && inv_start_offset > 0)
+                str += "↑\u2007";
+            else if(i == inv_display_num+inv_start_offset-1 && inv_display_num+inv_start_offset < INVENTORY_SIZE)
+                str += "↓\u2007";
             else
                 str += "　\u2007";
             if(i < inventory.length) {
@@ -80,6 +84,10 @@ function drawInv() {
             let str = "";
             if(i == skill_cursor)
                 str += "＞\u2007";
+            else if(i == skill_start_offset && skill_start_offset > 0)
+                str += "↑\u2007";
+            else if(i == skill_display_num+skill_start_offset-1 && skill_display_num+skill_start_offset < SKILL_SIZE)
+                str += "↓\u2007";
             else
                 str += "　\u2007";
             if(i == skill_favorite_idx)
@@ -123,6 +131,10 @@ function drawShop() {
             let str = "";
             if(i == shop_cursor)
                 str += "＞\u2007";
+            else if(i == shop_start_offset && shop_start_offset > 0)
+                str += "↑\u2007";
+            else if(i == shop_display_num+shop_start_offset-1 && shop_display_num+shop_start_offset < shop_using.item.length)
+                str += "↓\u2007";
             else
                 str += "　\u2007";
             if(upgrade_flag) {
@@ -167,9 +179,26 @@ function drawLog() {
     log_display_num = Math.floor(content_height/log.clientHeight) - 2;
 
     log.innerHTML = "";
-    for(let i=(log_reserve.length-log_display_num<0)?0:log_reserve.length-log_display_num; i<log_reserve.length; i++)
-        log.insertAdjacentHTML("afterbegin",log_reserve[i]+"<br>");
-    log.insertAdjacentHTML("afterbegin","LOG<br>");
+    log.insertAdjacentHTML("beforeend","LOG<br>");
+    let idx_end = log_reserve.length < log_display_num ? log_reserve.length : log_display_num;
+    let num_br_line = 0;
+    for(let i=0; i<idx_end - num_br_line; i++) {
+        log.insertAdjacentHTML("beforeend",log_reserve[i]+"<br>");
+
+        // 折り返し有の場合は表示行を減らす
+        const range = new Range();
+        range.selectNode(document.querySelector("#log"));
+        const num_line = range.getClientRects().length - (i + num_br_line + 3);
+        if(num_line > 0) {
+            num_br_line += num_line;
+
+            // 最下行のログが複数行の場合はその行削除
+            if(i + num_br_line >= log_display_num) {
+                log.innerHTML = log.innerHTML.substring(0, log.innerHTML.length - (log_reserve[i] + "<br>").length);
+                break;
+            }
+        }
+    }
 }
 
 function addSpaceAfterBreak(str) {
@@ -202,14 +231,14 @@ function addSpaceAfterBreak(str) {
 }
 
 function addLog(text) {
-    log_reserve.push(addSpaceAfterBreak(turn_cnt + ": " + text));
+    log_reserve.unshift(addSpaceAfterBreak(turn_cnt + ": " + text));
     if(log_reserve.length>LOG_RESERVE_SIZE)
-        log_reserve.shift();
+        log_reserve.pop();
     drawLog();
 }
 
 function addLogSameLine(text) {
-    log_reserve[log_reserve.length-1] += "　" + text;
+    log_reserve[0] += "　" + text;
     drawLog();
 }
 

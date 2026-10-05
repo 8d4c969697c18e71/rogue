@@ -25,6 +25,7 @@ body{
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
+    white-space: wrap;
 }
 .sub4{
     display: flex;
