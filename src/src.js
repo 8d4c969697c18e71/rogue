@@ -1044,15 +1044,22 @@ async function preSkill(skill_cursor) {
 }
 
 function setSkill(id) {
-    const skill = getSkillData(id);
-    if(!skill) return false;
     if(player_skill.length > SKILL_SIZE) {
         addLog("これ以上記憶できない");
         return false;
     }
-    player_skill.push(skill);
-    addLog(player.name+" は "+skill.name+" を記憶した");
-    return true;
+    if(player_skill.find(v=>v.id==id)) {
+        console.warn("setSkill: already learned");
+        return false;
+    }
+
+    const skill = getSkillData(id);
+    if(skill) {
+        player_skill.push(skill);
+        addLog(player.name+" は "+skill.name+" を記憶した");
+        return true;
+    }
+    return false;
 }
 
 function setSkillItem(skill, item) {
@@ -1109,10 +1116,16 @@ function learning(skill_id) {
 }
 
 function setCanLearning(skill_id) {
+    if(can_learning.find(v=>v.id==id)) {
+        console.warn("setCanLearning: can already learn");
+        return false;
+    }
+
     const learning_data = player_learning.find(v=>v.skill_id == skill_id);
-    can_learning.push(skill_id);
-    if(learning_data != undefined)
+    if(learning_data) {
+        can_learning.push(skill_id);
         player_learning.splice(player_learning.indexOf(learning_data), 1);
+    }
 }
 
 function setLearningList(item_list) {
@@ -1560,6 +1573,7 @@ function initStatusAll() {
     player.job = 0xf00;
     player_skill = [];
     player_learning = [];
+    can_learning = [];
     backLv();
 }
 
