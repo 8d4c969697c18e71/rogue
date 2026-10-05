@@ -182,7 +182,7 @@ function updateMap() {
     if(throwing_flag) updateShotRange(THROWING_RANGE);
     else if(skill_draw_aim_flag && skill_using) {
         if(skill_using.target_type == "range") updateShotRange(SKILL_RANGE);
-        else if(skill_using.target_type == "next") updateShotRange(1, 1);
+        else if(skill_using.target_type == "next") updateShotRange(1, 1, true);
         else if(skill_using.target_type == "self") updateShotRange(0, 0);
     }
     // アイテム
@@ -257,52 +257,52 @@ function updateMDTrap() {
 }
 
 // 射撃・投擲・魔法の射程
-function updateShotRange(range = 0, idx_init = 1) {
+function updateShotRange(range = 0, idx_init = 1, on_wall_flag = false) {
     // 左上
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y-cnt][player.x-cnt]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y-cnt][player.x-cnt]==ID_MAP.none)
             break;
         map_shotrange[player.y-cnt][player.x-cnt] = true;
     }
     // 上
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y-cnt][player.x]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y-cnt][player.x]==ID_MAP.none)
             break;
         map_shotrange[player.y-cnt][player.x] = true;
     }
     // 右上
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y-cnt][player.x+cnt]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y-cnt][player.x+cnt]==ID_MAP.none)
             break;
         map_shotrange[player.y-cnt][player.x+cnt] = true;
     }
     // 左
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y][player.x-cnt]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y][player.x-cnt]==ID_MAP.none)
             break;
         map_shotrange[player.y][player.x-cnt] = true;
     }
     // 右
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y][player.x+cnt]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y][player.x+cnt]==ID_MAP.none)
             break;
         map_shotrange[player.y][player.x+cnt] = true;
     }
     // 左下
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y+cnt][player.x-cnt]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y+cnt][player.x-cnt]==ID_MAP.none)
             break;
         map_shotrange[player.y+cnt][player.x-cnt] = true;
     }
     // 下
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y+cnt][player.x]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y+cnt][player.x]==ID_MAP.none)
             break;
         map_shotrange[player.y+cnt][player.x] = true;
     }
     // 右下
     for(let cnt=idx_init; cnt<=range; cnt++) {
-        if(map[player.y+cnt][player.x+cnt]==ID_MAP.none)
+        if(!on_wall_flag && map[player.y+cnt][player.x+cnt]==ID_MAP.none)
             break;
         map_shotrange[player.y+cnt][player.x+cnt] = true;
     }
