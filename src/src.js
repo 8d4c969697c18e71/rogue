@@ -235,12 +235,13 @@ async function doEventPlayer() {
                 play_audio(audio_apply);
                 shop_cursor = 0;
                 shop_flag = true;
-                shop_using.func_before();
+                await shop_using.func_before();
+                remember_ui = "inventory";
                 return true;
             }
             else if(isNPC(x, y)) {
                 let npc = npc_group.find(v=>v.x==x && v.y==y);
-                npc.func_before();
+                await npc.func_before();
                 let dialog = npc.dialogue[npc.dialogue_cnt];
                 if(dialog != "") {
                     if(npc.name != "") addLog(npc.name+"「"+dialog+"」");
@@ -251,7 +252,7 @@ async function doEventPlayer() {
                     npc.dialogue_cnt++;
                 else if(npc.loop && npc.dialogue_cnt>=npc.dialogue.length-1)
                     npc.dialogue_cnt = 0;
-                npc.func_after();
+                await npc.func_after();
                 return true;
             }
             else {
@@ -1178,7 +1179,7 @@ async function doEventShop() {
             }
             else if(await upgradeWeapon(cursor)) {
                 player.gold -= shop_using.item[shop_cursor].upgrade_cost;
-                shop_using.func_buy();
+                await shop_using.func_buy();
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
@@ -1191,7 +1192,7 @@ async function doEventShop() {
         // 保管庫
         else if(storage_flag) {
             if(fromStorage(shop_cursor)) {
-                shop_using.func_buy();
+                await shop_using.func_buy();
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
@@ -1216,7 +1217,7 @@ async function doEventShop() {
             if(player.gold >= shop_using.item[shop_cursor].price) {
                 if(addItem(shop_using.item[shop_cursor].id)) {
                     player.gold -= shop_using.item[shop_cursor].price;
-                    shop_using.func_buy();
+                    await shop_using.func_buy();
                     play_audio(audio_coin);
                     return true;
                 }
@@ -1245,7 +1246,7 @@ async function doEventShop() {
                 else inventory.splice(inventory.indexOf(item_sell), 1);
 
                 player.gold += -shop_using.item[shop_cursor].price;
-                shop_using.func_buy();
+                await shop_using.func_buy();
                 if(shop_using && shop_using.item.length > 0
                 && shop_cursor !== 0 && shop_using.item[shop_cursor] === undefined)
                     shop_cursor--;
@@ -1268,7 +1269,7 @@ async function doEventShop() {
             if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
             else addLog(dialog);
         }
-        shop_using.func_after();
+        await shop_using.func_after();
         setNotUseShop();
         
         return false;
@@ -1304,7 +1305,7 @@ async function doSubEventStorageInput() {
     // apply
     if(key_input.apply) {
         if(inv_cursor<inventory.length && toStorage(inv_cursor)) {
-            shop_using.func_buy();
+            await shop_using.func_buy();
             play_audio(audio_apply);
             return false;
         }
@@ -1319,7 +1320,7 @@ async function doSubEventStorageInput() {
             if(shop_using.name != "") addLog(shop_using.name+"「"+dialog+"」");
             else addLog(dialog);
         }
-        shop_using.func_after();
+        await shop_using.func_after();
         setNotUseShop();
         
         return false;
@@ -1405,7 +1406,9 @@ async function upgradeWeapon(inv_index) {
 // 保管庫
 function fromStorage(shop_cursor) {
     if(inventory.length < INVENTORY_SIZE) {
-        inventory.push(shop_using.item[shop_cursor]);
+        const item = shop_using.item[shop_cursor];
+        const price = getItemData(item.id).price;
+        inventory.push(Object.assign({}, item, {price: price}));
         storage.splice(shop_cursor, 1);
         return true;
     }
@@ -1546,7 +1549,7 @@ async function recalcStatus(who) {
     for(let type of EQ_TYPE) {
         const equip = who[type];
         if(equip && equip.func_recalc) {
-            equip.func_recalc();
+            await equip.func_recalc();
         }
     }
 }
