@@ -41,10 +41,10 @@ async function setCookie() {
         document.cookie = "inventory_"+i+"="+encodeURIComponent(JSON.stringify(inventory[i]))+age;
     }
     for(let i=0; i<player_skill.length; i++) {
-        document.cookie = "player_skill_"+i+"="+encodeURIComponent(JSON.stringify(player_skill[i]))+age;
+        document.cookie = "p_skill_"+i+"="+encodeURIComponent(JSON.stringify(player_skill[i]))+age;
     }
     for(let i=0; i<player_learning.length; i++) {
-        document.cookie = "player_learning_"+i+"="+encodeURIComponent(JSON.stringify(player_learning[i]))+age;
+        document.cookie = "p_learning_"+i+"="+encodeURIComponent(JSON.stringify(player_learning[i]))+age;
     }
     for(let i=0; i<can_learning.length; i++) {
         document.cookie = "can_learning_"+i+"="+encodeURIComponent(JSON.stringify(can_learning[i]))+age;
@@ -84,10 +84,10 @@ async function loadCookie() {
             else if(key.match(/inventory_([0-9]*)/)) {
                 inventory.push(Object.assign({}, getItemData(val.id), val));
             }
-            else if(key.match(/player_skill_([0-9]*)/)) {
+            else if(key.match(/p_skill_([0-9]*)/)) {
                 player_skill.push(Object.assign({}, getSkillData(val.id), val));
             }
-            else if(key.match(/player_learning_([0-9]*)/)) {
+            else if(key.match(/p_learning_([0-9]*)/)) {
                 player_learning.push(Object.assign({}, val));
             }
             else if(key.match(/can_learning_([0-9]*)/)) {
