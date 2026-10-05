@@ -235,8 +235,8 @@ async function doEventPlayer() {
                 play_audio(audio_apply);
                 shop_cursor = 0;
                 shop_flag = true;
-                await shop_using.func_before();
                 remember_ui = "inventory";
+                await shop_using.func_before();
                 return true;
             }
             else if(isNPC(x, y)) {
