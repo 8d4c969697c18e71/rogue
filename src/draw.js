@@ -182,7 +182,12 @@ function updateMap() {
     if(throwing_flag) updateShotRange(THROWING_RANGE);
     else if(skill_draw_aim_flag && skill_using) {
         if(skill_using.target_type == "range") updateShotRange(SKILL_RANGE);
-        else if(skill_using.target_type == "next") updateShotRange(1, 1, true);
+        else if(skill_using.target_type == "next") {
+            let on_wall_flag = false;
+            if(skill_using.id == 0x005)
+                on_wall_flag = true;
+            updateShotRange(1, 1, on_wall_flag);
+        }
         else if(skill_using.target_type == "self") updateShotRange(0, 0);
     }
     // アイテム
