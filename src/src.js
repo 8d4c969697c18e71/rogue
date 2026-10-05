@@ -680,7 +680,7 @@ async function dealDmg(from, to, dmg) {
         // 受け流し失敗
         if(cond.id == 0x80) {
             removeCondition(to, cond);
-            log_reserve.removeLogLatest();
+            removeLogLatest();
             addLog(to.name+" は受け流しに失敗した");
             await dealDmg(from, to, Math.round(dmg*1.5));
             if(from == player) learning(0x001);
