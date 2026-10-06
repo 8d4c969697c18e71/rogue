@@ -1071,8 +1071,11 @@ function setSkillItem(skill, item) {
 function removeSkill(id) {
     const skill = player_skill.find(v=>v.id==id);
     const index = player_skill.indexOf(skill);
-    if(!skill || index == undefined) return false;
+    
+    if(!skill || !index) return false;
     if(skill_favorite_idx == index) skill_favorite_idx = -1;
+    else if(skill_favorite_idx > index) skill_favorite_idx--;
+
     addLog(player.name+" は "+player_skill[index].name+" を外した");
     player_skill.splice(index, 1);
     return true;
@@ -1717,11 +1720,13 @@ async function equip(index) {
         // 装備欄チェック
         if(player[equip_item.type]) {
             addLog("装備スロットが埋まっている");
+            play_audio(audio_cancel);
             return false;
         }
         // 指輪
         else if(player.ring1 && player.ring2) {
             addLog("装備スロットが埋まっている");
+            play_audio(audio_cancel);
             return false;
         }
 
@@ -1742,7 +1747,7 @@ async function equip(index) {
         if(equip_item.func_equip) await equip_item.func_equip(player);
 
         addLog(equip_item.name+" を装備した");
-
+        play_audio(audio_apply);
         return true;
     }
     // 外す
@@ -1762,6 +1767,7 @@ async function equip(index) {
         if(equip_item.func_unequip) await equip_item.func_unequip(player);
 
         addLog(equip_item.name+" を外した");
+        play_audio(audio_apply);
         return true;
     }
 }

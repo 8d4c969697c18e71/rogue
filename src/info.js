@@ -56,9 +56,9 @@ function drawInv() {
             if(i == inv_cursor)
                 str += "＞\u2007";
             else if(i == inv_start_offset && inv_start_offset > 0)
-                str += "↑\u2007";
+                str += "∧\u2007";
             else if(i == inv_display_num+inv_start_offset-1 && inv_display_num+inv_start_offset < INVENTORY_SIZE)
-                str += "↓\u2007";
+                str += "∨\u2007";
             else
                 str += "　\u2007";
             if(i < inventory.length) {
@@ -85,9 +85,9 @@ function drawInv() {
             if(i == skill_cursor)
                 str += "＞\u2007";
             else if(i == skill_start_offset && skill_start_offset > 0)
-                str += "↑\u2007";
+                str += "∧\u2007";
             else if(i == skill_display_num+skill_start_offset-1 && skill_display_num+skill_start_offset < SKILL_SIZE)
-                str += "↓\u2007";
+                str += "∨\u2007";
             else
                 str += "　\u2007";
             if(i == skill_favorite_idx)
@@ -132,9 +132,9 @@ function drawShop() {
             if(i == shop_cursor)
                 str += "＞\u2007";
             else if(i == shop_start_offset && shop_start_offset > 0)
-                str += "↑\u2007";
+                str += "∧\u2007";
             else if(i == shop_display_num+shop_start_offset-1 && shop_display_num+shop_start_offset < shop_using.item.length)
-                str += "↓\u2007";
+                str += "∨\u2007";
             else
                 str += "　\u2007";
             if(upgrade_flag) {
@@ -286,10 +286,10 @@ function drawNote() {
         colorUI("&nbsp;"+CHAR_MAP.ammo+"&nbsp;", color_yellow)+": 弾薬<br>");
     note.insertAdjacentHTML("beforeend", "<br>");
     note.insertAdjacentHTML("beforeend", "CONTROL<br>");
-    note.insertAdjacentHTML("beforeend", "- 移動<br>&nbsp; ←↑↓→<br>");
-    note.insertAdjacentHTML("beforeend", "- 斜め移動<br>&nbsp; ←↑↓→ + CTRL<br>");
-    note.insertAdjacentHTML("beforeend", "- 高速移動<br>&nbsp; ←↑↓→ + SHIFT<br>");
-    note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←↑↓→ TO "+colorUI("赤字", color_red)+"<br>");
+    note.insertAdjacentHTML("beforeend", "- 移動<br>&nbsp; ←∧∨→<br>");
+    note.insertAdjacentHTML("beforeend", "- 斜め移動<br>&nbsp; ←∧∨→ + CTRL<br>");
+    note.insertAdjacentHTML("beforeend", "- 高速移動<br>&nbsp; ←∧∨→ + SHIFT<br>");
+    note.insertAdjacentHTML("beforeend", "- 攻撃<br>&nbsp; ←∧∨→ TO "+colorUI("赤字", color_red)+"<br>");
     note.insertAdjacentHTML("beforeend", "- 待機: Z<br>");
     note.insertAdjacentHTML("beforeend", "- インベントリ: X<br>");
     note.insertAdjacentHTML("beforeend", "- 登録スキル: C<br>");
