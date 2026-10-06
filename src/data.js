@@ -1546,7 +1546,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp: 12,
+        exp: 10,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1595,7 +1595,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: false,
         berserk_flag: false,
-        exp: 18,
+        exp: 16,
         func_spawn: async function(me) {},
         func_died: async function() {
             learning(0x002);
