@@ -1409,8 +1409,7 @@ const ENEMY_DATA = [
         berserk_flag: false,
         exp: 2,
         func_spawn: async function(me) {
-            await setCondition(me, 0x03, 1000);
-            removeLogLatest();
+            this.cannot_move_flag = true;
         },
         func_died: async function() {},
         skill: [
