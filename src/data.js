@@ -384,9 +384,9 @@ const ITEM_TABLE = [
         0xe00, 0xe01,
     ],
     [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x016, 0x021, 0x021,
+        0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
+        0x010, 0x015, 0x015, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x011, 0x016, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080, 0x081, 0x081,
         0x101, 0x201, 0x301,
@@ -397,9 +397,9 @@ const ITEM_TABLE = [
         0xe00, 0xe01,
     ],
     [
-        0x000, 0x000, 0x000, 0x000,
-        0x010, 0x015, 0x020, 0x020, 0x030, 0x030,
-        0x011, 0x011, 0x016, 0x021, 0x021,
+        0x000, 0x000, 0x000, 0x000, 0x000, 0x000,
+        0x010, 0x015, 0x015, 0x020, 0x020, 0x030, 0x030,
+        0x011, 0x011, 0x011, 0x016, 0x021, 0x021,
         0x012, 0x012,
         0x080, 0x080, 0x081, 0x081,
         0x101, 0x201, 0x301, 0x302,
@@ -1079,6 +1079,8 @@ const ITEM_DATA = [
         func: async function() {
             addLog(player.name+" は "+this.name+" を読んだ");
             setCanLearning(0x300);
+            inventory.splice(inventory.indexOf(this), 1);
+
             addLog(player.name+" は新しい技能を習得できるようになった");
             play_audio(audio_lvup);
             return false;
@@ -1093,6 +1095,8 @@ const ITEM_DATA = [
             addLog(player.name+" は "+this.name+" を読んだ");
             setCanLearning(0x400);
             setCanLearning(0x480);
+            inventory.splice(inventory.indexOf(this), 1);
+
             addLog(player.name+" は新しい技能を習得できるようになった");
             play_audio(audio_lvup);
             return false;
@@ -1106,6 +1110,8 @@ const ITEM_DATA = [
         func: async function() {
             addLog(player.name+" は "+this.name+" を読んだ");
             setCanLearning(0x502);
+            inventory.splice(inventory.indexOf(this), 1);
+
             addLog(player.name+" は新しい技能を習得できるようになった");
             play_audio(audio_lvup);
             return false;
@@ -1564,7 +1570,7 @@ const ENEMY_DATA = [
         lv: 1,
         hp: 150, hp_max: 150,
         fp: 0, fp_max: 0,
-        atk: 53, def: 22,
+        atk: 64, def: 22,
         speed: 1,
         sight_range: 3,
         escape_flag: false,
@@ -1588,7 +1594,7 @@ const ENEMY_DATA = [
         lv: 1,
         hp: 100, hp_max: 100,
         fp: 20, fp_max: 20,
-        atk: 30, def: 5,
+        atk: 36, def: 5,
         speed: 1,
         sight_range: 4,
         escape_flag: false,
@@ -1621,7 +1627,7 @@ const ENEMY_DATA = [
         distance: 0,
         group_spawn_flag: true,
         berserk_flag: false,
-        exp: 11,
+        exp: 8,
         func_spawn: async function(me) {},
         func_died: async function() {},
         skill: [
@@ -1638,7 +1644,7 @@ const ENEMY_DATA = [
         lv: 1,
         hp: 200, hp_max: 200,
         fp: 7, fp_max: 7,
-        atk: 30, def: 10,
+        atk: 50, def: 10,
         speed: 1,
         sight_range: 4,
         escape_flag: false,
@@ -2180,6 +2186,7 @@ const CONDITION_DATA = [
             who.cannot_move_flag = true;
         },
         func_during: async function(who) {
+            addLog(who.name+" は身動きがとれない");
             who.cannot_move_flag = true;
         },
         func_recovery: async function(who) {
