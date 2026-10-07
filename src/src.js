@@ -1394,7 +1394,7 @@ async function upgradeWeapon(inv_index) {
 
     addLog(item.name+" を鍛えた");
     item.level++;
-    item.base_dmg = Math.floor(item.base_dmg + getItemData(item.id).base_dmg * 0.25);
+    item.base_dmg = Math.floor(item.base_dmg + getItemData(item.id).base_dmg * 0.1);
     item.name = getItemData(item.id).name+"+"+item.level;
 
     // 再装備
@@ -2306,6 +2306,8 @@ function setTarget(who, target) {
 
 // 視界取得
 function getSight(who) {
+    if(who.sight_range+who.sight_range_offset <= 0) return;
+
     // 部屋
     for(let [i, j] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
         if(isRoom(who.x+j, who.y+i)) {
