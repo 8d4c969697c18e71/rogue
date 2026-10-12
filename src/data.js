@@ -2044,7 +2044,7 @@ const SKILL_DATA = [
 
             let int = from.int ? from.int : 10;
             let fth = from.fth ? from.fth : 10;
-            let dmg = 20 + int * 2 + fth * 2;
+            let dmg = 40 + int * 2 + fth * 2;
             await magic(from, dmg, getDirection(from, to));
             if(dmg > 100) learning(0x501);
             return true;
@@ -2066,7 +2066,7 @@ const SKILL_DATA = [
 
             let int = from.int ? from.int : 10;
             let fth = from.fth ? from.fth : 10;
-            let dmg = 30 + int * 2.5 + fth * 2.5;
+            let dmg = 50 + int * 2.5 + fth * 2.5;
             const targets = getTargetsInRectangleAOE(to.x, to.y, 1, from);
             for(let target of targets)
                 await magicDmg(from, target, dmg);
